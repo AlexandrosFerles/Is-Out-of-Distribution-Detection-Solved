@@ -254,6 +254,11 @@ def _get_7point_loaders(batch_size, csvfile='/raid/ferles/7-point/7pointAsISIC.c
     return val_loader, val_set.csv_columns
 
 
+def _get_Dermofit_loaders(batch_size):
+
+    return 
+
+
 def _get_isic_loader(batch_size, csvfile='/raid/ferles/ISIC2019/Training_paths_and_classes.csv'):
 
     input_size = 224
