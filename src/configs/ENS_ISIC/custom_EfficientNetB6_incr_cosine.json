@@ -1,0 +1,16 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "6",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 8,
+    "logFile": "custom_eb6_incr_cosine.csv",
+    "gtFile": "custom_eb6_incr_cosine.csv",
+    "checkpointFile": "custom_eb6_incr_cosine",
+    "exclude_class": "None",
+    "traincsv": "/local_storage/datasets/ISIC2019/folds/TrainFold1.csv",
+    "testcsv": "/local_storage/datasets/ISIC2019/folds/ValFold1.csv"
+  }
+}

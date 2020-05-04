@@ -1,0 +1,15 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "6",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 18,
+    "k_fold": 1,
+    "logFile": "EfficientNetB6-eval-train-7point-step-lr-auto-cutout.csv",
+    "gtFile": "EB6-GT-eval-train-7point-step-lr-auto-cutout.csv",
+    "checkpointFile": "EB6-eval-train-7point-step-lr-auto-cutout",
+    "traincsv": "/local_storage/datasets/7-point/Joint_paths_and_classes.csv"
+  }
+}

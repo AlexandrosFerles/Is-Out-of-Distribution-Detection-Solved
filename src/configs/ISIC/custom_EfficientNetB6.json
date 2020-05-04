@@ -1,0 +1,16 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "6",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 8,
+    "k_fold": 1,
+    "logFile": "test.csv",
+    "gtFile": "test_gt.csv",
+    "checkpointFile": "test",
+    "traincsv": "/local_storage/datasets/ISIC2019/Custom_Train_Set_Images_Only.csv",
+    "testcsv": "/local_storage/datasets/ISIC2019/Custom_Test_Set_Images_Only.csv"
+  }
+}

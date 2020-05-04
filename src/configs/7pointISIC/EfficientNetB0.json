@@ -1,0 +1,12 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "True",
+    "out_classes": 8,
+	"k_folds": 5,
+    "logFile": "EfficientNetB0.txt",
+    "traincsv": "/local_storage/datasets/ISIC2019/Training_paths_and_classes.csv"
+  }
+}

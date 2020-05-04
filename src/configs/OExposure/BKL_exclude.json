@@ -1,0 +1,16 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 7,
+    "logFile": "outlier_exposure_custom_exclude_BKL_step_lr_cutout_eb0.csv",
+    "gtFile": "outlier_exposure_custom_exclude_BKL_step_lr_cutout_gt_eb0.csv",
+    "checkpointFile": "outlier_exposure_custom_exclude_BKL_step_lr_cutout_eb0",
+    "traincsv": "/local_storage/datasets/ISIC2019/folds/TrainFold1.csv",
+    "testcsv": "/local_storage/datasets/ISIC2019/folds/ValFold1.csv",
+    "exclude_class": "BKL"
+  }
+}

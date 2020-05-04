@@ -1,0 +1,15 @@
+{
+  "training":{
+    "model": "WideResNet",
+    "depth": "6",
+    "pretrained": "False",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 8,
+    "k_fold": 1,
+    "logFile": "wrn.csv",
+    "gtFile": "wrn.csv",
+    "checkpointFile": "wrn",
+    "traincsv": "/local_storage/datasets/ISIC2019/Training_paths_and_classes.csv"
+  }
+}

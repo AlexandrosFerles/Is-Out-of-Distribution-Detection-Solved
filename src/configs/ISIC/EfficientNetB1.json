@@ -1,0 +1,12 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "1",
+    "pretrained": "True",
+    "freeze": "True",
+    "out_classes": 8,
+	"k_folds": 5,
+    "logFile": "EfficientNetB1.txt,",
+    "traincsv": "/Midgard/home/ferles/Dermatology/DermatologyData/Training_paths_and_classes.csv"
+  }
+}

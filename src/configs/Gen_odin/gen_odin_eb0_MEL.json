@@ -1,0 +1,16 @@
+{
+  "training":{
+    "model": "GenOdinEfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 7,
+    "logFile": "gen_odin_eb0_MEL.csv",
+    "gtFile": "gen_odin_eb0_MEL.csv",
+    "checkpointFile": "gen_odin_eb0_MEL",
+    "traincsv": "/local_storage/datasets/ISIC2019/folds/TrainFold1.csv",
+    "testcsv": "/local_storage/datasets/ISIC2019/folds/ValFold1.csv",
+    "exclude_class": "MEL"
+  }
+}

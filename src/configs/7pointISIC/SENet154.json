@@ -1,0 +1,14 @@
+{
+  "training":{
+    "model": "SENet",
+    "depth": "154",
+    "pretrained": "True",
+    "freeze": "True",
+    "out_classes": 8,
+	"k_folds": 5,
+    "logFile": "SENet.csv",
+    "gtFile": "SENet-GT.csv",
+    "checkpointFile": "SENet",
+    "traincsv": "/local_storage/datasets/ISIC2019/Training_paths_and_classes.csv"
+  }
+}

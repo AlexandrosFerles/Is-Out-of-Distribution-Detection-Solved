@@ -1,0 +1,10 @@
+{
+  "training":{
+    "model": "ResNet",
+    "depth": "152",
+    "pretrained": "True",
+    "out_classes": 8,
+	"k_folds": 5,
+    "logFile": "ResNet152 .txt"
+  }
+}

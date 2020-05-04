@@ -1,0 +1,16 @@
+{
+  "training":{
+    "model": "RotEfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 7,
+    "logFile": "exclude_AK_step_lr_cutout_eb0_rot.csv",
+    "gtFile": "exclude_AK_step_lr_cutout_gt_eb0_rot.csv",
+    "checkpointFile": "exclude_AK_step_lr_cutout_eb0_rot",
+    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new.csv",
+    "testcsv": "/raid/ferles/ISIC2019/folds/Val_Fold_new.csv",
+    "exclude_class": "AK"
+  }
+}

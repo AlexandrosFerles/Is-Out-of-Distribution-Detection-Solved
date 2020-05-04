@@ -1,0 +1,10 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "4",
+    "pretrained": "True",
+    "out_classes": 8,
+	"k_folds": 5,
+    "logFile": "EfficientNetB4.txt"
+  }
+}

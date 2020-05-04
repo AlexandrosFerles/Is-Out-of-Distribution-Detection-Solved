@@ -1,0 +1,12 @@
+{
+  "training":{
+    "model": "ResNet",
+    "depth": "50",
+    "pretrained": "True",
+    "freeze": "True",
+    "out_classes": 8,
+	"k_folds": 5,
+    "logFile": "ResNet50.txt",
+    "traincsv": "/Midgard/home/ferles/Dermatology/DermatologyData/Training_paths_and_classes.csv"
+  }
+}

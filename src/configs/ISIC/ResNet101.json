@@ -1,0 +1,14 @@
+{
+  "training":{
+    "model": "ResNet",
+    "depth": "101",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 8,
+    "logFile": "ResNet101-increased-res-32.csv",
+    "gtFile": "ResNet101-GT-increased-res-32.csv",
+    "checkpointFile": "ResNet101-increased-res-32",
+    "traincsv": "/local_storage/datasets/ISIC2019/Training_paths_and_classes.csv"
+  }
+}

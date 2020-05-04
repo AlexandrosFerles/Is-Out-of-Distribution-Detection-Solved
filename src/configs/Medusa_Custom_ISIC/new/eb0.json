@@ -1,0 +1,14 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "out_classes": 8,
+    "logFile": "eb0Custom_new.csv",
+    "gtFile": "eb0Custom_new.csv",
+    "checkpointFile": "eb0Custom",
+    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new.csv",
+    "testcsv": "/raid/ferles/ISIC2019/folds/ValFold1.csv",
+    "exclude_class": "None"
+  }
+}

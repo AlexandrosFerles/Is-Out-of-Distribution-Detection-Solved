@@ -1,0 +1,14 @@
+{
+  "training":{
+    "model": "GenOdinEfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 10,
+    "checkpoint": "genOdinCifar0",
+    "gen_odin_mode": 0,
+    "train_pickle": "train_indices_cifar10.pickle",
+    "test_pickle": "val_indices_cifar10.pickle"
+  }
+}

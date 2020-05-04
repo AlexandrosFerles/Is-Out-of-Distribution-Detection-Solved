@@ -1,0 +1,8 @@
+{
+  "training":{
+   "_comment": "This a comment only Choose model from options: ResNet, SENet. EfficientNet",
+    "model": "EfficientNet",
+    "depth": "0",
+    "pretrained": "True"
+  }
+}

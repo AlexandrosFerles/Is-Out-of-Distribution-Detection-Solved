@@ -1,0 +1,15 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "7",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "True",
+    "out_classes": 8,
+    "logFile": "EfficientNetB7.csv",
+    "gtFile": "EB7-GT.csv",
+    "checkpointFile": "EB7",
+    "traincsv": "/local_storage/datasets/ISIC2019/Training_paths_and_classes.csv"
+  }
+}
+
