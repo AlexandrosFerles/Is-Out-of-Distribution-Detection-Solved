@@ -1,0 +1,13 @@
+torch
+torchvision
+numpy
+sklearn
+efficientnet_pytorch
+wandb
+tqdm
+isic-challenge-scoring
+ipdb
+matplotlib
+imbalanced-learn
+imagesize
+pretrainedmodels
