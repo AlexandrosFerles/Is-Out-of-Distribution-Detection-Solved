@@ -1225,7 +1225,7 @@ if __name__ == '__main__':
         trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size)
         ood_loader, _ = _get_Dermofit_full_loaders(batch_size=args.batch_size)
     elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == 'dermofit-out':
-        trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size)
+        trainloader, val_loader, testloader = _get_isic_loaders_ood(batch_size=args.batch_size)
         _, ood_loader = _get_Dermofit_full_loaders(batch_size=args.batch_size)
 
     if args.with_FGSM or ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
