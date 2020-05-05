@@ -5,4 +5,5 @@ python /home/ferles/medusa/src/ood.py \
         --out_distribution_dataset Dermofit-out \
         --model_checkpoint /home/ferles/medusa/src/checkpoints/isic_classifiers/eb0Custom-best-balanced-accuracy-model_new.pth \
         --with_FGSM True \
-        --batch_size 10 > /home/ferles/medusa/src/results/txts/ISICvsDermoFit/Out/mahalanobis.txt
+        --batch_size 10 \
+        --dv $DEV> /home/ferles/medusa/src/results/txts/ISICvsDermoFit/Out/mahalanobis.txt
