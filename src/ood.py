@@ -301,7 +301,7 @@ def _process(model, images, T, epsilon, device, criterion=nn.CrossEntropyLoss())
     model.eval()
     if T == 1 and epsilon == 0:
         outputs = model(images.to(device))
-        nnOutputs = outputs.data.cpu()
+        nnOutputs = outputs.detach().cpu().numpy()
     else:
         inputs = Variable(images.to(device), requires_grad=True)
         outputs = model(inputs)
