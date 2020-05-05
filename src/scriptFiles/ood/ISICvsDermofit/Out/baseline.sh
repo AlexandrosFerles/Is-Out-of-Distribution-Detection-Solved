@@ -1,4 +1,3 @@
-conda activate isic
 python /home/ferles/medusa/src/ood.py \
         --ood_method baseline \
         --num_classes 8 \
