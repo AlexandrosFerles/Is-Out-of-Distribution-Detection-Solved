@@ -7,7 +7,8 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import roc_curve, auc
 from utils import build_model_with_checkpoint
-from dataLoaders import cifar10loaders, cifar100loaders, tinyImageNetloader, _get_isic_loaders_ood, _get_7point_loaders_ood, _get_custom_loader_7point
+from dataLoaders import cifar10loaders, cifar100loaders, tinyImageNetloader, \
+    _get_isic_loaders_ood, _get_7point_loaders_ood, _get_custom_loader_7point, _get_Dermofit_full_loaders
 from tqdm import tqdm
 import lib_generation
 import argparse
@@ -1220,15 +1221,19 @@ if __name__ == '__main__':
         exclude_class = None if args.exclude_class == 'None' else args.exclude_class
         trainloader, val_loader, testloader = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class)
         _, ood_loader = _get_7point_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class, out_mode=True)
-        # ood_loader, _ = _get_7point_loaders_ood(csvfile='/raid/ferles/7-point/7pointAsISICNoPreproc.csv', batch_size=args.batch_size, exclude_class=exclude_class, out_mode=True)
     elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == '7-point-custom':
-        exclude_class =args.exclude_class
+        exclude_class = args.exclude_class
         trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class='MEL')
         _, ood_loader = _get_custom_loader_7point(batch_size=args.batch_size, exclude_class=exclude_class)
-
+    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == 'dermofit-in':
+        trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size)
+        ood_loader, _ = _get_Dermofit_full_loaders(batch_size=args.batch_size)
+    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == 'dermofit-out':
+        trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size)
+        _, ood_loader = _get_Dermofit_full_loaders(batch_size=args.batch_size)
 
     if args.with_FGSM or ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-            loaders = [val_loader, testloader, ood_loader]
+        loaders = [val_loader, testloader, ood_loader]
     else:
         loaders = [testloader, ood_loader]
 
