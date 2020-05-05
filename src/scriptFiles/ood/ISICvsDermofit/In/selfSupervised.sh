@@ -1,5 +1,5 @@
 python /home/ferles/medusa/src/ood.py \
-        --ood_method selfSupervised \
+        --ood_method self-supervision \
         --num_classes 8 \
         --in_distribution_dataset ISIC \
         --out_distribution_dataset Dermofit-In \
