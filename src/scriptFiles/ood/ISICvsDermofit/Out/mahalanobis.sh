@@ -1,5 +1,5 @@
 python /home/ferles/medusa/src/ood.py \
-        --ood_method mahalanaobis \
+        --ood_method mahalanobis \
         --num_classes 8 \
         --in_distribution_dataset ISIC \
         --out_distribution_dataset Dermofit-out \
