@@ -2,6 +2,7 @@ import numpy as np
 import torchvision
 from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
+from torchvision.datasets import ImageFolder
 from torch.utils.data.sampler import SubsetRandomSampler, Sampler
 from sklearn.model_selection import StratifiedShuffleSplit
 from tqdm import tqdm
@@ -254,14 +255,24 @@ def _get_7point_loaders(batch_size, csvfile='/raid/ferles/7-point/7pointAsISIC.c
     return val_loader, val_set.csv_columns
 
 
-def _get_Dermofit_loaders(batch_size):
+def _get_Dermofit_full_loaders(batch_size, input_size=224):
 
-    return 
+    val_transform = transforms.Compose([
+        transforms.Resize((input_size, input_size)),
+        transforms.ToTensor(),
+    ])
+
+    in_path, out_path = '/raid/ferles/DermoFit/In', '/raid/ferles/DermoFit/Out'
+    in_dataset, out_dataset = ImageFolder(in_path, transform=val_transform), ImageFolder(out_path, transform=val_transform)
+
+    in_loader = DataLoader(in_dataset, batch_size=batch_size)
+    out_loader = DataLoader(out_dataset, batch_size=batch_size)
+
+    return in_loader, out_loader
 
 
-def _get_isic_loader(batch_size, csvfile='/raid/ferles/ISIC2019/Training_paths_and_classes.csv'):
+def _get_isic_loader(batch_size, csvfile='/raid/ferles/ISIC2019/Training_paths_and_classes.csv', input_size=224):
 
-    input_size = 224
     val_transform = transforms.Compose([
         transforms.Resize((input_size, input_size)),
         transforms.ToTensor(),
