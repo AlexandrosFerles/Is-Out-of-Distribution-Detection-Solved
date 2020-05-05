@@ -1221,15 +1221,6 @@ if __name__ == '__main__':
         exclude_class = None if args.exclude_class == 'None' else args.exclude_class
         trainloader, val_loader, testloader = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class)
         _, ood_loader = _get_7point_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class, out_mode=True)
-    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == '7-point-custom':
-<<<<<<< HEAD
-        exclude_class =args.exclude_class
-        trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class='NV')
-=======
-        exclude_class = args.exclude_class
-        trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class='MEL')
->>>>>>> 9f092a575306b6ce715805d57b27a7cc76aaad53
-        _, ood_loader = _get_custom_loader_7point(batch_size=args.batch_size, exclude_class=exclude_class)
     elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == 'dermofit-in':
         trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size)
         ood_loader, _ = _get_Dermofit_full_loaders(batch_size=args.batch_size)
