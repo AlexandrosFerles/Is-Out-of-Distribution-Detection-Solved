@@ -1223,7 +1223,7 @@ if __name__ == '__main__':
         # ood_loader, _ = _get_7point_loaders_ood(csvfile='/raid/ferles/7-point/7pointAsISICNoPreproc.csv', batch_size=args.batch_size, exclude_class=exclude_class, out_mode=True)
     elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == '7-point-custom':
         exclude_class =args.exclude_class
-        trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class='MEL')
+        trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class='NV')
         _, ood_loader = _get_custom_loader_7point(batch_size=args.batch_size, exclude_class=exclude_class)
 
 
