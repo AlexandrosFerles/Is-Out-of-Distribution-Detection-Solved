@@ -258,6 +258,7 @@ def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_step
         print()
         print('###############################################')
 
+
 def _create_fgsm_loader(val_loader):
 
     sample, gts = next(iter(val_loader))
@@ -298,7 +299,7 @@ def _create_fgsm_loader(val_loader):
 def _process(model, images, T, epsilon, device, criterion=nn.CrossEntropyLoss()):
 
     model.eval()
-    if T==1 and epsilon==0:
+    if T == 1 and epsilon == 0:
         outputs = model(images.to(device))
         nnOutputs = outputs.data.cpu()
     else:
@@ -339,6 +340,7 @@ def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
     for index, data in enumerate(loader):
         images, _ = data
         nnOutputs = _process(model, images, T, epsilon, device=device)
+        ipdb.set_trace()
         top_class_probability = np.max(nnOutputs, axis=1)
         if not score_entropy:
             arr[index*loader.batch_size:index*loader.batch_size + top_class_probability.shape[0]] = top_class_probability
