@@ -1260,7 +1260,7 @@ if __name__ == '__main__':
     elif ood_method == 'ensemble':
         if args.with_FGSM:
             print('FGSM cannot be combined with the ensemble method, skipping this step')
-        scaling = True if args.scaling==1 else False
+        scaling = True if args.scaling == 1 else False
         _ensemble_inference(model_checkpoints, loaders, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, mode=args.ensemble_mode, device=device, scaling=scaling)
 
     elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
