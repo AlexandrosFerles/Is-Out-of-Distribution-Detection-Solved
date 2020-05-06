@@ -1,6 +1,6 @@
 python /home/ferles/medusa/src/ood.py \
         --ood_method ensemble \
-        --num_classes 8 \
+        --num_classes 7 \
         --in_distribution_dataset ISIC \
         --out_distribution_dataset Dermofit-Out \
         --dv $DEV \
