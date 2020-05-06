@@ -122,7 +122,7 @@ if __name__ == '__main__':
     #     print(f'FPR: {fpr}')
     #     print()
 
-    st = 'Dermofit-In'
+    st = 'Dermofit-Out'
     print(f'{st}')
     for magnitude in m_list:
 
