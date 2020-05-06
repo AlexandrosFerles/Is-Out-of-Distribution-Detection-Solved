@@ -122,14 +122,15 @@ if __name__ == '__main__':
     #     print(f'FPR: {fpr}')
     #     print()
 
-    print('7-point-mel')
+    st = 'Dermofit-In'
+    print(f'{st}')
     for magnitude in m_list:
 
         with open(f'lr_pickles/logistic_regressor_None_{magnitude}.pickle', 'rb') as lrp:
             lr = pickle.load(lrp)
 
         ind = np.load(f'npzs/Mahalanobis_ISIC_{magnitude}.npz')['arr_0']
-        ood = np.load(f'npzs/Mahalanobis_7-point-mel_{magnitude}.npz')['arr_0']
+        ood = np.load(f'npzs/Mahalanobis_{st}_{magnitude}.npz')['arr_0']
 
         y_known = np.ones(ind.shape[0])
         y_novel = np.zeros(ood.shape[0])
