@@ -6,7 +6,7 @@ import argparse
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Npzs Eval')
-    parser.add_argument('--known', '--k', required=True)
+    parser.add_argument('--known', '--kn', required=True)
     parser.add_argument('--novel', '--nv', required=True)
 
     args = parser.parse_args()
