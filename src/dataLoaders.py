@@ -188,21 +188,17 @@ def _balance_order(data, labels, num_classes, batch_size):
 
 def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_batch_size, gtFile, with_auto_augment=False, input_size=224, load_gts=True):
 
-    list_x, list_y = [], []
-    center_transform = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=False)
+    center_transform, _ = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=False)
     temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=center_transform, ret_path=False)
-    temp_train_loader = DataLoader(temp_trainset, batch_size=1, num_workers=16)
-    for index, (data, target) in enumerate(temp_train_loader):
-        ipdb.set_trace()
     datasets = [temp_trainset]
     n_train_crops, n_val_crops = ncrops
     for i in range(n_train_crops-1):
-        random_transform = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=True)
+        random_transform, _ = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=True)
         temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=random_transform, ret_path=False)
         datasets.append(temp_trainset)
 
     trainset = ConcatDataset(datasets)
-
+    ipdb.set_trace()
     train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True)
 
     return train_loader
