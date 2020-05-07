@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import torchvision
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, ConcatDataset
 from torchvision import transforms, datasets
 from torchvision.datasets import ImageFolder
 from torch.utils.data.sampler import SubsetRandomSampler, Sampler
@@ -65,56 +65,83 @@ def _get_gts(dataset):
 def _get_transforms(input_size, with_auto_augment=False):
 
     if with_auto_augment:
-        if input_size is None:
-
-            training_transform = transforms.Compose([
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
-                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-                transforms.RandomRotation(45),
-                AutoAugment(),
-                Cutout(),
-                transforms.ToTensor()
-            ])
-        else:
-            training_transform = transforms.Compose([
-                transforms.Resize((input_size, input_size)),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
-                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-                transforms.RandomRotation(45),
-                AutoAugment(),
-                Cutout(),
-                transforms.ToTensor()
-            ])
-    else:
-        if input_size is None:
-            training_transform = transforms.Compose([
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
-                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-                transforms.RandomRotation(45),
-                transforms.ToTensor()
-            ])
-        else:
-            training_transform = transforms.Compose([
-                transforms.Resize((input_size, input_size)),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
-                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-                transforms.RandomRotation(45),
-                transforms.ToTensor()
-            ])
-
-    if input_size is None:
-        al_transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
-    else:
-        val_transform = transforms.Compose([
+        training_transform = transforms.Compose([
             transforms.Resize((input_size, input_size)),
-            transforms.ToTensor(),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
+            transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+            transforms.RandomRotation(45),
+            AutoAugment(),
+            Cutout(),
+            transforms.ToTensor()
         ])
+    else:
+        training_transform = transforms.Compose([
+            transforms.Resize((input_size, input_size)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
+            transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+            transforms.RandomRotation(45),
+            transforms.ToTensor()
+        ])
+
+    val_transform = transforms.Compose([
+        transforms.Resize((input_size, input_size)),
+        transforms.ToTensor(),
+    ])
+
+    return training_transform, val_transform
+
+
+def _get_crop_transforms(input_size, with_auto_augment=False, random_crop=True):
+
+    if with_auto_augment:
+        if random_crop:
+            training_transform = transforms.Compose([
+                transforms.RandomCrop(input_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+                transforms.RandomRotation(45),
+                AutoAugment(),
+                Cutout(),
+                transforms.ToTensor()
+            ])
+        else:
+            training_transform = transforms.Compose([
+                transforms.CenterCrop(input_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+                transforms.RandomRotation(45),
+                AutoAugment(),
+                Cutout(),
+                transforms.ToTensor()
+            ])
+    else:
+        if random_crop:
+            training_transform = transforms.Compose([
+                transforms.RandomCrop(input_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+                transforms.RandomRotation(45),
+                transforms.ToTensor()
+            ])
+        else:
+            training_transform = transforms.Compose([
+                transforms.CenterCrop(input_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+                transforms.RandomRotation(45),
+                transforms.ToTensor()
+            ])
+
+    val_transform = transforms.Compose([
+        transforms.Resize((input_size, input_size)),
+        transforms.ToTensor(),
+    ])
 
     return training_transform, val_transform
 
@@ -161,28 +188,17 @@ def _balance_order(data, labels, num_classes, batch_size):
 
 def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_batch_size, gtFile, with_auto_augment=False, input_size=224, load_gts=True):
 
+    datasets = []
+    center_transform = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=False)
+    temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=center_transform, ret_path=False)
+    datasets = [temp_trainset]
     n_train_crops, n_val_crops = ncrops
-    temp_train_transform = transforms.Compose([transforms.CenterCrop(input_size)] + (n_train_crops-1)*[transforms.RandomCrop(input_size)] + [transforms.ToTensor()])
-    temp_val_transform = transforms.Compose([transforms.CenterCrop(input_size)] + (n_val_crops-1)*[transforms.RandomCrop(input_size)] + [transforms.ToTensor()])
+    for i in range(n_train_crops-1):
+        random_transform = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=True)
+        temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=random_transform, ret_path=False)
+        datasets.append(temp_trainset)
 
-    temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=temp_train_transform, ret_path=False)
-    temp_train_loader = DataLoader(temp_trainset, batch_size=1)
-    # testset = PandasDataSetWithPaths(csvfiles[1], transform=temp_val_transform)
-
-    for index, (data, target) in enumerate(temp_train_loader):
-        ipdb.set_trace()
-        _, crops, c, h, w = data.size()
-        if index == 0:
-            list_x = [data.view(-1, c, h, w)]
-            list_y = crops * [torch.IntTensor(target)]
-        else:
-            list_x.append(data.view(-1, c, h, w))
-            list_y.extend(crops * [torch.IntTensor(target)])
-
-    training_transform, _ = _get_transforms(input_size=input_size, with_auto_augment=with_auto_augment)
-    training_data, training_targets = torch.Tensor(list_x), torch.Tensor(list_y)
-
-    trainset = CustomTensorDataset([training_data, training_targets], transform=training_transform)
+    trainset = ConcatDataset(datasets)
     train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True)
 
     return train_loader
