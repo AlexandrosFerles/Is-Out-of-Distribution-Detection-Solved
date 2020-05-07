@@ -165,7 +165,7 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_ba
     temp_train_transform = transforms.Compose([transforms.CenterCrop(input_size)] + (n_train_crops-1)*[transforms.RandomCrop(input_size)] + [transforms.ToTensor()])
     temp_val_transform = transforms.Compose([transforms.CenterCrop(input_size)] + (n_val_crops-1)*[transforms.RandomCrop(input_size)] + [transforms.ToTensor()])
 
-    temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=temp_train_transform)
+    temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=temp_train_transform, ret_path=False)
     temp_train_loader = DataLoader(temp_trainset, batch_size=1)
     # testset = PandasDataSetWithPaths(csvfiles[1], transform=temp_val_transform)
 
