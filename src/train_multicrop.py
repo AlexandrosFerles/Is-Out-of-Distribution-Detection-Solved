@@ -100,7 +100,7 @@ def train(args):
 
     input_size = 224
 
-    train_loader = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[0, 0], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True)
+    train_loader = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[5, 5], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True)
     ipdb.set_trace()
 
     model = build_model(args).to(device)
