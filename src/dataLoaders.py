@@ -170,7 +170,7 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_ba
     # testset = PandasDataSetWithPaths(csvfiles[1], transform=temp_val_transform)
 
     for index, (data, target) in enumerate(temp_train_loader):
-
+        ipdb.set_trace()
         _, crops, c, h, w = data.size()
         if index == 0:
             list_x = [data.view(-1, c, h, w)]
