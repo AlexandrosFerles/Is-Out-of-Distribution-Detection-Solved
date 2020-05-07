@@ -159,7 +159,7 @@ def _balance_order(data, labels, num_classes, batch_size):
     return final_indexes
 
 
-def generate_random_multi_crop_dataset(csvfiles, ncrops, train_batch_size, val_batch_size, gtFile, with_auto_augment=False, input_size=224, load_gts=True):
+def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_batch_size, gtFile, with_auto_augment=False, input_size=224, load_gts=True):
 
     n_train_crops, n_val_crops = ncrops
     temp_train_transform = transforms.Compose([transforms.CenterCrop(input_size)] + (n_train_crops-1)*[transforms.RandomCrop(input_size)])
