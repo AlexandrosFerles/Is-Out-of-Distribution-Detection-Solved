@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 import torchvision
 from torch.utils.data import DataLoader
@@ -14,7 +15,7 @@ import pickle
 import random
 import ipdb
 
-abs_path = '/home/ferles/Dermatology/medusa/'
+abs_path = '/home/ferles/medusa/src/'
 global_seed = 1
 torch.backends.cudnn.deterministic = True
 random.seed(global_seed)
@@ -64,32 +65,56 @@ def _get_gts(dataset):
 def _get_transforms(input_size, with_auto_augment=False):
 
     if with_auto_augment:
-        training_transform = transforms.Compose([
-            transforms.Resize((input_size, input_size)),
-            # transforms.CenterCrop(size=299),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomVerticalFlip(),
-            transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-            transforms.RandomRotation(45),
-            AutoAugment(),
-            Cutout(),
-            transforms.ToTensor()
+        if input_size is None:
+
+            training_transform = transforms.Compose([
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+                transforms.RandomRotation(45),
+                AutoAugment(),
+                Cutout(),
+                transforms.ToTensor()
+            ])
+        else:
+            training_transform = transforms.Compose([
+                transforms.Resize((input_size, input_size)),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+                transforms.RandomRotation(45),
+                AutoAugment(),
+                Cutout(),
+                transforms.ToTensor()
+            ])
+    else:
+        if input_size is None:
+            training_transform = transforms.Compose([
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+                transforms.RandomRotation(45),
+                transforms.ToTensor()
+            ])
+        else:
+            training_transform = transforms.Compose([
+                transforms.Resize((input_size, input_size)),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+                transforms.RandomRotation(45),
+                transforms.ToTensor()
+            ])
+
+    if input_size is None:
+        al_transform = transforms.Compose([
+            transforms.ToTensor(),
         ])
     else:
-        training_transform = transforms.Compose([
+        val_transform = transforms.Compose([
             transforms.Resize((input_size, input_size)),
-            # transforms.CenterCrop(size=299),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomVerticalFlip(),
-            transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-            transforms.RandomRotation(45),
-            transforms.ToTensor()
+            transforms.ToTensor(),
         ])
-
-    val_transform = transforms.Compose([
-        transforms.Resize((input_size, input_size)),
-        transforms.ToTensor(),
-    ])
 
     return training_transform, val_transform
 
@@ -132,6 +157,37 @@ def _balance_order(data, labels, num_classes, batch_size):
     random.shuffle(acc)
     final_indexes.extend(acc)
     return final_indexes
+
+
+def generate_random_multi_crop_dataset(csvfiles, ncrops, train_batch_size, val_batch_size, gtFile, with_auto_augment=False, input_size=224, load_gts=True):
+
+    n_train_crops, n_val_crops = ncrops
+    temp_train_transform = transforms.Compose([transforms.CenterCrop(input_size)] + (n_train_crops-1)*[transforms.RandomCrop(input_size)])
+    temp_val_transform = transforms.Compose([transforms.CenterCrop(input_size)] + (n_val_crops-1)*[transforms.RandomCrop(input_size)])
+
+    temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=temp_train_transform)
+    temp_train_loader = DataLoader(temp_trainset, batch_size=1)
+    # testset = PandasDataSetWithPaths(csvfiles[1], transform=temp_val_transform)
+
+    for index, (data, target) in enumerate(temp_train_loader):
+
+        _, crops, c, h, w = data.size()
+        if index == 0:
+            list_x = [data.view(-1, c, h, w)]
+            list_y = crops * [torch.IntTensor(target)]
+        else:
+            list_x.append(data.view(-1, c, h, w))
+            list_y.extend(crops * [torch.IntTensor(target)])
+
+    training_transform, _ = _get_transforms(input_size=input_size, with_auto_augment=with_auto_augment)
+    training_data, training_targets = torch.Tensor(list_x), torch.Tensor(list_y)
+
+    trainset = CustomTensorDataset([training_data, training_targets], transform=training_transform)
+    train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True)
+
+    return train_loader
+
+
 
 
 class SubsetSequentialSampler(Sampler):
@@ -318,6 +374,7 @@ def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/raid/ferles/7
 
     return ood_loader, ood_loader
 
+
 def _get_cifar_transforms(resize):
 
     normalize_cifar = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
@@ -478,7 +535,7 @@ def cifar100loaders(train_batch_size=32, test_batch_size=32, test=False, validat
     else:
 
         if pickle_files is None:
-            temp_test = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=temp_transform_cifar)
+            temp_test = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train_cifar)
             temp_loader = DataLoader(temp_test, batch_size=1000)
             gts = []
             for _, gt in temp_loader:
