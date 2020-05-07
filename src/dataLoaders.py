@@ -188,7 +188,6 @@ def _balance_order(data, labels, num_classes, batch_size):
 
 def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_batch_size, gtFile, with_auto_augment=False, input_size=224, load_gts=True):
 
-    datasets = []
     center_transform = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=False)
     temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=center_transform, ret_path=False)
     datasets = [temp_trainset]
@@ -199,11 +198,10 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_ba
         datasets.append(temp_trainset)
 
     trainset = ConcatDataset(datasets)
+    ipdb.set_trace()
     train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True)
 
     return train_loader
-
-
 
 
 class SubsetSequentialSampler(Sampler):
