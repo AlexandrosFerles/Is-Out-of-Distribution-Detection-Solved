@@ -168,30 +168,19 @@ class DenseNet(nn.Module):
             return F.log_softmax(out), h, g
 
 
-def get_optimizer(model, with_decay=False):
+def get_optimizer(model):
 
     weight_decay = 0.0001
-    if with_decay:
-        return optim.SGD([
-            {'params': model.conv1.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.dense1.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.trans1.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.dense2.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.trans2.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.dense3.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.bn1.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.fc.parameters(), 'weight_decay':  weight_decay},
-        ], lr=0.1, momentum=0.9)
-    else:
-        return optim.SGD([
-            {'params': model.conv1.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.dense1.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.trans1.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.dense2.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.trans2.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.dense3.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.bn1.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.gbn.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.g.parameters(), 'weight_decay':  weight_decay},
-            {'params': model.h.parameters(), 'weight_decay':  0},
-        ], lr=0.1, momentum=0.9)
+
+    return optim.SGD([
+        {'params': model.conv1.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.dense1.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.trans1.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.dense2.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.trans2.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.dense3.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.bn1.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.gbn.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.g.parameters(), 'weight_decay':  weight_decay},
+        {'params': model.h.parameters(), 'weight_decay':  0},
+    ], lr=0.1, momentum=0.9)
