@@ -19,12 +19,12 @@ import random
 import ipdb
 
 abs_path = '/home/ferles/medusa/src/'
-global_seed = 1
-torch.backends.cudnn.deterministic = True
-random.seed(global_seed)
-np.random.seed(global_seed)
-torch.manual_seed(global_seed)
-torch.cuda.manual_seed(global_seed)
+# global_seed = 1
+# torch.backends.cudnn.deterministic = True
+# random.seed(global_seed)
+# np.random.seed(global_seed)
+# torch.manual_seed(global_seed)
+# torch.cuda.manual_seed(global_seed)
 
 
 def _create_gt_csv_file(loader, columns, gtFile, fold_index=None):
@@ -230,12 +230,6 @@ class OrderedCrops(object):
 
         crop_positions = self.get_params(img, crop_size=self.crop_size, ncrops=self.ncrops)
         width, height = _get_image_size(img)
-        if width < self.crop_size:
-            height = int(self.crop_size/float(width)) * height
-            width = self.crop_size
-        if height < self.crop_size:
-            width = int(self.crop_size/float(height))*width
-            height = self.crop_size
 
         if self.pad_if_needed and img.size[0] < self.crop_size:
             img = F.pad(img, (self.crop_size-img.size[0], 0))

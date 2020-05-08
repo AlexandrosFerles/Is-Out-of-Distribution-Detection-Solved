@@ -5,9 +5,8 @@ import numpy as np
 import os
 import argparse
 from torch.optim.lr_scheduler import StepLR
-from utils import build_model
+from utils import build_model, json_file_to_pyobj
 from dataLoaders import generate_random_multi_crop_loader
-from utils import json_file_to_pyobj
 import random
 import wandb
 from logger import wandb_table
@@ -16,11 +15,11 @@ import pandas as pd
 import ipdb
 
 abs_path = '/home/ferles/medusa/src/'
-global_seed = 1
-torch.backends.cudnn.deterministic = True
-random.seed(global_seed)
-torch.manual_seed(global_seed)
-torch.cuda.manual_seed(global_seed)
+# global_seed = 1
+# torch.backends.cudnn.deterministic = True
+# random.seed(global_seed)
+# torch.manual_seed(global_seed)
+# torch.cuda.manual_seed(global_seed)
 
 
 def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile, use_wandb):
@@ -97,7 +96,7 @@ def train(args):
 
     input_size = 224
 
-    train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[5, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True)
+    train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[9, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True)
 
     model = build_model(args).to(device)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)

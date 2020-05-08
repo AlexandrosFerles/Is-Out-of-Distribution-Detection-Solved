@@ -7,12 +7,12 @@ import random
 import ipdb
 
 
-global_seed = 1
-torch.backends.cudnn.deterministic = True
-random.seed(global_seed)
-np.random.seed(global_seed)
-torch.manual_seed(global_seed)
-torch.cuda.manual_seed(global_seed)
+# global_seed = 1
+# torch.backends.cudnn.deterministic = True
+# random.seed(global_seed)
+# np.random.seed(global_seed)
+# torch.manual_seed(global_seed)
+# torch.cuda.manual_seed(global_seed)
 
 
 # TODO: MetaData

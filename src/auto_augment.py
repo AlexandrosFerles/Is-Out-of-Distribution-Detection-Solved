@@ -6,12 +6,12 @@ from scipy import ndimage
 from PIL import Image, ImageEnhance, ImageOps
 
 
-global_seed = 1
-torch.backends.cudnn.deterministic = True
-random.seed(global_seed)
-np.random.seed(global_seed)
-torch.manual_seed(global_seed)
-torch.cuda.manual_seed(global_seed)
+# global_seed = 1
+# torch.backends.cudnn.deterministic = True
+# random.seed(global_seed)
+# np.random.seed(global_seed)
+# torch.manual_seed(global_seed)
+# torch.cuda.manual_seed(global_seed)
 
 
 class AutoAugment(object):
