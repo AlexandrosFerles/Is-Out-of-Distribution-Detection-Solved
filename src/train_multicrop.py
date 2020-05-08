@@ -107,14 +107,14 @@ def train(args):
         _labels = torch.argmax(labels, dim=1)
         gts = np.copy(np.append(gts, _labels.detach().cpu().numpy()))
     val, counts = np.unique(gts, return_counts=True)
-    ipdb.set_trace()
+    freqs = counts / np.sum(counts)
 
     model = build_model(args).to(device)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
     scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 
     epochs = 20
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(weight=torch.Tensor(freqs).to(device))
 
     # use_scheduler = True
     use_scheduler = False
@@ -189,7 +189,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DL Custom Sets Train')
     parser.add_argument('--config', help='Training Configurations', required=True)
     parser.add_argument('--device', '--dv', help='GPU device', default=0, required=False)
-    parser.add_argument('--mode', '--md',  default='new', required=False)
 
     args = parser.parse_args()
     train(args)
