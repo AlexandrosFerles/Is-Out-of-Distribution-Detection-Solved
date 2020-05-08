@@ -101,7 +101,13 @@ def train(args):
 
     input_size = 224
 
-    train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[9, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, oversample=True)
+    train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[9, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, oversample=False)
+    gts = np.zeros(0)
+    for ( _, labels) in tqdm(train_loader):
+        _labels = torch.argmax(labels, dim=1)
+        gts = np.copy(np.append(gts, _labels.detach().cpu().numpy()))
+    val, counts = np.unique(gts, return_counts=True)
+    ipdb.set_trace()
 
     model = build_model(args).to(device)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
