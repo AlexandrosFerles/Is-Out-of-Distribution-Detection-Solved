@@ -38,7 +38,6 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
         for data in tqdm(test_loader):
             path, images, labels = data
-            ipdb.set_trace()
             _, ncrops, c, h , w = images.size()
             images = images.view(ncrops, c, h, w)
             images = images.to(device)
@@ -120,7 +119,8 @@ def train(args):
 
     early_stopping = False
     early_stopping_cnt = 0
-        
+
+    ipdb.set_trace()
     for epoch in tqdm(range(epochs)):
 
         model.train()
