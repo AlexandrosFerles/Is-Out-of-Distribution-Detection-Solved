@@ -242,7 +242,7 @@ class OrderedCrops(object):
         if self.pad_if_needed and img.size[1] < self.crop_size:
             img = F.pad(img, (0, self.crop_size-img.size[1]))
 
-        ret_tuple = (   img.crop((
+        ret_tuple = tuple(   img.crop((
                         crop_positions[0, 0]-height/2,
                         crop_positions[0, 1]-width/2,
                         (crop_positions[0, 0]-height/2)+height,
@@ -250,9 +250,10 @@ class OrderedCrops(object):
                         ))
                     )
 
+
         for i in range(1, self.ncrops):
 
-            temp_tuple = (   img.crop((
+            temp_tuple = tuple(   img.crop((
                 crop_positions[i, 0]-height/2,
                 crop_positions[i, 1]-width/2,
                 (crop_positions[i, 0]-height/2)+height,
@@ -260,7 +261,7 @@ class OrderedCrops(object):
                 ))
             )
 
-            ret_tuple = ret_tuple + temp_tuple
+            ret_tuple += temp_tuple
 
         return ret_tuple
 
