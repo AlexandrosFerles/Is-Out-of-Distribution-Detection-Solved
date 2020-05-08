@@ -53,6 +53,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             results.append(softmax_outputs.detach().cpu().numpy().tolist())
 
             _labels = torch.argmax(labels, dim=1)
+            ipdb.set_trace()
             loss = criterion(outputs, _labels)
             loss_acc.append(loss.item())
 
