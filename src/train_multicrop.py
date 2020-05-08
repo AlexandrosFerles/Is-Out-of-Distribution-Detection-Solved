@@ -74,6 +74,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
         wandb.log({'Val Set Loss': val_loss, 'epoch': epoch})
         wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
         wandb.log({'AUC': auc, 'epoch': epoch})
+        wandb.log({'Detection Accuracy': accuracy, 'epoch': epoch})
 
     return auc, balanced_accuracy, accuracy
 
@@ -141,7 +142,6 @@ def train(args):
             # loss_acc.append(focal_loss.item())
             # focal_loss.backward()
             optimizer.step()
-            break
 
         if use_wandb:
             wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
