@@ -239,7 +239,7 @@ class OrderedCrops(object):
 
         if self.pad_if_needed and img.size[0] < self.crop_size:
             img = F.pad(img, (self.crop_size-img.size[0], 0))
-        if self.pad_if_needed and img.size[1] < self.size[0]:
+        if self.pad_if_needed and img.size[1] < self.crop_size:
             img = F.pad(img, (0, self.crop_size-img.size[1]))
 
         ret_tuple = (   img.crop(
