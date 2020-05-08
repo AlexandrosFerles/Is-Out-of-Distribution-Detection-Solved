@@ -52,10 +52,10 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             softmax_outputs = torch.mean(softmax_outputs, axis=0)
             results.append(softmax_outputs.detach().cpu().numpy().tolist())
 
-            ipdb.set_trace()
             preds = torch.argmax(softmax_outputs)
             _labels = torch.argmax(labels, dim=1)
-            correct += (preds==_labels).sum().item()
+            correct += ( preds == _labels).sum().item()
+            total += _labels.size(0)
             loss = criterion(outputs.unsqueeze(0), _labels)
             loss_acc.append(loss.item())
 
