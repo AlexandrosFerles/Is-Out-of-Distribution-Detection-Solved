@@ -292,7 +292,8 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile
 
     val_transform = transforms.Compose([
         OrderedCrops(crop_size=input_size, ncrops=n_val_crops),
-        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))])
+        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))
+    ])
     valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
     val_loader = DataLoader(valset, batch_size=1)
 
@@ -320,7 +321,7 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, inpu
 
     training_transform, val_transform = _get_transforms(input_size=input_size, with_auto_augment=with_auto_augment)
 
-    trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform)
+    trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, ret_path=False)
     testset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
 
     if load_gts:
@@ -352,7 +353,7 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
 
     training_transform, val_transform = _get_transforms(input_size=input_size, with_auto_augment=with_auto_augment)
 
-    trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, exclude_class=exclude_class)
+    trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, exclude_class=exclude_class, ret_path=False)
     valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform, exclude_class=exclude_class)
 
     if load_gts:
@@ -362,7 +363,7 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
         np.savez(f'{abs_path}npzs/indexes/isic/gts_{exclude_class}_{mode}.npz', gts)
 
     indexes = np.array(list(range(gts.shape[0])))
-    ros = RandomOverSampler(random_state=global_seed)
+    ros = RandomOverSampler()
     idxs, labels = ros.fit_resample(indexes.reshape(-1, 1), gts)
     idxs = np.squeeze(idxs).tolist()
     labels = np.squeeze(labels).tolist()
