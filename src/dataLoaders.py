@@ -249,6 +249,8 @@ class OrderedCrops(object):
                         (crop_positions[0, 1]-width/2) + width
                         ))
 
+        temp = [croppped_image]
+
         for i in range(1, self.ncrops):
 
             cropped_image = img.crop((
@@ -257,8 +259,9 @@ class OrderedCrops(object):
                 (crop_positions[i, 0]-height/2)+height,
                 (crop_positions[i, 1]-width/2) + width
                 ))
+            temp.append(croppped_image)
 
-        # return ret_tuple
+        return tuple(temp)
 
     def __repr__(self):
         return self.__class__.__name__ + '(size={0}, padding={1})'.format(self.size, self.padding)
