@@ -237,10 +237,10 @@ class OrderedCrops(object):
             width = int(self.crop_size/float(height))*width
             height = self.crop_size
 
-        if self.pad_if_needed and img.size[0] < self.crop_size:
-            img = F.pad(img, (self.crop_size-img.size[0], 0))
-        if self.pad_if_needed and img.size[1] < self.crop_size:
-            img = F.pad(img, (0, self.crop_size-img.size[1]))
+        # if self.pad_if_needed and img.size[0] < self.crop_size:
+        #     img = F.pad(img, (self.crop_size-img.size[0], 0))
+        # if self.pad_if_needed and img.size[1] < self.crop_size:
+        #     img = F.pad(img, (0, self.crop_size-img.size[1]))
 
         # ret_tuple = tuple(   img.crop((
         #                 crop_positions[0, 0]-height/2,
