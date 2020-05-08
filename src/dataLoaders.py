@@ -268,7 +268,6 @@ class OrderedCrops(object):
                 ))
             temp.append(cropped_image)
 
-        ipdb.set_trace()
         return tuple(temp)
 
     def __repr__(self):
