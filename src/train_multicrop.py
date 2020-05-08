@@ -49,10 +49,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             outputs = net(images)
             softmax_outputs = torch.softmax(outputs, 1)
             softmax_outputs = torch.mean(softmax_outputs, axis=0)
-            for output in softmax_outputs:
-                ipdb.set_trace()
-                temp = output.detach().cpu().numpy().tolist()
-                results.append([float(elem) for elem in temp])
+            results.append(softmax_outputs.detach().cpu().numpy().tolist())
 
             _labels = torch.argmax(labels, dim=1)
             loss = criterion(outputs, _labels)
