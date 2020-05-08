@@ -218,8 +218,8 @@ class OrderedCrops(object):
             height = crop_size
         crop_positions = np.zeros((ncrops, 2))
         ind = 0
-        for i in range(np.sqrt(ncrops)):
-            for j in range(np.sqrt(ncrops)):
+        for i in range(np.int64(np.sqrt(ncrops))):
+            for j in range(np.int64(np.sqrt(ncrops))):
                 crop_positions[ind, 0] = crop_size/2 + i*(width-crop_size)/(np.sqrt(ncrops)-1)
                 crop_positions[ind, 1] = crop_size/2 + j*(height-crop_size)/(np.sqrt(ncrops)-1)
                 ind += 1
