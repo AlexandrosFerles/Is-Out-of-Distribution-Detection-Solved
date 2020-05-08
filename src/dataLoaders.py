@@ -246,8 +246,8 @@ class OrderedCrops(object):
                         crop_positions[0, 0]-height/2,
                         crop_positions[0, 1]-width/2,
                         (crop_positions[0, 0]-height/2)+height,
-                        (crop_positions[0, 1]-width/2) + width
-                        ))
+                        # (crop_positions[0, 1]-width/2) + width
+                        crop_positions[0, 1]-width/2))
                     )
 
 
