@@ -32,8 +32,6 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
         loss_acc = []
         criterion = nn.CrossEntropyLoss()
 
-        preds_acc, gts_acc = np.zeros(0), np.zeros(0)
-
         paths, results = [], []
 
         for data in tqdm(test_loader):
@@ -50,14 +48,12 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
             outputs = net(images)
             softmax_outputs = torch.softmax(outputs, 1)
-            max_idx = torch.argmax(softmax_outputs)
+            softmax_outputs = torch.mean(softmax_outputs, axis=0)
             for output in softmax_outputs:
                 temp = output.detach().cpu().numpy().tolist()
                 results.append([float(elem) for elem in temp])
 
             _labels = torch.argmax(labels, dim=1)
-            preds_acc = np.append(preds_acc, max_idx.detach().cpu().numpy())
-            gts_acc = np.append(gts_acc, _labels.detach().cpu().numpy())
             loss = criterion(outputs, _labels)
             loss_acc.append(loss.item())
 
@@ -81,8 +77,8 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
 def train(args):
 
-    # use_wandb = True
-    use_wandb = False
+    use_wandb = True
+    # use_wandb = False
 
     device = torch.device(f'cuda:{args.device}')
 
@@ -144,7 +140,6 @@ def train(args):
             # loss_acc.append(focal_loss.item())
             # focal_loss.backward()
             optimizer.step()
-            break
 
         if use_wandb:
             wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
