@@ -242,8 +242,14 @@ class OrderedCrops(object):
         if self.pad_if_needed and img.size[1] < self.crop_size:
             img = F.pad(img, (0, self.crop_size-img.size[1]))
 
-        print(crop_positions)
-
+        proposal = (
+            crop_positions[0, 0]-self.crop_size/2,
+            crop_positions[0, 1]-self.crop_size/2,
+            (crop_positions[0, 0]-height/2)+self.crop_size/2,
+            (crop_positions[0, 1]-width/2) + self.crop_size/2
+        )
+        print(proposal)
+        ipdb.set_trace()
         cropped_image = img.crop((
                         crop_positions[0, 0]-self.crop_size/2,
                         crop_positions[0, 1]-self.crop_size/2,
