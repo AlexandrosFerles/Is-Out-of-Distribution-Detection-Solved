@@ -190,7 +190,7 @@ def _balance_order(data, labels, num_classes, batch_size):
 
 
 def _get_image_size(img):
-    if F._is_pil_image(img):
+    if Ftransforms._is_pil_image(img):
         return img.size
     elif isinstance(img, torch.Tensor) and img.dim() > 2:
         return img.shape[-2:][::-1]
