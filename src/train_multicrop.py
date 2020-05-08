@@ -81,8 +81,8 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
 def train(args):
 
-    use_wandb = True
-    # use_wandb = False
+    # use_wandb = True
+    use_wandb = False
 
     device = torch.device(f'cuda:{args.device}')
 
