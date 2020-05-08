@@ -220,8 +220,8 @@ class OrderedCrops(object):
         ind = 0
         for i in range(np.int64(np.sqrt(ncrops))):
             for j in range(np.int64(np.sqrt(ncrops))):
-                crop_positions[ind, 0] = crop_size/2 + i*(width-crop_size)/(np.int64(np.sqrt(ncrops))-1)
-                crop_positions[ind, 1] = crop_size/2 + j*(height-crop_size)/(np.int64(np.sqrt(ncrops))-1)
+                crop_positions[ind, 0] = np.int64(crop_size/2 + i*(width-crop_size)/(np.int64(np.sqrt(ncrops))-1))
+                crop_positions[ind, 1] = np.int64(crop_size/2 + j*(height-crop_size)/(np.int64(np.sqrt(ncrops))-1))
                 ind += 1
 
         return crop_positions
