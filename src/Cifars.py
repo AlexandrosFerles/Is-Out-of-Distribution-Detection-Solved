@@ -24,14 +24,14 @@ def train(args):
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
     wandb.init(name=training_configurations.checkpoint)
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    device = torch.device(f'cuda:{args.device}')
 
     flag = False
     if training_configurations.train_pickle != 'None' and training_configurations.test_pickle != 'None':
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    model = torch.nn.DataParallel(build_model(args)).to(device) if torch.cuda.device_count() > 1 else build_model(args).to(device)
+    model = build_model(args).to(device)
 
     epochs = 90
 
@@ -110,7 +110,7 @@ def train(args):
 
         if epoch_accuracy > best_test_acc:
             best_test_acc = epoch_accuracy
-            torch.save(model.state_dict(), f'checkpoints/{training_configurations.checkpoint}.pth')
+            torch.save(model.state_dict(), f'checkpoints/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_test_acc}.pth')
 
 
 if __name__ == '__main__':
@@ -121,6 +121,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DL Dermatology models')
 
     parser.add_argument('--config', help='Training Configurations', required=True)
+    parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     args = parser.parse_args()
     train(args)
