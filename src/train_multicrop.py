@@ -101,8 +101,8 @@ def train(args):
     input_size = 224
 
     train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[5, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True)
-    ipdb.set_trace()
     aa, bb, cc = next(iter(val_loader))
+    ipdb.set_trace()
 
     model = build_model(args).to(device)
     # optimizer = optim.Adam(model.parameters(), lr=1e-3)
