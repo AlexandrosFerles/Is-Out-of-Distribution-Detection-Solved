@@ -94,7 +94,6 @@ def train(args):
     exclude_class = training_configurations.exclude_class
     exclude_class = None if exclude_class == "None" else exclude_class
 
-    mode = args.mode
     if use_wandb:
         wandb.init(name=checkpointFileName)
 
@@ -156,17 +155,17 @@ def train(args):
 
         if auc > best_auc:
             best_auc = auc
-            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-auc-model_{mode}_multicrop.pth')
+            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-auc-model-multicrop.pth')
             torch.save(model.state_dict(), checkpointFile)
 
         if accuracy > best_accuracy:
             best_accuracy = accuracy
-            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-accuracy-model_{mode}_multicrop.pth')
+            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-accuracy-model-multicrop.pth')
             torch.save(model.state_dict(), checkpointFile)
 
         if balanced_accuracy > best_balanced_accuracy:
             best_balanced_accuracy = balanced_accuracy
-            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-balanced-accuracy-model_{mode}_multicrop.pth')
+            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-balanced-accuracy-model-multicrop.pth')
             torch.save(model.state_dict(), checkpointFile)
         else:
             if early_stopping:
