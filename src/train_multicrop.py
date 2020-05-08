@@ -48,6 +48,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
             outputs = net(images)
             softmax_outputs = torch.softmax(outputs, 1)
+            outputs = torch.mean(outputs, axis=0)
             softmax_outputs = torch.mean(softmax_outputs, axis=0)
             results.append(softmax_outputs.detach().cpu().numpy().tolist())
 
