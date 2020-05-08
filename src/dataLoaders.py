@@ -1,13 +1,16 @@
 import torch
-import numpy as np
 import torchvision
 from torch.utils.data import DataLoader, TensorDataset, ConcatDataset
 from torchvision import transforms, datasets
+from torchvision.transforms import functional as Ftransforms
 from torchvision.datasets import ImageFolder
 from torch.utils.data.sampler import SubsetRandomSampler, Sampler
+import torch.nn.functional as F
+import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
-from tqdm import tqdm
 from imblearn.over_sampling import RandomOverSampler
+import numbers
+from tqdm import tqdm
 from auto_augment import AutoAugment, Cutout
 from Datasets import *
 import os
@@ -186,7 +189,86 @@ def _balance_order(data, labels, num_classes, batch_size):
     return final_indexes
 
 
-def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_batch_size, gtFile, with_auto_augment=False, input_size=224, load_gts=True):
+def _get_image_size(img):
+    if F._is_pil_image(img):
+        return img.size
+    elif isinstance(img, torch.Tensor) and img.dim() > 2:
+        return img.shape[-2:][::-1]
+    else:
+        raise TypeError("Unexpected type {}".format(type(img)))
+
+
+class OrderedCrops(object):
+    """
+    Ordered crops of an image
+    """
+    def __init__(self, crop_size, ncrops, pad_if_needed=True):
+        self.pad_if_needed = pad_if_needed
+        self.crop_size = crop_size
+        self.ncrops = ncrops
+
+    @staticmethod
+    def get_params(img, crop_size, ncrops):
+        width, height = _get_image_size(img)
+        if width < crop_size:
+            height = int(crop_size/float(width)) * height
+            width = crop_size
+        if height < crop_size:
+            width = int(crop_size/float(height))*width
+            height = crop_size
+        crop_positions = np.zeros((ncrops, 2))
+        ind = 0
+        for i in range(np.sqrt(ncrops)):
+            for j in range(np.sqrt(ncrops)):
+                crop_positions[ind, 0] = crop_size/2 + i*(width-crop_size)/(np.sqrt(ncrops)-1)
+                crop_positions[ind, 1] = crop_size/2 + j*(height-crop_size)/(np.sqrt(ncrops)-1)
+                ind += 1
+
+        return crop_positions
+
+    def __call__(self, img):
+
+        crop_positions = self.get_params(img, crop_size=self.crop_size, ncrops=self.ncrops)
+        width, height = _get_image_size(img)
+        if width < self.crop_size:
+            height = int(self.crop_size/float(width)) * height
+            width = self.crop_size
+        if height < self.crop_size:
+            width = int(self.crop_size/float(height))*width
+            height = self.crop_size
+
+        if self.pad_if_needed and img.size[0] < self.crop_size:
+            img = F.pad(img, (self.crop_size-img.size[0], 0))
+        if self.pad_if_needed and img.size[1] < self.size[0]:
+            img = F.pad(img, (0, self.crop_size-img.size[1]))
+
+        ret_tuple = (   img.crop(
+                        crop_positions[0, 0]-height/2,
+                        crop_positions[0, 1]-width/2,
+                        (crop_positions[0, 0]-height/2)+height,
+                        (crop_positions[0, 1]-width/2) + width
+                        )
+                    )
+
+        for i in range(1, self.ncrops):
+
+            temp_tuple = (   img.crop(
+                crop_positions[i, 0]-height/2,
+                crop_positions[i, 1]-width/2,
+                (crop_positions[i, 0]-height/2)+height,
+                (crop_positions[i, 1]-width/2) + width
+                )
+            )
+
+            ret_tuple = ret_tuple + temp_tuple
+
+        return ret_tuple
+
+    def __repr__(self):
+        return self.__class__.__name__ + '(size={0}, padding={1})'.format(self.size, self.padding)
+
+
+def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile, with_auto_augment=False, input_size=224):
 
     center_transform, _ = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=False)
     temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=center_transform, ret_path=False)
@@ -198,10 +280,19 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, val_ba
         datasets.append(temp_trainset)
 
     trainset = ConcatDataset(datasets)
-    ipdb.set_trace()
     train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True)
 
-    return train_loader
+    val_transform = transforms.Compose([
+        OrderedCrops(crop_size=input_size, ncrops=n_val_crops),
+        transforms.ToTensor()
+    ])
+    valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
+    val_loader = DataLoader(valset, batch_size=1)
+    ipdb.set_trace()
+
+    _create_gt_csv_file(loader=val_loader, columns=valset.csv_columns, gtFile=gtFile)
+
+    return train_loader, val_loader, valset.csv_columns
 
 
 class SubsetSequentialSampler(Sampler):
