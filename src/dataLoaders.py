@@ -245,16 +245,16 @@ class OrderedCrops(object):
         proposal = (
             crop_positions[0, 0]-self.crop_size/2,
             crop_positions[0, 1]-self.crop_size/2,
-            (crop_positions[0, 0]-height/2)+self.crop_size/2,
-            (crop_positions[0, 1]-width/2) + self.crop_size/2
+            (crop_positions[0, 0]-self.crop_size/2)+self.crop_size/2,
+            (crop_positions[0, 1]-self.crop_size/2) + self.crop_size/2
         )
         print(proposal)
         ipdb.set_trace()
         cropped_image = img.crop((
                         crop_positions[0, 0]-self.crop_size/2,
                         crop_positions[0, 1]-self.crop_size/2,
-                        (crop_positions[0, 0]-height/2)+self.crop_size/2,
-                        (crop_positions[0, 1]-width/2) + self.crop_size/2
+                        (crop_positions[0, 0]-self.crop_size/2)+self.crop_size/2,
+                        (crop_positions[0, 1]-self.crop_size/2) + self.crop_size/2
                         ))
 
         temp = [cropped_image]
