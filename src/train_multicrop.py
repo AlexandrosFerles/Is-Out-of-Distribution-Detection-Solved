@@ -101,7 +101,7 @@ def train(args):
 
     input_size = 224
 
-    train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[9, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, oversample=True)
+    train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[9, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, oversample=False)
 
     model = build_model(args).to(device)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
