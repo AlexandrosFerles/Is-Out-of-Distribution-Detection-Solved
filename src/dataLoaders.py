@@ -281,7 +281,7 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile
     valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
     val_loader = DataLoader(valset, batch_size=1)
 
-    # _create_gt_csv_file(loader=val_loader, columns=valset.csv_columns, gtFile=gtFile)
+    _create_gt_csv_file(loader=val_loader, columns=valset.csv_columns, gtFile=gtFile)
 
     return train_loader, val_loader, valset.csv_columns
 
