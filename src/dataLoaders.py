@@ -245,8 +245,8 @@ class OrderedCrops(object):
         cropped_image = img.crop((
                         crop_positions[0, 0]-self.crop_size/2,
                         crop_positions[0, 1]-self.crop_size/2,
-                        (crop_positions[0, 0]-height/2)+self.crop_size,
-                        (crop_positions[0, 1]-width/2) + self.crop_size
+                        (crop_positions[0, 0]-height/2)+self.crop_size/2,
+                        (crop_positions[0, 1]-width/2) + self.crop_size/2
                         ))
 
         temp = [cropped_image]
@@ -256,8 +256,8 @@ class OrderedCrops(object):
             cropped_image = img.crop((
                 crop_positions[i, 0]-self.crop_size/2,
                 crop_positions[i, 1]-self.crop_size/2,
-                (crop_positions[i, 0]-height/2)+self.crop_size,
-                (crop_positions[i, 1]-width/2) + self.crop_size
+                (crop_positions[i, 0]-height/2)+self.crop_size/2,
+                (crop_positions[i, 1]-width/2) + self.crop_size/2
                 ))
             temp.append(cropped_image)
 
