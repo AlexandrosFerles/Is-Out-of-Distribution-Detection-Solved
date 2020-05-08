@@ -243,10 +243,10 @@ class OrderedCrops(object):
             img = F.pad(img, (0, self.crop_size-img.size[1]))
 
         cropped_image = img.crop((
-                        crop_positions[0, 0]-self.crop_size/2,
-                        crop_positions[0, 1]-self.crop_size/2,
-                        (crop_positions[0, 0]-self.crop_size/2)+self.crop_size/2,
-                        (crop_positions[0, 1]-self.crop_size/2) + self.crop_size/2
+                        crop_positions[0, 0]-self.crop_size,
+                        crop_positions[0, 1]-self.crop_size,
+                        (crop_positions[0, 0]-self.crop_size)+self.crop_size,
+                        (crop_positions[0, 1]-self.crop_size) + self.crop_size
                         ))
 
         temp = [cropped_image]
@@ -254,10 +254,10 @@ class OrderedCrops(object):
         for i in range(1, self.ncrops):
 
             cropped_image = img.crop((
-                crop_positions[i, 0]-self.crop_size/2,
-                crop_positions[i, 1]-self.crop_size/2,
-                (crop_positions[i, 0]-self.crop_size/2)+self.crop_size/2,
-                (crop_positions[i, 1]-self.crop_size/2) + self.crop_size/2
+                crop_positions[i, 0]-self.crop_size,
+                crop_positions[i, 1]-self.crop_size,
+                (crop_positions[i, 0]-self.crop_size)+self.crop_size,
+                (crop_positions[i, 1]-self.crop_size) + self.crop_size
                 ))
             temp.append(cropped_image)
 
