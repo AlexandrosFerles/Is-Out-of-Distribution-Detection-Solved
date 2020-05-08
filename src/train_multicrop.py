@@ -23,7 +23,7 @@ torch.manual_seed(global_seed)
 torch.cuda.manual_seed(global_seed)
 
 
-def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile):
+def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile, use_wandb):
 
     with torch.no_grad():
 
@@ -38,6 +38,9 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
         for data in tqdm(test_loader):
             path, images, labels = data
+            ipdb.set_trace()
+            _, ncrops, c, h , w = images.size()
+            images = images.view(ncrops, c, h, w)
             images = images.to(device)
             labels = labels.to(device)
 
@@ -101,12 +104,9 @@ def train(args):
     input_size = 224
 
     train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[5, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True)
-    aa, bb, cc = next(iter(val_loader))
-    ipdb.set_trace()
 
     model = build_model(args).to(device)
-    # optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    optimizer = optim.Adam(model.parameters(), lr=0.000015)
+    optimizer = optim.Adam(model.parameters(), lr=5e-4)
     scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 
     epochs = 20
@@ -144,16 +144,18 @@ def train(args):
             # loss_acc.append(focal_loss.item())
             # focal_loss.backward()
             optimizer.step()
+            break
 
-        wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
-        wandb.log({'epoch': epoch}, commit=False)
+        if use_wandb:
+            wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
+            wandb.log({'epoch': epoch}, commit=False)
         train_loss.append(sum(loss_acc) / float(train_loader.__len__()))
         loss_acc.clear()
 
         if use_scheduler:
             scheduler.step()
 
-        auc, balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
+        auc, balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName, use_wandb=use_wandb)
 
         if auc > best_auc:
             best_auc = auc
