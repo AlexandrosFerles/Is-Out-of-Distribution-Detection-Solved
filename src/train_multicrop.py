@@ -22,8 +22,9 @@ abs_path = '/home/ferles/medusa/src/'
 # torch.cuda.manual_seed(global_seed)
 
 
-def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile, use_wandb):
+def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile):
 
+    correct, total = 0, 0
     with torch.no_grad():
 
         net.eval()
@@ -51,10 +52,13 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             softmax_outputs = torch.mean(softmax_outputs, axis=0)
             results.append(softmax_outputs.detach().cpu().numpy().tolist())
 
+            preds = torch.argmax(softmax_outputs, dim=1)
             _labels = torch.argmax(labels, dim=1)
+            correct += (preds==_labels).sum().item()
             loss = criterion(outputs.unsqueeze(0), _labels)
             loss_acc.append(loss.item())
 
+        accuracy = correct / total
         df = pd.DataFrame(columns=columns)
 
         for idx, (path, result) in enumerate(zip(paths, results)):
@@ -70,13 +74,13 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
         wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
         wandb.log({'AUC': auc, 'epoch': epoch})
 
-    return auc, balanced_accuracy
+    return auc, balanced_accuracy, accuracy
 
 
 def train(args):
 
-    use_wandb = True
-    # use_wandb = False
+    # use_wandb = True
+    use_wandb = False
 
     device = torch.device(f'cuda:{args.device}')
 
@@ -108,7 +112,7 @@ def train(args):
     # use_scheduler = True
     use_scheduler = False
 
-    best_auc, best_balanced_accuracy = 0, 0
+    best_auc, best_balanced_accuracy, best_accuracy = 0, 0, 0
     train_loss, val_loss, balanced_accuracies = [], [], []
 
     early_stopping = False
@@ -137,6 +141,7 @@ def train(args):
             # loss_acc.append(focal_loss.item())
             # focal_loss.backward()
             optimizer.step()
+            break
 
         if use_wandb:
             wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
@@ -147,16 +152,21 @@ def train(args):
         if use_scheduler:
             scheduler.step()
 
-        auc, balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName, use_wandb=use_wandb)
+        auc, balanced_accuracy, accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
 
         if auc > best_auc:
             best_auc = auc
-            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-auc-model_{mode}_next.pth')
+            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-auc-model_{mode}_multicrop.pth')
+            torch.save(model.state_dict(), checkpointFile)
+
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-accuracy-model_{mode}_multicrop.pth')
             torch.save(model.state_dict(), checkpointFile)
 
         if balanced_accuracy > best_balanced_accuracy:
             best_balanced_accuracy = balanced_accuracy
-            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-balanced-accuracy-model_{mode}_next.pth')
+            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-balanced-accuracy-model_{mode}_multicrop.pth')
             torch.save(model.state_dict(), checkpointFile)
         else:
             if early_stopping:
