@@ -19,7 +19,7 @@ torch.cuda.manual_seed(global_seed)
 np.random.seed(global_seed)
 
 
-def train(mode, dv):
+def train(dv):
 
     wandb.init(name=f'WideResNet')
     device = torch.device(f'cuda:{dv}')
@@ -105,8 +105,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='DenseNetGodin')
 
-    parser.add_argument('--mode', type=int, default=-1, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     args = parser.parse_args()
-    train(args.mode, args.device)
+    train(args.device)
