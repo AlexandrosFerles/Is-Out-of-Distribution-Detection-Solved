@@ -50,6 +50,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             softmax_outputs = torch.softmax(outputs, 1)
             softmax_outputs = torch.mean(softmax_outputs, axis=0)
             for output in softmax_outputs:
+                ipdb.set_trace()
                 temp = output.detach().cpu().numpy().tolist()
                 results.append([float(elem) for elem in temp])
 
@@ -139,6 +140,7 @@ def train(args):
             # loss_acc.append(focal_loss.item())
             # focal_loss.backward()
             optimizer.step()
+            break
 
         if use_wandb:
             wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
