@@ -55,7 +55,6 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             _labels = torch.argmax(labels, dim=1)
             loss = criterion(outputs.unsqueeze(0), _labels)
             loss_acc.append(loss.item())
-        # ipdb.set_trace()
 
         df = pd.DataFrame(columns=columns)
 
@@ -139,7 +138,6 @@ def train(args):
             # loss_acc.append(focal_loss.item())
             # focal_loss.backward()
             optimizer.step()
-            break
 
         if use_wandb:
             wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
