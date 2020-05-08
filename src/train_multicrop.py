@@ -53,12 +53,12 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             results.append(softmax_outputs.detach().cpu().numpy().tolist())
 
             _labels = torch.argmax(labels, dim=1)
-            ipdb.set_trace()
-            loss = criterion(outputs, _labels)
+            loss = criterion(outputs.unsqueeze(0), _labels)
             loss_acc.append(loss.item())
+        # ipdb.set_trace()
 
         df = pd.DataFrame(columns=columns)
-        
+
         for idx, (path, result) in enumerate(zip(paths, results)):
             df.loc[idx] = [path] + result
 
