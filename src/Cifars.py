@@ -110,7 +110,7 @@ def train(args):
 
         if epoch_accuracy > best_test_acc:
             best_test_acc = epoch_accuracy
-            torch.save(model.state_dict(), f'checkpoints/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_test_acc}.pth')
+            torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_test_acc}.pth')
 
 
 if __name__ == '__main__':
