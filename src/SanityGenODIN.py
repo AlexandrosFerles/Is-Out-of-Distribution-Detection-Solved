@@ -26,8 +26,10 @@ def train(mode, dv):
 
     model = DenseNet(mode=mode)
     model = model.to(device)
-    optimizer = get_optimizer(model)
-    # optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
+    if mode != -1:
+        optimizer = get_optimizer(model)
+    else:
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
     criterion = nn.CrossEntropyLoss()
 
     pickle_files = ['train_indices_cifar10.pickle', 'val_indices_cifar10.pickle']
