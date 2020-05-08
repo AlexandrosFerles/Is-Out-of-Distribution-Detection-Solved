@@ -249,7 +249,6 @@ class OrderedCrops(object):
             (crop_positions[0, 1]-self.crop_size/2) + self.crop_size/2
         )
         print(proposal)
-        ipdb.set_trace()
         cropped_image = img.crop((
                         crop_positions[0, 0]-self.crop_size/2,
                         crop_positions[0, 1]-self.crop_size/2,
@@ -269,6 +268,7 @@ class OrderedCrops(object):
                 ))
             temp.append(cropped_image)
 
+        ipdb.set_trace()
         return tuple(temp)
 
     def __repr__(self):
