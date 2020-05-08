@@ -285,8 +285,7 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile
 
     val_transform = transforms.Compose([
         OrderedCrops(crop_size=input_size, ncrops=n_val_crops),
-        transforms.ToTensor()
-    ])
+        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))    ])
     valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
     val_loader = DataLoader(valset, batch_size=1)
 
