@@ -261,7 +261,7 @@ class OrderedCrops(object):
         return self.__class__.__name__ + '(size={0}, padding={1})'.format(self.size, self.padding)
 
 
-def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile, with_auto_augment=False, input_size=224):
+def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile, with_auto_augment=False, input_size=224, oversample=False):
 
     center_transform, _ = _get_crop_transforms(input_size=input_size, with_auto_augment=with_auto_augment, random_crop=False)
     temp_trainset = PandasDataSetWithPaths(csvfiles[0], transform=center_transform, ret_path=False)
@@ -273,11 +273,26 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile
         datasets.append(temp_trainset)
 
     trainset = ConcatDataset(datasets)
-    train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True)
+    if oversample:
+        gts = _get_gts(trainset)
+        indexes = np.array(list(range(gts.shape[0])))
+        ros = RandomOverSampler()
+        idxs, labels = ros.fit_resample(indexes.reshape(-1, 1), gts)
+        idxs = np.squeeze(idxs).tolist()
+        labels = np.squeeze(labels).tolist()
+        labels = [int(e) for e in labels]
+        num_classes = np.unique(labels).shape[0]
+
+        final_idx = _balance_order(idxs, labels, num_classes, batch_size=train_batch_size)
+        sampler = SubsetSequentialSampler(indices=final_idx)
+
+        train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=16)
+    else:
+        train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
 
     val_transform = transforms.Compose([
         OrderedCrops(crop_size=input_size, ncrops=n_val_crops),
-        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))    ])
+        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))])
     valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
     val_loader = DataLoader(valset, batch_size=1)
 
@@ -288,8 +303,10 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile
 
 class SubsetSequentialSampler(Sampler):
 
-    def __init__(self, indices):
+    def __init__(self, indices, shuffle=True):
         self.num_samples = len(indices)
+        if shuffle:
+            np.random.shuffle(indices)
         self.indices = indices
 
     def __iter__(self):
@@ -313,7 +330,7 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, inpu
         np.savez(f'{abs_path}/npzs/indexes/isic/gts_{mode}.npz', gts)
 
     indexes = np.array(list(range(gts.shape[0])))
-    ros = RandomOverSampler(random_state=global_seed)
+    ros = RandomOverSampler()
     idxs, labels = ros.fit_resample(indexes.reshape(-1, 1), gts)
     idxs = np.squeeze(idxs).tolist()
     labels = np.squeeze(labels).tolist()
@@ -323,9 +340,8 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, inpu
     final_idx = _balance_order(idxs, labels, num_classes, batch_size=train_batch_size)
     sampler = SubsetSequentialSampler(indices=final_idx)
 
-    gpu_count = torch.cuda.device_count()
-    train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=16*gpu_count)
-    val_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=16*gpu_count)
+    train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=16)
+    val_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=16)
 
     _create_gt_csv_file(loader=val_loader, columns=testset.csv_columns, gtFile=gtFile)
 
