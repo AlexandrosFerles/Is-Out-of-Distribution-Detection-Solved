@@ -58,7 +58,7 @@ def _get_gts(dataset):
 
     dataloader = DataLoader(dataset, batch_size=100)
     gts = np.zeros(0)
-    for (_, _, labels) in tqdm(dataloader):
+    for ( _, labels) in tqdm(dataloader):
         _labels = torch.argmax(labels, dim=1)
         gts = np.copy(np.append(gts, _labels.detach().cpu().numpy()))
 
