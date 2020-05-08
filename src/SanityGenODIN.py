@@ -99,7 +99,7 @@ def train(mode, dv):
 
         if epoch_accuracy > best_test_acc:
             best_test_acc = epoch_accuracy
-            torch.save(model.state_dict(), f'checkpoints/sanity/dense_net_godin_{mode}_epoch_{epoch}_acc_{best_test_acc}.pth')
+            torch.save(model.state_dict(), f'/raid/ferles/checkpoints/dense/dense_net_godin_{mode}_epoch_{epoch}_acc_{best_test_acc}.pth')
 
         scheduler.step(epoch=epoch)
 
