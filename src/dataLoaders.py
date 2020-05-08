@@ -516,11 +516,11 @@ def _get_cifar_transforms(resize):
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            normalize_cifar        ])
+            normalize_cifar])
 
         transform_test_cifar = transforms.Compose([
             transforms.ToTensor(),
-            normalize_cifar        ])
+            normalize_cifar])
 
     return transform_train_cifar, transform_test_cifar
 
