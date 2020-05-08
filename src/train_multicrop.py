@@ -114,8 +114,8 @@ def train(args):
     scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 
     epochs = 20
-    # criterion = nn.CrossEntropyLoss()
-    criterion = nn.CrossEntropyLoss(weight=torch.Tensor(freqs).to(device))
+    criterion = nn.CrossEntropyLoss()
+    # criterion = nn.CrossEntropyLoss(weight=torch.Tensor(freqs).to(device))
 
     # use_scheduler = True
     use_scheduler = False
