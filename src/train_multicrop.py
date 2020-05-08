@@ -103,6 +103,7 @@ def train(args):
     input_size = 224
 
     train_loader, val_loader, columns = generate_random_multi_crop_loader(csvfiles=[traincsv, testcsv], ncrops=[5, 16], train_batch_size=32, input_size=input_size, gtFile=gtFileName, with_auto_augment=True)
+    ipdb.set_trace()
 
     model = build_model(args).to(device)
     optimizer = optim.Adam(model.parameters(), lr=5e-4)
@@ -120,7 +121,6 @@ def train(args):
     early_stopping = False
     early_stopping_cnt = 0
 
-    ipdb.set_trace()
     for epoch in tqdm(range(epochs)):
 
         model.train()
