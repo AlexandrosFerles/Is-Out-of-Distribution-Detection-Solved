@@ -58,8 +58,7 @@ def train(args):
         train_loss = 0
         for data in tqdm(trainloader):
             inputs, labels = data
-            if torch.cuda.device_count() == 1:
-                inputs = inputs.to(device)
+            inputs = inputs.to(device)
             labels = labels.to(device)
 
             optimizer.zero_grad()
