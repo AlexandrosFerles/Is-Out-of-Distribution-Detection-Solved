@@ -77,7 +77,7 @@ def train(dv):
                 images = images.to(device)
                 labels = labels.to(device)
 
-                outputs, h, g = model(images)
+                outputs = model(images)
                 t_loss = criterion(outputs, labels)
                 test_loss += t_loss.item()
 
