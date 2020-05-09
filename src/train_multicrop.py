@@ -110,15 +110,16 @@ def train(args):
     # freqs = counts / np.sum(counts)
 
     model = build_model(args).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=5e-4)
-    scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
+    # optimizer = optim.Adam(model.parameters(), lr=5e-4)
+    optimizer = optim.Adam(model.parameters(), lr=0.000015)
+    scheduler = StepLR(optimizer, step_size=7, gamma=0.1)
 
-    epochs = 20
+    epochs = 60
     criterion = nn.CrossEntropyLoss()
     # criterion = nn.CrossEntropyLoss(weight=torch.Tensor(freqs).to(device))
 
-    # use_scheduler = True
-    use_scheduler = False
+    use_scheduler = True
+    # use_scheduler = False
 
     best_auc, best_balanced_accuracy, best_accuracy = 0, 0, 0
     train_loss, val_loss, balanced_accuracies = [], [], []
