@@ -100,13 +100,12 @@ def train(args):
     input_size = 224
 
     if exclude_class is None:
-        train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, mode=args.mode)
+        train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, load_gts=False)
     else:
-        train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, exclude_class=exclude_class, with_auto_augment=True, mode=args.mode)
+        train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, exclude_class=exclude_class, with_auto_augment=True)
 
     model = build_model(args).to(device)
-    # optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    optimizer = optim.Adam(model.parameters(), lr=0.000015)
+    optimizer = optim.Adam(model.parameters(), lr=5e-4)
     scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 
     epochs = 20
@@ -154,11 +153,6 @@ def train(args):
             scheduler.step()
 
         auc, balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
-
-        if auc > best_auc:
-            best_auc = auc
-            checkpointFile = os.path.join(f'./checkpoints/isic_classifiers/{checkpointFileName}-best-auc-model_{mode}_next.pth')
-            torch.save(model.state_dict(), checkpointFile)
 
         if balanced_accuracy > best_balanced_accuracy:
             best_balanced_accuracy = balanced_accuracy
