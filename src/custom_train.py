@@ -15,7 +15,7 @@ from tqdm import tqdm
 import pandas as pd
 import ipdb
 
-abs_path = '/home/ferles/Dermatology/medusa/'
+abs_path = '/home/ferles/medusa/src/'
 global_seed = 1
 torch.backends.cudnn.deterministic = True
 random.seed(global_seed)
