@@ -110,11 +110,7 @@ class PandasDataSetWithPaths(data.Dataset):
 
     def get_x(self, idx):
 
-        try:
-            img = Image.open(self.image_path[idx])
-        except IndexError:
-            print(idx)
-            print(len(self.image_path))
+        img = Image.open(self.image_path[idx])
         return self.image_path[idx], img
 
     def get_y(self, idx):
@@ -182,10 +178,7 @@ class PandasDataSetWithPathsSingleClass(data.Dataset):
 
     def get_x(self, idx):
 
-        try:
-            img = Image.open(self.image_path[idx])
-        except IndexError:
-            ipdb.set_trace()
+        img = Image.open(self.image_path[idx])
         return self.image_path[idx], img
 
     def get_y(self, idx):
@@ -228,10 +221,7 @@ class PandasDataSetWithPathsExcludes(data.Dataset):
 
     def get_x(self, idx):
 
-        try:
-            img = Image.open(self.image_path[idx])
-        except IndexError:
-            ipdb.set_trace()
+        img = Image.open(self.image_path[idx])
         if self.ret_path:
             return self.image_path[idx], img
         else:
@@ -271,10 +261,7 @@ class PandasDataSetWithPathsSelectClasses(data.Dataset):
 
     def get_x(self, idx):
 
-        try:
-            img = Image.open(self.image_path[idx])
-        except IndexError:
-            ipdb.set_trace()
+        img = Image.open(self.image_path[idx])
         if self.ret_path:
             return self.image_path[idx], img
         else:
@@ -342,7 +329,6 @@ class ISIC19TestSet(data.Dataset):
         return path, single_image
 
     def get_x(self, idx):
-
         return self.image_path[idx]
 
     def get_y(self, idx):
