@@ -100,7 +100,7 @@ def train(args):
     input_size = 224
 
     if exclude_class is None:
-        train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, load_gts=False)
+        train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True)
     else:
         train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, exclude_class=exclude_class, with_auto_augment=True)
 
@@ -126,7 +126,7 @@ def train(args):
         loss_acc = []
 
         for data in tqdm(train_loader):
-            path, inputs, labels = data
+            inputs, labels = data
             inputs = inputs.to(device)
             labels = labels.to(device)
             optimizer.zero_grad()
