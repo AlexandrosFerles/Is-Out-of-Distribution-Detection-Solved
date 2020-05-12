@@ -105,7 +105,8 @@ def train(args):
         train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, exclude_class=exclude_class, with_auto_augment=True)
 
     model = build_model(args).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=5e-4)
+    # optimizer = optim.Adam(model.parameters(), lr=5e-4)
+    optimizer = optim.Adam(model.parameters(), lr=0.0015)
     scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 
     epochs = 20
