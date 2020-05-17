@@ -695,3 +695,28 @@ def tinyImageNetloader(batch_size, resize=True):
     loader = DataLoader(dataset, batch_size=batch_size)
 
     return loader
+
+
+def _get_stanford_dogs_transforms():
+
+    normalize_sdogs = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+
+    transform_train_sdogs = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomRotation(45),
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        normalize_sdogs
+    ]),
+
+    transform_test_sdogs = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        normalize_sdogs
+    ]),
+
+    return transform_train_sdogs, transform_test_sdogs
+
+
