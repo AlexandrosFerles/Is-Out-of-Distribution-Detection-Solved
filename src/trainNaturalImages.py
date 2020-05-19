@@ -34,23 +34,12 @@ def train(args):
     model = build_model(args).to(device)
 
     epochs = 90
+    dataset = args.dataset.lower()
 
-    if args.dataset.lower() == 'cifar10':
-        if not flag:
-            trainloader, val_loader, testloader = cifar10loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
-        else:
-            trainloader, val_loader, testloader = cifar10loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
-    elif args.dataset.lower() == 'cifar100':
-        if not flag:
-            trainloader, val_loader, testloader = cifar100loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
-        else:
-            trainloader, val_loader, testloader = cifar100loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
-    elif args.dataset.lower() == 'mnist':
-        if not flag:
-            trainloader, val_loader, testloader = mnistloaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
-        else:
-            trainloader, val_loader, testloader = mnistloaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
-
+    if not flag:
+        trainloader, val_loader, testloader = cifar10loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
+    else:
+        trainloader, val_loader, testloader = cifar10loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
@@ -126,6 +115,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DL Dermatology models')
 
     parser.add_argument('--config', help='Training Configurations', required=True)
+    parser.add_argument('--dataset', '--ds', default='cifar10', required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     args = parser.parse_args()
