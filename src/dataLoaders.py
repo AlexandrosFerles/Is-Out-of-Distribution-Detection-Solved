@@ -19,12 +19,12 @@ import random
 import ipdb
 
 abs_path = '/home/ferles/medusa/src/'
-# global_seed = 1
-# torch.backends.cudnn.deterministic = True
-# random.seed(global_seed)
-# np.random.seed(global_seed)
-# torch.manual_seed(global_seed)
-# torch.cuda.manual_seed(global_seed)
+global_seed = 1
+torch.backends.cudnn.deterministic = True
+random.seed(global_seed)
+np.random.seed(global_seed)
+torch.manual_seed(global_seed)
+torch.cuda.manual_seed(global_seed)
 
 
 def _create_gt_csv_file(loader, columns, gtFile, fold_index=None):
@@ -644,7 +644,6 @@ def cifar100loaders(train_batch_size=32, test_batch_size=32, test=False, validat
     if validation_test_split == 0:
         return trainloader, testloader
     else:
-
         if pickle_files is None:
             temp_test = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train_cifar)
             temp_loader = DataLoader(temp_test, batch_size=1000)
@@ -720,3 +719,6 @@ def _get_stanford_dogs_transforms():
     return transform_train_sdogs, transform_test_sdogs
 
 
+# def get_stanford_dogs_loaders():
+
+    
