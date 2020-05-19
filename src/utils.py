@@ -31,7 +31,7 @@ def build_model(args):
 
     modelName = training_configurations.model.lower()
     depth = int(training_configurations.depth)
-    pretrained = training_configurations.pretrained
+    pretrained = bool(training_configurations.pretrained)
     out_classes = training_configurations.out_classes
 
     if modelName == 'wideresnet':
