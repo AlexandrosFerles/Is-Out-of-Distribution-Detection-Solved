@@ -2,7 +2,7 @@ import torch
 from torch import nn as nn
 from torch.optim.lr_scheduler import MultiStepLR
 from torch import optim
-from dataLoaders import cifar10loaders, cifar100loaders
+from dataLoaders import natural_image_loaders
 from utils import build_model, json_file_to_pyobj
 import wandb
 import argparse
@@ -37,9 +37,9 @@ def train(args):
     dataset = args.dataset.lower()
 
     if not flag:
-        trainloader, val_loader, testloader = cifar10loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
+        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
     else:
-        trainloader, val_loader, testloader = cifar10loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
+        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
