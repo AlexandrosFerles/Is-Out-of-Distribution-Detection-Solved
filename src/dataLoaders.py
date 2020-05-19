@@ -488,7 +488,7 @@ def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/raid/ferles/7
     return ood_loader, ood_loader
 
 
-def _get_natural_image_transforms(resize, dataset='cifar10'):
+def _get_natural_image_transforms(dataset, resize):
 
     if 'cifar' in dataset:
         normalize_cifar = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
@@ -655,7 +655,35 @@ def cifar100loaders(train_batch_size=32, test_batch_size=32, test=False, validat
         return trainloader, val_loader, testloader
 
 
-def natural_image_loaders():
+def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
+
+    transform_train, transform_test = _get_natural_image_transforms(dataset, resize)
+    if dataset == 'cifar10':
+        if not test:
+            trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+    elif dataset == 'cifar100':
+        if not test:
+            trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
+    elif dataset=='mnist':
+        if not test:
+            trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform_test)
+    elif dataset=='fashionmnist':
+        if not test:
+            trainset = torchvision.datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform_test)
+    else:
+        raise NotImplementedError(f'{dataset} not implemented!')
 
 
 
