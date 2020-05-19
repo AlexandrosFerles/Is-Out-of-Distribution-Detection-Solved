@@ -623,10 +623,10 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
     else:
         raise NotImplementedError(f'{dataset} not implemented!')
 
-    trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=True, num_workers=16)
 
     if validation_test_split == 0:
+        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
         return trainloader, testloader
     else:
         if pickle_files is None:
@@ -646,10 +646,10 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
                 trainset_indices = pickle.load(train_pickle)
                 valset_indices = pickle.load(val_pickle)
 
-            train_sampler = SubsetRandomSampler(trainset_indices)
-            test_sampler = SubsetRandomSampler(valset_indices)
-            trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
-            val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
+        train_sampler = SubsetRandomSampler(trainset_indices)
+        test_sampler = SubsetRandomSampler(valset_indices)
+        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
+        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
 
         return trainloader, val_loader, testloader
 
