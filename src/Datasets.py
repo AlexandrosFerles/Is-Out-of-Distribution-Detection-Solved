@@ -439,7 +439,6 @@ class TinyImageNetDataset(data.Dataset):
         self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}
 
     def _create_class_idx_dict_val(self):
-        val_image_dir = os.path.join(self.val_dir, "images")
         val_annotations_file = os.path.join(self.val_dir, "val_annotations.txt")
         self.val_img_to_class = {}
         set_of_classes = set()
