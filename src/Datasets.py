@@ -387,16 +387,14 @@ class CustomEnsembleDatasetOut(data.Dataset):
         return self.dataset.__len__()
 
 
-# gently borrowed from: https://github.com/Manikvsin/TinyImagenet-pytorch/blob/master/tiny_image_net_torch.py
-class TinyImageNet(data.Dataset):
+class TinyImageNetDataset(data.Dataset):
 
     def __init__(self, root='/raid/ferles/tiny-imagenet-200', train=True, transform=None):
-        self.Train = train
-        self.root_dir = root
+        self.train = train
+        self.root = root
         self.transform = transform
         self.train_dir = os.path.join(self.root_dir, "train")
-        self.val_dir = os.path.join(self.root_dir, "test")
-        # self.test_dir = os.path.join(self.root_dir, "test")
+        self.val_dir = os.path.join(self.root_dir, "val")
 
         if (self.Train):
             self._create_class_idx_dict_train()
@@ -442,10 +440,6 @@ class TinyImageNet(data.Dataset):
 
     def _create_class_idx_dict_val(self):
         val_image_dir = os.path.join(self.val_dir, "images")
-        if sys.version_info >= (3,5):
-            classes = [d.name for d in os.scandir(val_image_dir) if d.is_file()]
-        else:
-            classes = [d for d in os.listdir(val_image_dir) if os.path.isfile(os.path.join(self.train_dir,d))]
         val_annotations_file = os.path.join(self.val_dir, "val_annotations.txt")
         self.val_img_to_class = {}
         set_of_classes = set()
@@ -458,8 +452,8 @@ class TinyImageNet(data.Dataset):
 
         self.len_dataset = len(list(self.val_img_to_class.keys()))
         classes = sorted(list(set_of_classes))
-        self.class_to_tgt_idx = {classes[i]:i for i in range(len(classes))}
-        self.tgt_idx_to_class = {i:classes[i] for i in range(len(classes))}
+        self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}
+        self.tgt_idx_to_class = {i: classes[i] for i in range(len(classes))}
 
     def _make_dataset(self, Train=True):
         self.images = []
@@ -475,9 +469,9 @@ class TinyImageNet(data.Dataset):
             if not os.path.isdir(dirs):
                 continue
 
-            for root,_,files in sorted(os.walk(dirs)):
+            for root, _, files in sorted(os.walk(dirs)):
                 for fname in sorted(files):
-                    if (fname.endswith(".JPEG")):
+                    if fname.endswith(".JPEG"):
                         path = os.path.join(root, fname)
                         if Train:
                             item = (path, self.class_to_tgt_idx[tgt])
@@ -488,14 +482,15 @@ class TinyImageNet(data.Dataset):
     def return_label(self, idx):
         return [self.class_to_label[self.tgt_idx_to_class[i.item()]] for i in idx]
 
+    def get_targets(self):
+        return [self.return_label(idx) for idx in range(self.len_dataset)]
 
     def __len__(self):
         return self.len_dataset
 
-
     def __getitem__(self, idx):
         img_path, tgt = self.images[idx]
-        with open(img_path,'rb') as f:
+        with open(img_path, 'rb') as f:
             sample = Image.open(img_path)
             sample = sample.convert('RGB')
         if self.transform is not None:
