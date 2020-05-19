@@ -548,14 +548,42 @@ def _get_natural_image_transforms(dataset, resize):
         else:
 
             transform_train = transforms.Compose([
-                transforms.ToTensor(),
                 transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
                 normalize,
             ])
 
             transform_test = transforms.Compose([
                 transforms.ToTensor(),
                 normalize,
+            ])
+
+    elif dataset=='fashionmnist':
+
+        if resize:
+
+            image_size = 224
+            transform_train = transforms.Compose([
+                transforms.Resize(256),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+            ])
+
+            transform_test = transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+            ])
+
+        else:
+
+            transform_train = transforms.Compose([
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+            ])
+
+            transform_test = transforms.Compose([
+                transforms.ToTensor(),
             ])
 
     return transform_train, transform_test
