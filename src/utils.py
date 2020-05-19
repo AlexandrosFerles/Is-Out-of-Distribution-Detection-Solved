@@ -112,13 +112,12 @@ def build_model(args):
     elif modelName == 'efficientnet':
         if depth in range(8):
             from efficientnet_pytorch import EfficientNet
-            if pretrained:
-                model = EfficientNet.from_pretrained('efficientnet-b{}'.format(depth))
-            else:
-                model = EfficientNet.from_name('efficientnet-b{}'.format(depth))
+            model = EfficientNet.from_pretrained('efficientnet-b{}'.format(depth))
             net = deepcopy(model)
             for param in net.parameters():
                 param.requires_grad = True
+            if not pretrained:
+                net._conv_stem = nn.Conv2d(1, net._conv_stem.out_channels, kernel_size=3, stride=2, bias=False)
             net._fc = nn.Linear(model._fc.in_features, out_classes)
             return net
         else:
