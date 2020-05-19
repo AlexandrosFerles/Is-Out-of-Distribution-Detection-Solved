@@ -651,7 +651,7 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
             trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
             val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
 
-    return trainloader, val_loader, testloader
+        return trainloader, val_loader, testloader
 
 
 def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_classes=10, pickle_files=None, resize=True):
