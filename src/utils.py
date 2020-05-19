@@ -31,6 +31,7 @@ def build_model(args):
 
     modelName = training_configurations.model.lower()
     depth = int(training_configurations.depth)
+    pretrained = training_configurations.pretrained
     out_classes = training_configurations.out_classes
 
     if modelName == 'wideresnet':
@@ -111,7 +112,10 @@ def build_model(args):
     elif modelName == 'efficientnet':
         if depth in range(8):
             from efficientnet_pytorch import EfficientNet
-            model = EfficientNet.from_pretrained('efficientnet-b{}'.format(depth))
+            if pretrained:
+                model = EfficientNet.from_pretrained('efficientnet-b{}'.format(depth))
+            else:
+                model = EfficientNet.from_name('efficientnet-b{}'.format(depth))
             net = deepcopy(model)
             for param in net.parameters():
                 param.requires_grad = True
