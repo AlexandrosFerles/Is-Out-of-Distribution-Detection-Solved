@@ -116,6 +116,7 @@ def build_model(args):
             net = deepcopy(model)
             for param in net.parameters():
                 param.requires_grad = True
+            ipdb.set_trace()
             if not pretrained:
                 net._conv_stem = nn.Conv2d(1, net._conv_stem.out_channels, kernel_size=3, stride=2, bias=False)
             net._fc = nn.Linear(model._fc.in_features, out_classes)
