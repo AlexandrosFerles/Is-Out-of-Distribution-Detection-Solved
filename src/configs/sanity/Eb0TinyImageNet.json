@@ -5,7 +5,7 @@
     "pretrained": "False",
     "freeze": "False",
     "resolutionIncrease": "False",
-    "out_classes": 10,
+    "out_classes": 200,
     "checkpoint": "tinyimagenet",
     "train_pickle": "None",
     "test_pickle": "None"
