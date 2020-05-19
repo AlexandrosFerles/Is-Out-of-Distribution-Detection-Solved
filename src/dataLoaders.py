@@ -645,13 +645,11 @@ def cifar100loaders(train_batch_size=32, test_batch_size=32, test=False, validat
         return trainloader, testloader
     else:
         if pickle_files is None:
-            temp_test = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train_cifar)
-            temp_loader = DataLoader(temp_test, batch_size=1000)
-            gts = []
-            for _, gt in temp_loader:
-                gts.append(gt.detach().cpu().numpy().tolist())
+            temp_trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True)
+            gts = temp_trainset.targets
             indexes = list(range(trainset.__len__()))
 
+            ipdb.set_trace()
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
             trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
 
