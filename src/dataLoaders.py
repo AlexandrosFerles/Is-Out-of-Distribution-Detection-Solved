@@ -523,9 +523,11 @@ def _get_natural_image_transforms(dataset, resize):
                 transforms.ToTensor(),
                 normalize_cifar])
 
-    elif dataset=='mnist':
-
-        normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
+    elif dataset=='mnist' or dataset=='tinyimagenet':
+        if dataset=='mnist':
+            normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
+        elif dataset=='tinyimagenet':
+            normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 
         if resize:
 
@@ -597,29 +599,31 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
             trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
         else:
             trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        temp_trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True)
         testset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
     elif dataset == 'cifar100':
         if not test:
             trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
         else:
             trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        temp_trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True)
         testset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
     elif dataset=='mnist':
         if not test:
             trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
         else:
             trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        temp_trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True)
         testset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
     elif dataset=='fashionmnist':
         if not test:
             trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
         else:
             trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        temp_trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True)
         testset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset=='tinyimagent':
+        if not test:
+            trainset = TinyImageNetDataset(transform=transform_train)
+        else:
+            trainset = TinyImageNetDataset(transform=transform_test)
+        testset = TinyImageNetDataset(train=False, transform=transform_test)
     else:
         raise NotImplementedError(f'{dataset} not implemented!')
 
@@ -630,7 +634,10 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         return trainloader, testloader
     else:
         if pickle_files is None:
-            gts = temp_trainset.targets
+            if dataset != 'tinyimagenet':
+                gts = trainset.targets
+            else:
+                gts = trainset.get_targets()
             indexes = list(range(trainset.__len__()))
 
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
@@ -705,29 +712,6 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
         point += step
 
     return train_ind_loaders, train_ood_loaders, test_ind_loaders, test_ood_loaders
-
-
-def tinyImageNetloader(batch_size, resize=True):
-
-    normalize_cifar = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-
-    if resize:
-        transform_test = transforms.Compose([
-            transforms.Resize(224),
-            transforms.ToTensor(),
-            normalize_cifar,
-        ])
-    else:
-        transform_test = transforms.Compose([
-            transforms.Resize(32),
-            transforms.ToTensor(),
-            normalize_cifar,
-        ])
-
-    dataset = datasets.ImageFolder(root='/raid/ferles/tiny-imagenet-200/test', transform=transform_test)
-    loader = DataLoader(dataset, batch_size=batch_size)
-
-    return loader
 
 
 def _get_stanford_dogs_transforms():
