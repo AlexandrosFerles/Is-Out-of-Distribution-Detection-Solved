@@ -558,87 +558,58 @@ def _get_natural_image_transforms(dataset, resize):
                 normalize,
             ])
 
-
     return transform_train, transform_test
 
 
-def cifar10loaders(train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
+def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
 
-    transform_train_cifar, transform_test_cifar = _get_cifar_transforms(resize)
-    if not test:
-        trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train_cifar)
+    transform_train, transform_test = _get_natural_image_transforms(dataset, resize)
+    if dataset == 'cifar10':
+        if not test:
+            trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        temp_trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True)
+        testset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset == 'cifar100':
+        if not test:
+            trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        temp_trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True)
+        testset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset=='mnist':
+        if not test:
+            trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        temp_trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True)
+        testset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset=='fashionmnist':
+        if not test:
+            trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        temp_trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True)
+        testset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
     else:
-        trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_test_cifar)
+        raise NotImplementedError(f'{dataset} not implemented!')
 
-    testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test_cifar)
-    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=True, num_workers=16)
-
-    if validation_test_split == 0 and pickle_files is None:
-        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
-        return trainloader, testloader
-    elif pickle_files is not None:
-        trainpickle, valpickle = pickle_files
-        with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
-            trainset_indices = pickle.load(train_pickle)
-            valset_indices = pickle.load(val_pickle)
-
-            train_sampler = SubsetRandomSampler(trainset_indices)
-            test_sampler = SubsetRandomSampler(valset_indices)
-            trainloader = DataLoader(trainset, batch_size=train_batch_size, sampler=train_sampler, num_workers=0)
-            val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=0)
-
-            return trainloader, val_loader, testloader
-    else:
-
-        temp_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=temp_transform_cifar)
-        temp_loader = DataLoader(temp_set, batch_size=10000)
-        gts = []
-        for _, gt in temp_loader:
-            gts.extend(gt.detach().cpu().numpy().tolist())
-        indexes = list(range(trainset.__len__()))
-
-        splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
-        trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
-
-        if save_to_pickle:
-            with open('train_indices_cifar10.pickle', 'wb') as train_pickle, open('val_indices_cifar10.pickle', 'wb') as val_pickle:
-                pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
-                pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        train_sampler = SubsetRandomSampler(trainset_indices)
-        test_sampler = SubsetRandomSampler(valset_indices)
-        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
-        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
-
-        return trainloader, val_loader, testloader
-
-
-def cifar100loaders(train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
-
-    transform_train_cifar, transform_test_cifar = _get_cifar_transforms(resize=resize)
-    if not test:
-        trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train_cifar)
-    else:
-        trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test_cifar)
     trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
-
-    testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test_cifar)
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=True, num_workers=16)
 
     if validation_test_split == 0:
         return trainloader, testloader
     else:
         if pickle_files is None:
-            temp_trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True)
             gts = temp_trainset.targets
             indexes = list(range(trainset.__len__()))
 
-            ipdb.set_trace()
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
             trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
 
             if save_to_pickle:
-                with open('train_indices_cifar100.pickle', 'wb') as train_pickle, open('val_indices_cifar100.pickle', 'wb') as val_pickle:
+                with open(f'train_indices_{dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}.pickle', 'wb') as val_pickle:
                     pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
                     pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
@@ -647,45 +618,12 @@ def cifar100loaders(train_batch_size=32, test_batch_size=32, test=False, validat
                 trainset_indices = pickle.load(train_pickle)
                 valset_indices = pickle.load(val_pickle)
 
-        train_sampler = SubsetRandomSampler(trainset_indices)
-        test_sampler = SubsetRandomSampler(valset_indices)
-        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
-        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
+            train_sampler = SubsetRandomSampler(trainset_indices)
+            test_sampler = SubsetRandomSampler(valset_indices)
+            trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
+            val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
 
-        return trainloader, val_loader, testloader
-
-
-def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
-
-    transform_train, transform_test = _get_natural_image_transforms(dataset, resize)
-    if dataset == 'cifar10':
-        if not test:
-            trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
-    elif dataset == 'cifar100':
-        if not test:
-            trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
-    elif dataset=='mnist':
-        if not test:
-            trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform_test)
-    elif dataset=='fashionmnist':
-        if not test:
-            trainset = torchvision.datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform_test)
-    else:
-        raise NotImplementedError(f'{dataset} not implemented!')
-
-
+    return trainloader, val_loader, testloader
 
 
 def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_classes=10, pickle_files=None, resize=True):
