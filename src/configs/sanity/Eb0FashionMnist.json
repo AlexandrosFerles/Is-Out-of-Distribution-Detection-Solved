@@ -6,7 +6,7 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 10,
-    "checkpoint": "Cifar10_seed_24_Auto_CutOut",
+    "checkpoint": "fashionmnist",
     "train_pickle": "None",
     "test_pickle": "None"
   }
