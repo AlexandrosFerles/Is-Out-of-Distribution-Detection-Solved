@@ -488,41 +488,78 @@ def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/raid/ferles/7
     return ood_loader, ood_loader
 
 
-def _get_cifar_transforms(resize):
+def _get_natural_image_transforms(resize, dataset='cifar10'):
 
-    normalize_cifar = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    if 'cifar' in dataset:
+        normalize_cifar = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 
-    if resize:
+        if resize:
 
-        image_size = 224
-        transform_train_cifar = transforms.Compose([
-            transforms.Resize(256),
-            transforms.RandomHorizontalFlip(),
-            transforms.CenterCrop(image_size),
-            transforms.ToTensor(),
-            normalize_cifar,
-        ])
+            image_size = 224
+            transform_train = transforms.Compose([
+                transforms.Resize(256),
+                transforms.RandomHorizontalFlip(),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+                normalize_cifar,
+            ])
 
-        transform_test_cifar = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(image_size),
-            transforms.ToTensor(),
-            normalize_cifar,
-        ])
+            transform_test = transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+                normalize_cifar,
+            ])
 
-    else:
+        else:
 
-        transform_train_cifar = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize_cifar])
+            transform_train = transforms.Compose([
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize_cifar])
 
-        transform_test_cifar = transforms.Compose([
-            transforms.ToTensor(),
-            normalize_cifar])
+            transform_test = transforms.Compose([
+                transforms.ToTensor(),
+                normalize_cifar])
 
-    return transform_train_cifar, transform_test_cifar
+    elif dataset=='mnist':
+
+        normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
+
+        if resize:
+
+            image_size = 224
+            transform_train = transforms.Compose([
+                transforms.Resize(256),
+                transforms.RandomHorizontalFlip(),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+                normalize,
+            ])
+
+            transform_test = transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+                normalize,
+            ])
+
+        else:
+
+            transform_train = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.RandomHorizontalFlip(),
+                normalize,
+            ])
+
+            transform_test = transforms.Compose([
+                transforms.ToTensor(),
+                normalize,
+            ])
+
+
+    return transform_train, transform_test
 
 
 def cifar10loaders(train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
@@ -576,6 +613,53 @@ def cifar10loaders(train_batch_size=32, test_batch_size=32, test=False, validati
         return trainloader, val_loader, testloader
 
 
+def cifar100loaders(train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
+
+    transform_train_cifar, transform_test_cifar = _get_cifar_transforms(resize=resize)
+    if not test:
+        trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train_cifar)
+    else:
+        trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test_cifar)
+    trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
+
+    testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test_cifar)
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=True, num_workers=16)
+
+    if validation_test_split == 0:
+        return trainloader, testloader
+    else:
+        if pickle_files is None:
+            temp_trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True)
+            gts = temp_trainset.targets
+            indexes = list(range(trainset.__len__()))
+
+            ipdb.set_trace()
+            splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
+            trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
+
+            if save_to_pickle:
+                with open('train_indices_cifar100.pickle', 'wb') as train_pickle, open('val_indices_cifar100.pickle', 'wb') as val_pickle:
+                    pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            trainpickle, valpickle = pickle_files
+            with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
+                trainset_indices = pickle.load(train_pickle)
+                valset_indices = pickle.load(val_pickle)
+
+        train_sampler = SubsetRandomSampler(trainset_indices)
+        test_sampler = SubsetRandomSampler(valset_indices)
+        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
+        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
+
+        return trainloader, val_loader, testloader
+
+
+def natural_image_loaders():
+
+
+
+
 def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_classes=10, pickle_files=None, resize=True):
 
     transform_train_cifar, transform_test_cifar = _get_cifar_transforms(resize)
@@ -627,48 +711,6 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
         point += step
 
     return train_ind_loaders, train_ood_loaders, test_ind_loaders, test_ood_loaders
-
-
-def cifar100loaders(train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
-
-    transform_train_cifar, transform_test_cifar = _get_cifar_transforms(resize=resize)
-    if not test:
-        trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train_cifar)
-    else:
-        trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test_cifar)
-    trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
-
-    testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test_cifar)
-    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=True, num_workers=16)
-
-    if validation_test_split == 0:
-        return trainloader, testloader
-    else:
-        if pickle_files is None:
-            temp_trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True)
-            gts = temp_trainset.targets
-            indexes = list(range(trainset.__len__()))
-
-            ipdb.set_trace()
-            splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
-            trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
-
-            if save_to_pickle:
-                with open('train_indices_cifar100.pickle', 'wb') as train_pickle, open('val_indices_cifar100.pickle', 'wb') as val_pickle:
-                    pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
-                    pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            trainpickle, valpickle = pickle_files
-            with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
-                trainset_indices = pickle.load(train_pickle)
-                valset_indices = pickle.load(val_pickle)
-
-        train_sampler = SubsetRandomSampler(trainset_indices)
-        test_sampler = SubsetRandomSampler(valset_indices)
-        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
-        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
-
-        return trainloader, val_loader, testloader
 
 
 def tinyImageNetloader(batch_size, resize=True):

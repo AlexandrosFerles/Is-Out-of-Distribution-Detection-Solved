@@ -35,16 +35,22 @@ def train(args):
 
     epochs = 90
 
-    if training_configurations.out_classes == 10:
+    if args.dataset.lower() == 'cifar10':
         if not flag:
             trainloader, val_loader, testloader = cifar10loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
         else:
             trainloader, val_loader, testloader = cifar10loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
-    elif training_configurations.out_classes == 100:
+    elif args.dataset.lower() == 'cifar100':
         if not flag:
             trainloader, val_loader, testloader = cifar100loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
         else:
             trainloader, val_loader, testloader = cifar100loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
+    elif args.dataset.lower() == 'mnist':
+        if not flag:
+            trainloader, val_loader, testloader = mnistloaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
+        else:
+            trainloader, val_loader, testloader = mnistloaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
+
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
