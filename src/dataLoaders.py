@@ -627,7 +627,7 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
     else:
         raise NotImplementedError(f'{dataset} not implemented!')
 
-    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=True, num_workers=16)
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=16)
 
     if validation_test_split == 0:
         trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
@@ -639,6 +639,51 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
             else:
                 ipdb.set_trace()
                 gts = trainset.get_targets()
+            indexes = list(range(trainset.__len__()))
+
+            splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
+            trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
+
+            if save_to_pickle:
+                with open(f'train_indices_{dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}.pickle', 'wb') as val_pickle:
+                    pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            trainpickle, valpickle = pickle_files
+            with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
+                trainset_indices = pickle.load(train_pickle)
+                valset_indices = pickle.load(val_pickle)
+
+        train_sampler = SubsetRandomSampler(trainset_indices)
+        test_sampler = SubsetRandomSampler(valset_indices)
+        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
+        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
+
+        return trainloader, val_loader, testloader
+
+
+def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
+
+    transform_train, transform_test = _get_natural_image_transforms(dataset, resize)
+    if dataset == 'stanforddogs':
+        if not test:
+            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_train)
+        else:
+            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_test)
+        testset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', train=False, transform=transform_test)
+    elif dataset == 'nabirds':
+        pass
+    else:
+        raise NotImplementedError(f'{dataset} not implemented!')
+
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=16)
+
+    if validation_test_split == 0:
+        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
+        return trainloader, testloader
+    else:
+        if pickle_files is None:
+            gts = trainset.get_targets()
             indexes = list(range(trainset.__len__()))
 
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
