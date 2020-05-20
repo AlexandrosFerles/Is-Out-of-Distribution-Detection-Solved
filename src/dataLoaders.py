@@ -621,6 +621,14 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         else:
             trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
         testset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset=='svhn':
+        if not test:
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset=='stl':
+        pass
     elif dataset=='tinyimagenet':
         if not test:
             trainset = TinyImageNetDataset(transform=transform_train)
