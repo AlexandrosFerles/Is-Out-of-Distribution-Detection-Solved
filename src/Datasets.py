@@ -421,8 +421,6 @@ class TinyImageNetDataset(data.Dataset):
                 if words[0] in self.set_nids:
                     self.class_to_label[words[0]] = (words[1].strip("\n").split(","))[0]
 
-        ipdb.set_trace()
-        
     def _create_class_idx_dict_train(self):
         if sys.version_info >= (3,5):
             classes = [d.name for d in os.scandir(self.train_dir) if d.is_dir()]
@@ -455,7 +453,8 @@ class TinyImageNetDataset(data.Dataset):
         classes = sorted(list(set_of_classes))
         self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}
         self.tgt_idx_to_class = {i: classes[i] for i in range(len(classes))}
-
+        ipdb.set_trace()
+        
     def _make_dataset(self, Train=True):
         self.images = []
         if Train:
