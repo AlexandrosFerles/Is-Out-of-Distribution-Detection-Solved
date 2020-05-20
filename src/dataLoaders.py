@@ -523,7 +523,7 @@ def _get_natural_image_transforms(dataset, resize):
                 transforms.ToTensor(),
                 normalize_cifar])
 
-    elif dataset == 'mnist' or dataset=='tinyimagenet' or dataset=='svhn':
+    elif dataset != 'fashionmnist':
         if dataset == 'mnist':
             normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
         elif dataset == 'tinyimagenet':
