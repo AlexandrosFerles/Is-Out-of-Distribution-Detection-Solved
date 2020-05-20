@@ -393,18 +393,18 @@ class TinyImageNetDataset(data.Dataset):
         self.train = train
         self.root = root
         self.transform = transform
-        self.train_dir = os.path.join(self.root_dir, "train")
-        self.val_dir = os.path.join(self.root_dir, "val")
+        self.train_dir = os.path.join(self.root, "train")
+        self.val_dir = os.path.join(self.root, "val")
 
-        if (self.Train):
+        if self.train:
             self._create_class_idx_dict_train()
         else:
             self._create_class_idx_dict_val()
 
-        self._make_dataset(self.Train)
+        self._make_dataset(self.train)
 
-        words_file = os.path.join(self.root_dir, "words.txt")
-        wnids_file = os.path.join(self.root_dir, "wnids.txt")
+        words_file = os.path.join(self.root, "words.txt")
+        wnids_file = os.path.join(self.root, "wnids.txt")
 
         self.set_nids = set()
 
