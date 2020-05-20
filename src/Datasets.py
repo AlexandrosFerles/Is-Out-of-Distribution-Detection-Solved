@@ -543,7 +543,7 @@ class GenericImageFolderDataset(data.Dataset):
                         path = os.path.join(root, fname)
                         item = (path, self.class_to_tgt_idx[tgt])
                         self.images.append(item)
-        ipdb.set_trace()
+        # ipdb.set_trace()
     def get_targets(self):
         return [target for (_, target) in self.images]
 
@@ -556,6 +556,6 @@ class GenericImageFolderDataset(data.Dataset):
             sample = Image.open(img_path)
             sample = sample.convert('RGB')
         if self.transform is not None:
-            sample = self.transform(sample)
+            sample = self.transform[0](sample)
 
         return sample, tgt
