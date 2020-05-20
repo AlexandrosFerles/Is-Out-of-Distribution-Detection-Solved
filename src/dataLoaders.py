@@ -627,7 +627,7 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
     else:
         raise NotImplementedError(f'{dataset} not implemented!')
 
-    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=True, num_workers=16)
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=16)
 
     if validation_test_split == 0:
         trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
@@ -638,6 +638,75 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
                 gts = trainset.targets
             else:
                 gts = trainset.get_targets()
+            indexes = list(range(trainset.__len__()))
+
+            splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
+            trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
+
+            if save_to_pickle:
+                with open(f'train_indices_{dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}.pickle', 'wb') as val_pickle:
+                    pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            trainpickle, valpickle = pickle_files
+            with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
+                trainset_indices = pickle.load(train_pickle)
+                valset_indices = pickle.load(val_pickle)
+
+        train_sampler = SubsetRandomSampler(trainset_indices)
+        test_sampler = SubsetRandomSampler(valset_indices)
+        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
+        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
+
+        return trainloader, val_loader, testloader
+
+
+def _get_fine_grained_transforms(dataset):
+
+    if dataset == 'stanforddogs':
+        normalize_sdogs = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    
+        transform_train_sdogs = transforms.Compose([
+            transforms.Resize(256),
+            transforms.RandomRotation(45),
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            normalize_sdogs
+        ]),
+
+        transform_test_sdogs = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            normalize_sdogs
+        ]),
+
+    return transform_train_sdogs, transform_test_sdogs
+
+
+def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
+
+    transform_train, transform_test = _get_fine_grained_transforms(dataset)
+    if dataset == 'stanforddogs':
+        if not test:
+            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_train)
+        else:
+            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_test)
+        testset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', train=False, transform=transform_test)
+    elif dataset == 'nabirds':
+        pass
+    else:
+        raise NotImplementedError(f'{dataset} not implemented!')
+
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=16)
+
+    if validation_test_split == 0:
+        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=16)
+        return trainloader, testloader
+    else:
+        if pickle_files is None:
+            gts = trainset.get_targets()
             indexes = list(range(trainset.__len__()))
 
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
@@ -714,27 +783,6 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
     return train_ind_loaders, train_ood_loaders, test_ind_loaders, test_ood_loaders
 
 
-def _get_stanford_dogs_transforms():
-
-    normalize_sdogs = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-
-    transform_train_sdogs = transforms.Compose([
-        transforms.Resize(256),
-        transforms.RandomRotation(45),
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        normalize_sdogs
-    ]),
-
-    transform_test_sdogs = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        normalize_sdogs
-    ]),
-
-    return transform_train_sdogs, transform_test_sdogs
 
 
 # def get_stanford_dogs_loaders():
