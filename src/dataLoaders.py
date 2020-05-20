@@ -56,7 +56,7 @@ def _create_gt_csv_file(loader, columns, gtFile, fold_index=None):
 
 def _get_gts(dataset):
 
-    dataloader = DataLoader(dataset, batch_size=100)
+    dataloader = DataLoader(dataset, batch_size=1000)
     gts = np.zeros(0)
     for ( _, labels) in tqdm(dataloader):
         _labels = torch.argmax(labels, dim=1)
@@ -649,10 +649,12 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         return trainloader, testloader
     else:
         if pickle_files is None:
-            if dataset != 'tinyimagenet':
-                gts = trainset.targets
-            else:
+            if dataset == 'tinyimagenet':
                 gts = trainset.get_targets()
+            elif dataset == 'svhn':
+                gts = _get_gts(trainset)
+            else:
+                gts = trainset.targets
             indexes = list(range(trainset.__len__()))
 
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
