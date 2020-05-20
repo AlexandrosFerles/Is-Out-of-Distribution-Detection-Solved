@@ -479,7 +479,7 @@ class TinyImageNetDataset(data.Dataset):
                         self.images.append(item)
 
     def return_label(self, idx):
-        return [self.class_to_label[self.tgt_idx_to_class[i.item()]] for i in idx]
+        return [self.class_to_label[self.tgt_idx_to_class[idx]]]
 
     def get_targets(self):
         return [self.return_label(idx) for idx in range(self.len_dataset)]
