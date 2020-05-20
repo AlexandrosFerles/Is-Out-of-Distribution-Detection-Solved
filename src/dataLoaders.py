@@ -523,7 +523,7 @@ def _get_natural_image_transforms(dataset, resize):
                 transforms.ToTensor(),
                 normalize_cifar])
 
-    elif dataset=='mnist' or dataset=='tinyimagenet':
+    elif dataset=='mnist' or dataset=='tinyimagenet' or dataset=='svhn':
         if dataset=='mnist':
             normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
         elif dataset=='tinyimagenet':
@@ -628,7 +628,11 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
             trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
         testset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
     elif dataset=='stl':
-        pass
+        if not test:
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
     elif dataset=='tinyimagenet':
         if not test:
             trainset = TinyImageNetDataset(transform=transform_train)
