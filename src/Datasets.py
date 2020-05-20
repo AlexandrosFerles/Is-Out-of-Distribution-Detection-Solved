@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import pandas as pd
 import random
+from glob import glob as glob
 import os
 import sys
 import ipdb
@@ -477,6 +478,71 @@ class TinyImageNetDataset(data.Dataset):
                             item = (path, self.class_to_tgt_idx[tgt])
                         else:
                             item = (path, self.class_to_tgt_idx[self.val_img_to_class[fname]])
+                        self.images.append(item)
+
+    def get_targets(self):
+        return [target for (_, target) in self.images]
+
+    def __len__(self):
+        return self.len_dataset
+
+    def __getitem__(self, idx):
+        img_path, tgt = self.images[idx]
+        with open(img_path, 'rb') as f:
+            sample = Image.open(img_path)
+            sample = sample.convert('RGB')
+        if self.transform is not None:
+            sample = self.transform(sample)
+
+        return sample, tgt
+
+
+class GenericImageFolderDataset(data.Dataset):
+
+    def __init__(self, root, train=True, transform=None):
+
+        self.train = train
+        self.root = root
+        self.transform = transform
+        self.train_dir = os.path.join(self.root, "Train")
+        self.val_dir = os.path.join(self.root, "Test")
+
+        if self.train:
+            self._create_class_idx_dict(self.train_dir)
+        else:
+            self._create_class_idx_dict_val(self.val_dir)
+
+        self._make_dataset(self.train)
+
+    def _create_class_idx_dict_train(self, dir):
+        classes = glob(os.path.join(dir, '*'))
+        classes = sorted(classes)
+        num_images = 0
+        for root, dirs, files in os.walk(dir):
+            for f in files:
+                if f.endswith(".jpg"):
+                    num_images = num_images + 1
+
+        self.len_dataset = num_images
+
+        self.tgt_idx_to_class = {i: classes[i] for i in range(len(classes))}
+        self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}
+
+    def _make_dataset(self, dir):
+        self.images = []
+        img_root_dir = dir
+        list_of_dirs = [target for target in self.class_to_tgt_idx.keys()]
+
+        for tgt in list_of_dirs:
+            dirs = os.path.join(img_root_dir, tgt)
+            if not os.path.isdir(dirs):
+                continue
+
+            for root, _, files in sorted(os.walk(dirs)):
+                for fname in sorted(files):
+                    if fname.endswith(".jpg"):
+                        path = os.path.join(root, fname)
+                        item = (path, self.class_to_tgt_idx[tgt])
                         self.images.append(item)
 
     def get_targets(self):
