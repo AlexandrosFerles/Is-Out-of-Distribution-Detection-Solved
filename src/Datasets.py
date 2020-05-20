@@ -508,10 +508,10 @@ class GenericImageFolderDataset(data.Dataset):
 
         if self.train:
             self._create_class_idx_dict(self.train_dir)
+            self._make_dataset(self.train_dir)
         else:
             self._create_class_idx_dict(self.val_dir)
-
-        self._make_dataset(self.train)
+            self._make_dataset(self.val_dir)
 
     def _create_class_idx_dict(self, dir):
         classes = glob(os.path.join(dir, '*'))
