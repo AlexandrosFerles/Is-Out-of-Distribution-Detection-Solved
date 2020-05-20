@@ -552,6 +552,7 @@ class GenericImageFolderDataset(data.Dataset):
 
     def __getitem__(self, idx):
         img_path, tgt = self.images[idx]
+        ipdb.set_trace()
         with open(img_path, 'rb') as f:
             sample = Image.open(img_path)
             sample = sample.convert('RGB')
