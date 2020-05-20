@@ -5,7 +5,7 @@
     "pretrained": "True",
     "freeze": "False",
     "resolutionIncrease": "False",
-    "out_classes": 10,
+    "out_classes": 120,
     "checkpoint": "StanfordDogs",
     "train_pickle": "None",
     "test_pickle": "None"
