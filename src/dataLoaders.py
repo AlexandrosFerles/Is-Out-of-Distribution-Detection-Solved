@@ -690,6 +690,7 @@ def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32,
     transform_train, transform_test = _get_fine_grained_transforms(dataset)
     if dataset == 'stanforddogs':
         if not test:
+            print(transform_train)
             trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_train)
         else:
             trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_test)
