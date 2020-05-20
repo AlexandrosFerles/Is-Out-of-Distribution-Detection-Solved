@@ -523,13 +523,15 @@ def _get_natural_image_transforms(dataset, resize):
                 transforms.ToTensor(),
                 normalize_cifar])
 
-    elif dataset=='mnist' or dataset=='tinyimagenet' or dataset=='svhn':
-        if dataset=='mnist':
+    elif dataset == 'mnist' or dataset=='tinyimagenet' or dataset=='svhn':
+        if dataset == 'mnist':
             normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
-        elif dataset=='tinyimagenet':
+        elif dataset == 'tinyimagenet':
             normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
-        elif dataset=='svhn':
+        elif dataset == 'svhn':
             normalize = transforms.Normalize((0.4377, 0.4438, 0.4728), (0.1980, 0.2010, 0.1970))
+        elif dataset == 'stl':
+            normalize = transforms.Normalize(np.array([125.3, 123.0, 113.9]) / 255.0, np.array([63.0, 62.1, 66.7]) / 255.0)
 
         if resize:
 
