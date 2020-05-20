@@ -454,7 +454,7 @@ class TinyImageNetDataset(data.Dataset):
         self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}
         self.tgt_idx_to_class = {i: classes[i] for i in range(len(classes))}
         ipdb.set_trace()
-        
+
     def _make_dataset(self, Train=True):
         self.images = []
         if Train:
@@ -478,6 +478,8 @@ class TinyImageNetDataset(data.Dataset):
                         else:
                             item = (path, self.class_to_tgt_idx[self.val_img_to_class[fname]])
                         self.images.append(item)
+
+            ipdb.set_trace()
 
     def return_label(self, idx):
         return [self.class_to_label[self.tgt_idx_to_class[idx]]]
