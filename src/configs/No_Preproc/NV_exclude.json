@@ -1,0 +1,14 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "out_classes": 7,
+    "logFile": "custom_exclude_NV_step_lr_cutout_eb0_new.csv",
+    "gtFile": "custom_exclude_NV_step_lr_cutout_gt_eb0_new.csv",
+    "checkpointFile": "custom_exclude_NV_step_lr_cutout_eb0",
+    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new.csv",
+    "testcsv": "/raid/ferles/ISIC2019/folds/ValFold1.csv",
+    "exclude_class": "NV"
+  }
+}

@@ -453,7 +453,6 @@ class TinyImageNetDataset(data.Dataset):
         classes = sorted(list(set_of_classes))
         self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}
         self.tgt_idx_to_class = {i: classes[i] for i in range(len(classes))}
-        ipdb.set_trace()
 
     def _make_dataset(self, Train=True):
         self.images = []
