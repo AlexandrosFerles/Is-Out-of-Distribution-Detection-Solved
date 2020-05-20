@@ -637,7 +637,6 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
             if dataset != 'tinyimagenet':
                 gts = trainset.targets
             else:
-                ipdb.set_trace()
                 gts = trainset.get_targets()
             indexes = list(range(trainset.__len__()))
 
