@@ -666,7 +666,7 @@ def _get_fine_grained_transforms(dataset):
 
     if dataset == 'stanforddogs':
         normalize_sdogs = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    
+
         transform_train_sdogs = transforms.Compose([
             transforms.Resize(256),
             transforms.RandomRotation(45),
