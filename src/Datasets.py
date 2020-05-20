@@ -533,6 +533,7 @@ class GenericImageFolderDataset(data.Dataset):
         list_of_dirs = [target for target in self.class_to_tgt_idx.keys()]
 
         for tgt in list_of_dirs:
+            ipdb.set_trace()
             dirs = os.path.join(img_root_dir, tgt)
             if not os.path.isdir(dirs):
                 continue
