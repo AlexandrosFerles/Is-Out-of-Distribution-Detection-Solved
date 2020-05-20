@@ -1,0 +1,13 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 120,
+    "checkpoint": "StanfordDogs",
+    "train_pickle": "None",
+    "test_pickle": "None"
+  }
+}

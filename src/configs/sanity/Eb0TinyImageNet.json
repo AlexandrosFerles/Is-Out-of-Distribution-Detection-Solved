@@ -7,7 +7,7 @@
     "resolutionIncrease": "False",
     "out_classes": 200,
     "checkpoint": "tinyimagenet",
-    "train_pickle": "None",
-    "test_pickle": "None"
+    "train_pickle": "train_indices_tinyimagenet.pickle",
+    "test_pickle": "val_indices_tinyimagenet.pickle"
   }
 }
