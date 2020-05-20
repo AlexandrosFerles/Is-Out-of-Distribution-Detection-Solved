@@ -479,13 +479,8 @@ class TinyImageNetDataset(data.Dataset):
                             item = (path, self.class_to_tgt_idx[self.val_img_to_class[fname]])
                         self.images.append(item)
 
-            ipdb.set_trace()
-
-    def return_label(self, idx):
-        return [self.class_to_label[self.tgt_idx_to_class[idx]]]
-
     def get_targets(self):
-        return [self.return_label(idx) for idx in range(self.len_dataset)]
+        return [target for (_, target) in self.images]
 
     def __len__(self):
         return self.len_dataset
