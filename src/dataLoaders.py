@@ -499,7 +499,7 @@ def _get_natural_image_transforms(dataset, resize):
             transform_train = transforms.Compose([
                 transforms.Resize(256),
                 transforms.RandomHorizontalFlip(),
-                transforms.CenterCrop(image_size),
+                transforms.RandomCrop(image_size),
                 transforms.ToTensor(),
                 normalize_cifar,
             ])
@@ -528,6 +528,8 @@ def _get_natural_image_transforms(dataset, resize):
             normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
         elif dataset=='tinyimagenet':
             normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+        elif dataset=='svhn':
+            normalize = transforms.Normalize((0.4377, 0.4438, 0.4728), (0.1980, 0.2010, 0.1970))
 
         if resize:
 
@@ -535,7 +537,7 @@ def _get_natural_image_transforms(dataset, resize):
             transform_train = transforms.Compose([
                 transforms.Resize(256),
                 transforms.RandomHorizontalFlip(),
-                transforms.CenterCrop(image_size),
+                transforms.RandomCrop(image_size),
                 transforms.ToTensor(),
                 normalize,
             ])
@@ -568,6 +570,7 @@ def _get_natural_image_transforms(dataset, resize):
             transform_train = transforms.Compose([
                 transforms.Resize(256),
                 transforms.RandomHorizontalFlip(),
+                transforms.RandomCrop(image_size),
                 transforms.ToTensor(),
             ])
 
