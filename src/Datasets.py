@@ -543,7 +543,7 @@ class GenericImageFolderDataset(data.Dataset):
                         path = os.path.join(root, fname)
                         item = (path, self.class_to_tgt_idx[tgt])
                         self.images.append(item)
-
+        ipdb.set_trace()
     def get_targets(self):
         return [target for (_, target) in self.images]
 
