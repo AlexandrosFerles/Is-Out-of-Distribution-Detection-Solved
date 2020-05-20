@@ -623,16 +623,16 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         testset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
     elif dataset=='svhn':
         if not test:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
+        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
     elif dataset=='stl':
         if not test:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
+        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
     elif dataset=='tinyimagenet':
         if not test:
             trainset = TinyImageNetDataset(transform=transform_train)
