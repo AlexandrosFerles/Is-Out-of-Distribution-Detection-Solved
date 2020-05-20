@@ -629,10 +629,10 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         testset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
     elif dataset=='stl':
         if not test:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
+            trainset = torchvision.datasets.STL10(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
-        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
+            trainset = torchvision.datasets.STL10(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
+        testset = torchvision.datasets.STL10(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
     elif dataset=='tinyimagenet':
         if not test:
             trainset = TinyImageNetDataset(transform=transform_train)
@@ -651,8 +651,8 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         if pickle_files is None:
             if dataset == 'tinyimagenet':
                 gts = trainset.get_targets()
-            elif dataset == 'svhn':
-                gts = _get_gts(trainset)
+            elif dataset == 'svhn' or dataset == 'stl':
+                gts = trainset.labels
             else:
                 gts = trainset.targets
             indexes = list(range(trainset.__len__()))
@@ -801,9 +801,3 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
 
     return train_ind_loaders, train_ood_loaders, test_ind_loaders, test_ood_loaders
 
-
-
-
-# def get_stanford_dogs_loaders():
-
-    
