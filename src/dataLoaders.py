@@ -661,33 +661,31 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         return trainloader, val_loader, testloader
 
 
-def _get_fine_grained_transforms(dataset):
+def _get_fine_grained_transforms():
 
-    if dataset == 'stanforddogs':
-        normalize_sdogs = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    transform_train = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomRotation(45),
+        transforms.RandomCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        normalize
+    ]),
 
-        transform_train_sdogs = transforms.Compose([
-            transforms.Resize(256),
-            transforms.RandomRotation(45),
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize_sdogs
-        ]),
+    transform_test = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        normalize
+    ]),
 
-        transform_test_sdogs = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize_sdogs
-        ]),
-
-    return transform_train_sdogs, transform_test_sdogs
+    return transform_train, transform_test
 
 
 def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
 
-    transform_train, transform_test = _get_fine_grained_transforms(dataset)
+    transform_train, transform_test = _get_fine_grained_transforms()
     if dataset == 'stanforddogs':
         if not test:
             trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_train)
