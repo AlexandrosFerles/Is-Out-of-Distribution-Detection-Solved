@@ -104,7 +104,7 @@ class WideResNet(nn.Module):
         self.batch_norm = nn.BatchNorm2d(filters[-1])
         self.activation = nn.ReLU(inplace=True)
         self.avg_pool = nn.AvgPool2d(kernel_size=8)
-        self.dropout = nn.Dropout(p=0.2)
+        self._dropout = nn.Dropout(p=0.2)
         self.fc = nn.Linear(filters[-1], n_classes)
 
         self.rot = rot
