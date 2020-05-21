@@ -132,7 +132,8 @@ class WideResNet(nn.Module):
         out = self.activation(out)
         out = self.avg_pool(out)
         out = out.view(-1, self.out_filters)
-
+        out = self._dropout(out)
+        
         if self.rot and rot:
             return self.rot_fc(out)
         else:
