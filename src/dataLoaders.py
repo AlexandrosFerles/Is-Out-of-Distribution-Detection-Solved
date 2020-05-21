@@ -833,7 +833,7 @@ def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=Non
 
     if ood_dataset in natural_datasets or finegrained_datasets:
         trainset_ood, testset_ood = _get_dataset(ood_dataset, transforms, test=True)
-        with open(f'val_oodices_{ood_dataset}.pickle', 'rb') as index_pickle:
+        with open(f'val_indices_{ood_dataset}.pickle', 'rb') as index_pickle:
             oodexes = pickle.load(index_pickle)
         val_sampler = SubsetRandomSampler(oodexes)
         val_loader_ood = DataLoader(trainset_ood, batch_size=batchsize, sampler=val_sampler)
@@ -845,7 +845,7 @@ def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=Non
     if val_ood_dataset is not None:
         if val_ood_dataset in natural_datasets or finegrained_datasets:
             trainset_val_ood, testset_val_ood = _get_dataset(val_ood_dataset, transforms, test=True)
-            with open(f'val_val_oodices_{val_ood_dataset}.pickle', 'rb') as index_pickle:
+            with open(f'val_indices_{val_ood_dataset}.pickle', 'rb') as index_pickle:
                 val_oodexes = pickle.load(index_pickle)
             val_sampler = SubsetRandomSampler(val_oodexes)
             val_loader_val_ood = DataLoader(trainset_val_ood, batch_size=batchsize, sampler=val_sampler)
