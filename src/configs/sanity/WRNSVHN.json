@@ -1,0 +1,13 @@
+{
+  "training":{
+    "model": "WideResNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 10,
+    "checkpoint": "SVHN",
+    "train_pickle": "None",
+    "test_pickle": "None"
+  }
+}
