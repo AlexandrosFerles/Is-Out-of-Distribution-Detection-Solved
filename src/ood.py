@@ -922,7 +922,7 @@ def _process_gen_odin(model, images, epsilon, criterion=nn.CrossEntropyLoss()):
 def _gen_odin_temp(model, loaders, ind_dataset):
 
     model.eval()
-    _, test_loader, ood_loader = loaders
+    test_loader, ood_loader = loaders
     _score_classification_accuracy(model, testloader, dataset=ind_dataset, genOdin=True)
 
     max_h_scores_ind = np.zeros(test_loader.batch_size*test_loader.__len__())
@@ -1197,10 +1197,10 @@ if __name__ == '__main__':
     #         ood_loader = tinyImageNetloader(batch_size=args.batch_size, resize=False)
 
     testloader, ood_loader = get_temp_data_loaders()
-    if args.with_FGSM or ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-        loaders = [val_loader, testloader, ood_loader]
-    else:
-        loaders = [testloader, ood_loader]
+    # if args.with_FGSM or ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
+    #     loaders = [val_loader, testloader, ood_loader]
+    # else:
+    loaders = [testloader, ood_loader]
 
     if ood_method == 'baseline':
         if args.with_FGSM:
