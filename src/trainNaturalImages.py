@@ -57,7 +57,6 @@ def train(args):
 
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
-
     for epoch in tqdm(range(epochs)):
 
         model.train()
