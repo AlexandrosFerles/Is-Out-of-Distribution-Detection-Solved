@@ -104,11 +104,11 @@ def train(args):
 
         if epoch_val_accuracy > best_val_acc:
             best_val_acc = epoch_val_accuracy
-            torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/triplets/{training_configurations.checkpoint}.pth')
+            torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
 
             if best_val_acc - checkpoint_val_accuracy > 0.05:
                 checkpoint_val_accuracy = best_val_acc
-                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/triplets/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_val_acc}.pth')
+                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_val_acc}.pth')
 
             correct, total = 0, 0
 
