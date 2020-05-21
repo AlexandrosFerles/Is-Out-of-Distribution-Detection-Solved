@@ -267,6 +267,7 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
             model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
         state_dict = torch.load(model_checkpoint, map_location=device)
         net.load_state_dict(state_dict)
+        net._dropout = nn.Dropout(p=0.5)
         net = net.to(device)
         return net
     elif 'geneb6' in modelName:
