@@ -33,7 +33,7 @@ def train(args):
 
     model = build_model(args).to(device)
 
-    epochs = 90
+    epochs = 40
     dataset = args.dataset.lower()
 
     if not flag:
@@ -44,7 +44,7 @@ def train(args):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
     best_test_acc = 0
-    scheduler = MultiStepLR(optimizer, milestones=[30, 60, 80], gamma=0.1)
+    scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
     for epoch in tqdm(range(epochs)):
 
