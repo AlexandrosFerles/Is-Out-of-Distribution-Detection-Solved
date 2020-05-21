@@ -35,7 +35,6 @@ def train(args):
     dataset = args.dataset.lower()
 
     if 'wide' in training_configurations.model.lower():
-        resize = False
         epochs = 100
         optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
         scheduler = MultiStepLR(optimizer, milestones=[20, 50, 80], gamma=0.2)
@@ -43,7 +42,6 @@ def train(args):
         epochs = 40
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
-        resize = True
 
     if not flag:
         trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
