@@ -803,21 +803,56 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
     return train_ind_loaders, train_ood_loaders, test_ind_loaders, test_ood_loaders
 
 
-def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_dataset=None, batchsize=10, resize=True):
+def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=None, batchsize=32, resize=True):
 
     natural_datasets = ['cifar10', 'cifar100', 'svhn', 'tinyimagenet', 'mnist', 'fashionmnist', 'stl']
     finegrained_datasets = ['stanforddogs', 'nabirds']
     # dermatology_datasets = ['isic', 'dermofit']
 
     if ind_dataset in natural_datasets:
-        _, transform_test = _get_natural_image_transforms(ind_dataset, resize)
-    elif ind_dataset in finegrained_datasets:
-        _, transform_test = _get_natural_image_transforms(ind_dataset, resize)
+        transforms = _get_natural_image_transforms(ind_dataset, resize)
+    elif ood_dataset in finegrained_datasets:
+        transforms = _get_natural_image_transforms(ind_dataset, resize)
     else:
-        _, transform_test = _get_transforms()
+        transforms = _get_transforms()
 
     if ind_dataset in natural_datasets or finegrained_datasets:
-        val_ind_pickle_file = f'val_indices_{ind_dataset}.pickle'
-    if ood_dataset in natural_datasets or finegrained_datasets:
-        val_ood_pickle_file = f'val_indices_{ood_dataset}.pickle'
+        trainset_ind, testset_ind = _get_dataset(ind_dataset, transforms, test=True)
+        with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_index_pickle, \
+                open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_index_pickle:
+            train_indexes = pickle.load(train_index_pickle)
+            val_indexes = pickle.load(val_index_pickle)
+        train_sampler = SubsetRandomSampler(train_indexes)
+        val_sampler = SubsetRandomSampler(val_indexes)
+        train_loader_ind = DataLoader(trainset_ind, batch_size=batchsize, sampler=train_sampler)
+        val_loader_ind = DataLoader(trainset_ind, batch_size=batchsize, sampler=val_sampler)
+        test_loader_ind = DataLoader(trainset_ind, batch_size=batchsize)
+    else:
+        #TODO
+        pass
 
+    if ood_dataset in natural_datasets or finegrained_datasets:
+        trainset_ood, testset_ood = _get_dataset(ood_dataset, transforms, test=True)
+        with open(f'val_oodices_{ood_dataset}.pickle', 'rb') as index_pickle:
+            oodexes = pickle.load(index_pickle)
+        val_sampler = SubsetRandomSampler(oodexes)
+        val_loader_ood = DataLoader(trainset_ood, batch_size=batchsize, sampler=val_sampler)
+        test_loader_ood = DataLoader(trainset_ood, batch_size=batchsize)
+    else:
+        #TODO
+        pass
+
+    if val_ood_dataset is not None:
+        if val_ood_dataset in natural_datasets or finegrained_datasets:
+            trainset_val_ood, testset_val_ood = _get_dataset(val_ood_dataset, transforms, test=True)
+            with open(f'val_val_oodices_{val_ood_dataset}.pickle', 'rb') as index_pickle:
+                val_oodexes = pickle.load(index_pickle)
+            val_sampler = SubsetRandomSampler(val_oodexes)
+            val_loader_val_ood = DataLoader(trainset_val_ood, batch_size=batchsize, sampler=val_sampler)
+            test_loader_val_ood = DataLoader(trainset_val_ood, batch_size=batchsize)
+        else:
+            #TODO
+            pass
+        return train_loader_ind, val_loader_ind, test_loader_ind, val_loader_ood, test_loader_ood, val_loader_val_ood, test_loader_val_ood
+    else:
+        return train_loader_ind, val_loader_ind, test_loader_ind, val_loader_ood, test_loader_ood
