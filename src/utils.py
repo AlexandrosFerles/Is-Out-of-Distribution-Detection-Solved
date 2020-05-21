@@ -36,79 +36,11 @@ def build_model(args):
 
     if modelName == 'wideresnet':
       from models.WideResNet import WideResNet
-      net = WideResNet(d=40, k=4, n_classes=out_classes, input_features=3, output_features=16, strides=[1, 1, 2, 2])
+      if not pretrained:
+        net = WideResNet(d=40, k=4, n_classes=out_classes, input_features=3, output_features=16, strides=[1, 1, 2, 2])
+      else:
+        net = WideResNet(d=40, k=4, n_classes=out_classes, input_features=3, output_features=16, strides=[1, 1, 2, 2])
       return net
-    elif modelName == 'resnet':
-        if depth == 50:
-            pretrained = torchvision.models.resnet50(pretrained=pretrained)
-        elif depth == 101:
-            pretrained = torchvision.models.resnet101(pretrained=pretrained)
-        elif depth == 152:
-            pretrained = torchvision.models.resnet152(pretrained=pretrained)
-        else:
-            raise NotImplementedError('ResNet depth {} not implemented'.format(depth))
-        net = deepcopy(pretrained)
-        for param in net.parameters():
-            param.requires_grad = True
-        net.fc = nn.Linear(net.fc.in_features, out_classes)
-        return net 
-    elif modelName == 'senet':
-        if depth == 154:
-            from models.SENets import senet154
-            pretrained = senet154(num_classes=1000, pretrained=pretrained)
-            net = deepcopy(pretrained)
-            for param in net.parameters():
-                param.requires_grad = True
-            net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-            return net
-        else:
-            raise NotImplementedError('SENet depth {} not implemented'.format(depth))
-    elif modelName == 'seresnext':
-        if depth == 50:
-            from pretrainedmodels import se_resnext50_32x4d
-            pretrained = se_resnext50_32x4d(num_classes=1000, pretrained='imagenet')
-            net = deepcopy(pretrained)
-            for param in net.parameters():
-                param.requires_grad = True
-            net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-            return net
-        elif depth == 101:
-            from pretrainedmodels import se_resnext101_32x4d
-            pretrained = se_resnext101_32x4d(num_classes=1000, pretrained='imagenet')
-            net = deepcopy(pretrained)
-            for param in net.parameters():
-                param.requires_grad = True
-            net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-            return net
-        else:
-            raise NotImplementedError('SE-ResNext depth {} not implemented'.format(depth))
-    elif modelName == 'densenet':
-        if depth == 121:
-            from pretrainedmodels import densenet121
-            pretrained = densenet121(num_classes=1000, pretrained='imagenet')
-            net = deepcopy(pretrained)
-            for param in net.parameters():
-                param.requires_grad = True
-            net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-            return net
-        elif depth == 169:
-            from pretrainedmodels import densenet169
-            pretrained = densenet169(num_classes=1000, pretrained='imagenet')
-            net = deepcopy(pretrained)
-            for param in net.parameters():
-                param.requires_grad = True
-            net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-            return net
-        elif depth == 201:
-            from pretrainedmodels import densenet201
-            pretrained = densenet201(num_classes=1000, pretrained='imagenet')
-            net = deepcopy(pretrained)
-            for param in net.parameters():
-                param.requires_grad = True
-            net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-            return net
-        else:
-            raise NotImplementedError('net not implemented')
     elif modelName == 'efficientnet':
         if depth in range(8):
             from efficientnet_pytorch import EfficientNet
@@ -119,6 +51,7 @@ def build_model(args):
             if not pretrained:
                 net._conv_stem = nn.Conv2d(1, net._conv_stem.out_channels, kernel_size=3, stride=2, bias=False)
             net._fc = nn.Linear(model._fc.in_features, out_classes)
+            net._dropout = torch.nn.Dropout(p=0.5)
             return net
         else:
             raise NotImplementedError('net not implemented')
