@@ -7,8 +7,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import roc_curve, auc
 from utils import build_model_with_checkpoint
-from dataLoaders import cifar10loaders, cifar100loaders, tinyImageNetloader, \
-    _get_isic_loaders_ood, _get_7point_loaders_ood, _get_custom_loader_7point, _get_Dermofit_full_loaders
+from dataLoaders import *
 from tqdm import tqdm
 import lib_generation
 import argparse
