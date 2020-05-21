@@ -36,10 +36,15 @@ def train(args):
     epochs = 40
     dataset = args.dataset.lower()
 
-    if not flag:
-        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
+    if 'wide' in training_configurations.model.lower():
+        resize = False
     else:
-        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
+        resize = True
+
+    if not flag:
+        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True, resize=resize)
+    else:
+        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files, resize=resize)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
