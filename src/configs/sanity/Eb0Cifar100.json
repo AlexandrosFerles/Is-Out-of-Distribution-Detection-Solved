@@ -6,8 +6,8 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 100,
-    "checkpoint": "Cifar100",
-    "train_pickle": "None",
-    "test_pickle": "None"
+    "checkpoint": "eb0Cifar100",
+    "train_pickle": "train_indices_cifar100.pickle",
+    "test_pickle": "val_indices_cifar100.pickle"
   }
 }

@@ -6,8 +6,8 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 10,
-    "checkpoint": "wrnSVHN",
-    "train_pickle": "train_indices_svhn.pickle",
-    "test_pickle": "val_indices_svhn.pickle"
+    "checkpoint": "wrnSTL",
+    "train_pickle": "train_indices_stl.pickle",
+    "test_pickle": "val_indices_stl.pickle"
   }
 }

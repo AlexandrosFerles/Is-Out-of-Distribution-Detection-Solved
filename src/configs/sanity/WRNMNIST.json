@@ -1,0 +1,13 @@
+{
+  "training":{
+    "model": "WideResNet",
+    "depth": "0",
+    "pretrained": "False",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 10,
+    "checkpoint": "wrnmnist",
+    "train_pickle": "train_indices_mnist.pickle",
+    "test_pickle": "val_indices_mnist.pickle"
+  }
+}

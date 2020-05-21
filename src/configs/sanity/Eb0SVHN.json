@@ -6,8 +6,8 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 10,
-    "checkpoint": "SVHN",
-    "train_pickle": "None",
-    "test_pickle": "None"
+    "checkpoint": "eb0SVHN",
+    "train_pickle": "train_indices_svhn.pickle",
+    "test_pickle": "val_indices_svhn.pickle"
   }
 }
