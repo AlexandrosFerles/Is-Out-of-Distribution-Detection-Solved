@@ -864,7 +864,7 @@ def get_temp_data_loaders(batch_size=32):
     transforms = _get_natural_image_transforms(ind_dataset, resize=False)
 
     trainset_ind, testset_ind = _get_dataset(ind_dataset, transforms, test=True)
-    test_loader_ind = DataLoader(trainset_ind, batch_size=batch_size)
+    test_loader_ind = DataLoader(testset_ind, batch_size=batch_size)
 
     testset = ImageFolder(root='/raid/ferles/ood_benchmark/Imagenet_resize', transform=transforms[1])
     test_loader_ood = DataLoader(testset, batch_size=batch_size)
