@@ -148,12 +148,12 @@ def build_model(args):
         raise NotImplementedError('net not implemented')
 
 
-def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes, gen_odin_mode=0):
+def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes, gen_odin_mode=0, input_features=3, rot=False):
 
     if 'wide' in modelName:
         from models.WideResNet import WideResNet
         strides = [1, 1, 2, 2]
-        net = WideResNet(d=40, k=2, n_classes=10, input_features=3, output_features=16, strides=strides, rot=True)
+        net = WideResNet(d=40, k=2, n_classes=out_classes, input_features=input_features, output_features=16, strides=strides, rot=rot)
         if 'checkpoints' not in model_checkpoint:
             model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
         state_dict = torch.load(model_checkpoint, map_location=device)
