@@ -1196,7 +1196,7 @@ if __name__ == '__main__':
     #         trainloader, val_loader, testloader = cifar10loaders(train_batch_size=args.batch_size, test_batch_size=args.batch_size, pickle_files=pickle_files, test=True, resize=False)
     #         ood_loader = tinyImageNetloader(batch_size=args.batch_size, resize=False)
 
-    testloader, ood_loader = _get_temp_data_loaders()
+    testloader, ood_loader = get_temp_data_loaders()
     if args.with_FGSM or ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
         loaders = [val_loader, testloader, ood_loader]
     else:
