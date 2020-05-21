@@ -803,7 +803,7 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
     return train_ind_loaders, train_ood_loaders, test_ind_loaders, test_ood_loaders
 
 
-def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=None, batchsize=32, resize=True):
+def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=None, batch_size=32, resize=True):
 
     natural_datasets = ['cifar10', 'cifar100', 'svhn', 'tinyimagenet', 'mnist', 'fashionmnist', 'stl']
     finegrained_datasets = ['stanforddogs', 'nabirds']
@@ -824,9 +824,9 @@ def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=Non
             val_indexes = pickle.load(val_index_pickle)
         train_sampler = SubsetRandomSampler(train_indexes)
         val_sampler = SubsetRandomSampler(val_indexes)
-        train_loader_ind = DataLoader(trainset_ind, batch_size=batchsize, sampler=train_sampler)
-        val_loader_ind = DataLoader(trainset_ind, batch_size=batchsize, sampler=val_sampler)
-        test_loader_ind = DataLoader(trainset_ind, batch_size=batchsize)
+        train_loader_ind = DataLoader(trainset_ind, batch_size=batch_size, sampler=train_sampler)
+        val_loader_ind = DataLoader(trainset_ind, batch_size=batch_size, sampler=val_sampler)
+        test_loader_ind = DataLoader(testset_ind, batch_size=batch_size)
     else:
         #TODO
         pass
@@ -836,8 +836,8 @@ def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=Non
         with open(f'val_indices_{ood_dataset}.pickle', 'rb') as index_pickle:
             oodexes = pickle.load(index_pickle)
         val_sampler = SubsetRandomSampler(oodexes)
-        val_loader_ood = DataLoader(trainset_ood, batch_size=batchsize, sampler=val_sampler)
-        test_loader_ood = DataLoader(trainset_ood, batch_size=batchsize)
+        val_loader_ood = DataLoader(trainset_ood, batch_size=batch_size, sampler=val_sampler)
+        test_loader_ood = DataLoader(testset_ood, batch_size=batch_size)
     else:
         #TODO
         pass
@@ -848,11 +848,25 @@ def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=Non
             with open(f'val_indices_{val_ood_dataset}.pickle', 'rb') as index_pickle:
                 val_oodexes = pickle.load(index_pickle)
             val_sampler = SubsetRandomSampler(val_oodexes)
-            val_loader_val_ood = DataLoader(trainset_val_ood, batch_size=batchsize, sampler=val_sampler)
-            test_loader_val_ood = DataLoader(trainset_val_ood, batch_size=batchsize)
+            val_loader_val_ood = DataLoader(trainset_val_ood, batch_size=batch_size, sampler=val_sampler)
+            test_loader_val_ood = DataLoader(testset_val_ood, batch_size=batch_size)
         else:
             #TODO
             pass
         return train_loader_ind, val_loader_ind, test_loader_ind, val_loader_ood, test_loader_ood, val_loader_val_ood, test_loader_val_ood
     else:
         return train_loader_ind, val_loader_ind, test_loader_ind, val_loader_ood, test_loader_ood
+
+
+def _get_temp_data_loaders(batch_size=32):
+
+    ind_dataset = 'cifar10'
+    transforms = _get_natural_image_transforms(ind_dataset, resize=False)
+
+    trainset_ind, testset_ind = _get_dataset(ind_dataset, transforms, test=True)
+    test_loader_ind = DataLoader(trainset_ind, batch_size=batch_size)
+
+    testset = ImageFolder(root='/raid/ferles/ood_benchmark/Imagenet_resize', transform=transforms[1])
+    test_loader_ood = DataLoader(testset, batch_size=batch_size)
+
+    return test_loader_ind, test_loader_ood
