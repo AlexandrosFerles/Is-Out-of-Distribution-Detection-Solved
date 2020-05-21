@@ -32,9 +32,18 @@ def train(args):
         flag = True
 
     model = build_model(args).to(device)
-
-    epochs = 90
     dataset = args.dataset.lower()
+
+    if 'wide' in training_configurations.model.lower():
+        resize = False
+        epochs = 100
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
+        scheduler = MultiStepLR(optimizer, milestones=[20, 50, 80], gamma=0.2)
+    else:
+        epochs = 40
+        optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+        scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+        resize = True
 
     if not flag:
         trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
@@ -42,9 +51,7 @@ def train(args):
         trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
-    best_test_acc = 0
-    scheduler = MultiStepLR(optimizer, milestones=[30, 60, 80], gamma=0.1)
+    checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
     for epoch in tqdm(range(epochs)):
 
@@ -77,10 +84,35 @@ def train(args):
 
         model.eval()
         correct, total = 0, 0
-        test_loss = 0
-        scheduler.step(epoch=epoch)
 
         with torch.no_grad():
+
+            for data in val_loader:
+                images, labels = data
+                images = images.to(device)
+                labels = labels.to(device)
+
+                if 'genOdin' in training_configurations.checkpoint:
+                    outputs, h, g = model(images)
+                else:
+                    outputs = model(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+            epoch_val_accuracy = correct / total
+
+            wandb.log({'Validation Set Accuracy': epoch_val_accuracy, 'epoch': epoch})
+
+        if epoch_val_accuracy > best_val_acc:
+            best_val_acc = epoch_val_accuracy
+            torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/triplets/{training_configurations.checkpoint}.pth')
+
+            if best_val_acc - checkpoint_val_accuracy > 0.05:
+                checkpoint_val_accuracy = best_val_acc
+                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/triplets/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_val_acc}.pth')
+
+            correct, total = 0, 0
 
             for data in testloader:
                 images, labels = data
@@ -91,20 +123,15 @@ def train(args):
                     outputs, h, g = model(images)
                 else:
                     outputs = model(images)
-                t_loss = criterion(outputs, labels)
-                test_loss += t_loss.item()
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-            epoch_accuracy = correct / total
+            test_set_accuracy = correct / total
 
-            wandb.log({'Test Set Loss': test_loss / testloader.__len__(), 'epoch': epoch})
-            wandb.log({'Test Set Accuracy': epoch_accuracy, 'epoch': epoch})
+        wandb.log({'Test Set Accuracy': test_set_accuracy, 'epoch': epoch})
 
-        if epoch_accuracy > best_test_acc:
-            best_test_acc = epoch_accuracy
-            torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_test_acc}.pth')
+        scheduler.step(epoch=epoch)
 
 
 if __name__ == '__main__':
