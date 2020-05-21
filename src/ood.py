@@ -919,7 +919,7 @@ def _process_gen_odin(model, images, epsilon, criterion=nn.CrossEntropyLoss()):
     return np.max(o.detach().cpu().numpy(), axis=1), np.max(h.detach().cpu().numpy(), axis=1), g.detach().cpu().numpy()
 
 
-def _gen_odin_temp(model, loaders, ind_dataset):
+def _gen_odin_temp(model, loaders, ind_dataset, device):
 
     model.eval()
     test_loader, ood_loader = loaders
