@@ -554,6 +554,7 @@ def _get_natural_image_transforms(dataset, resize):
         else:
 
             transform_train = transforms.Compose([
+                transforms.Resize(256),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize,
