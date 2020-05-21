@@ -35,12 +35,18 @@ def train(args):
     model._dropout = nn.Dropout(p=0.4)
     model = model.to(device)
 
-    epochs = 40
+
     dataset = args.dataset.lower()
 
     if 'wide' in training_configurations.model.lower():
         resize = False
+        epochs = 100
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
+        scheduler = MultiStepLR(optimizer, milestones=[20, 50, 80], gamma=0.2)
     else:
+        epochs = 40
+        optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+        scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
         resize = True
 
     if not flag:
@@ -49,9 +55,9 @@ def train(args):
         trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files, resize=resize)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
-    scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+
 
     for epoch in tqdm(range(epochs)):
 
