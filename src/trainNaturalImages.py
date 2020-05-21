@@ -32,8 +32,9 @@ def train(args):
         flag = True
 
     model = build_model(args).to(device)
-    model._dropout = 0.4
-    
+    model._dropout = nn.Dropout(p=0.4)
+    model = model.to(device)
+
     epochs = 40
     dataset = args.dataset.lower()
 
