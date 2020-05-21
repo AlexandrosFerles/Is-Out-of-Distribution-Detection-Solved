@@ -6,7 +6,7 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 200,
-    "checkpoint": "tinyimagenet",
+    "checkpoint": "eb0tinyimagenet",
     "train_pickle": "train_indices_tinyimagenet.pickle",
     "test_pickle": "val_indices_tinyimagenet.pickle"
   }

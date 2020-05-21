@@ -6,7 +6,7 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 10,
-    "checkpoint": "Cifar10_seed_24_Auto_CutOut",
+    "checkpoint": "eb0Cifar10",
     "train_pickle": "train_indices_cifar10.pickle",
     "test_pickle": "val_indices_cifar10.pickle"
   }
