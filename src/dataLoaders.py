@@ -858,7 +858,7 @@ def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=Non
         return train_loader_ind, val_loader_ind, test_loader_ind, val_loader_ood, test_loader_ood
 
 
-def _get_temp_data_loaders(batch_size=32):
+def get_temp_data_loaders(batch_size=32):
 
     ind_dataset = 'cifar10'
     transforms = _get_natural_image_transforms(ind_dataset, resize=False)
