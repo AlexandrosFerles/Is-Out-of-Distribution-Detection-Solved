@@ -121,14 +121,14 @@ class WideResNet(nn.Module):
             elif isinstance(m, nn.Linear):
                 m.bias.data.zero_()
 
-    def forward(self, x, rot=False):
+    def forward(self, x, rot=False, att=False):
 
         x = self.conv1(x)
 
-        x = self.block1(x)
-        x = self.block2(x)
-        x = self.block3(x)
-        out = self.batch_norm(x)
+        att1 = self.block1(x)
+        att2 = self.block2(att1)
+        att3 = self.block3(att2)
+        out = self.batch_norm(att3)
         out = self.activation(out)
         out = self.avg_pool(out)
         out = out.view(-1, self.out_filters)
@@ -137,7 +137,10 @@ class WideResNet(nn.Module):
         if self.rot and rot:
             return self.rot_fc(out)
         else:
-            return self.fc(out)
+            if att:
+                return att1, att2, att3, self.fc(out)
+            else:
+                return self.fc(out)
 
 
 if __name__ == '__main__':
