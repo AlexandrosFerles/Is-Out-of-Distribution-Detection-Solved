@@ -1186,47 +1186,15 @@ if __name__ == '__main__':
         for line in open(args.model_checkpoints_file, 'r'):
             model_checkpoints.append(line.split('\n')[0])
 
-    if args.in_distribution_dataset.lower() == 'cifar10' and args.out_distribution_dataset.lower() == 'tinyimagenet':
-        pickle_files = ['train_indices_cifar10.pickle', 'val_indices_cifar10.pickle']
-        if args.model_type == 'efficient':
-            trainloader, val_loader, testloader = cifar10loaders(train_batch_size=args.batch_size, test_batch_size=args.batch_size, pickle_files=pickle_files, test=True)
-            ood_loader = tinyImageNetloader(batch_size=args.batch_size)
-        else:
-            trainloader, val_loader, testloader = cifar10loaders(train_batch_size=args.batch_size, test_batch_size=args.batch_size, pickle_files=pickle_files, test=True, resize=False)
-            ood_loader = tinyImageNetloader(batch_size=args.batch_size, resize=False)
-    elif args.in_distribution_dataset.lower() == 'cifar10' and args.out_distribution_dataset.lower() == 'cifar100':
-        pickle_files = ['train_indices_cifar10.pickle', 'val_indices_cifar10.pickle']
-        trainloader, val_loader, testloader = cifar10loaders(train_batch_size=args.batch_size, test_batch_size=args.batch_size, pickle_files=pickle_files, test=True)
-        _, ood_loader = cifar100loaders(test_batch_size=args.batch_size, test=True, resize=True)
-    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == 'isic':
-        exclude_class = args.exclude_class
-        trainloader, val_loader, testloader, ood_loader = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class)
-    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == '7-point-out':
-        exclude_class = args.exclude_class
-        if exclude_class != 'None':
-            trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class)
-            _, ood_loader = _get_7point_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class, out_mode=True)
-        else:
-            raise NotImplementedError('7-point-out dataset assumes an exclude class')
-    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == '7-point-in':
-        exclude_class = args.exclude_class
-        if exclude_class != 'None':
-            trainloader, val_loader, testloader, _ = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class)
-            ood_loader, _ = _get_7point_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class)
-    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == '7-point-b':
-        exclude_class = None if args.exclude_class == 'None' else args.exclude_class
-        trainloader, val_loader, testloader = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class)
-        ood_loader, _ = _get_7point_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class, out_mode=True)
-    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == '7-point-mel':
-        exclude_class = None if args.exclude_class == 'None' else args.exclude_class
-        trainloader, val_loader, testloader = _get_isic_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class)
-        _, ood_loader = _get_7point_loaders_ood(batch_size=args.batch_size, exclude_class=exclude_class, out_mode=True)
-    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == 'dermofit-in':
-        trainloader, val_loader, testloader = _get_isic_loaders_ood(batch_size=args.batch_size)
-        ood_loader, _ = _get_Dermofit_full_loaders(batch_size=args.batch_size)
-    elif args.in_distribution_dataset.lower() == 'isic' and args.out_distribution_dataset.lower() == 'dermofit-out':
-        trainloader, val_loader, testloader = _get_isic_loaders_ood(batch_size=args.batch_size)
-        _, ood_loader = _get_Dermofit_full_loaders(batch_size=args.batch_size)
+    # standard_datasets = ['cifar10']
+    # if args.in_distribution_dataset.lower() == 'cifar10' and args.out_distribution_dataset.lower() == 'tinyimagenet':
+    #     pickle_files = ['train_indices_cifar10.pickle', 'val_indices_cifar10.pickle']
+    #     if args.model_type == 'efficient':
+    #         trainloader, val_loader, testloader = cifar10loaders(train_batch_size=args.batch_size, test_batch_size=args.batch_size, pickle_files=pickle_files, test=True)
+    #         ood_loader = tinyImageNetloader(batch_size=args.batch_size)
+    #     else:
+    #         trainloader, val_loader, testloader = cifar10loaders(train_batch_size=args.batch_size, test_batch_size=args.batch_size, pickle_files=pickle_files, test=True, resize=False)
+    #         ood_loader = tinyImageNetloader(batch_size=args.batch_size, resize=False)
 
     if args.with_FGSM or ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
         loaders = [val_loader, testloader, ood_loader]

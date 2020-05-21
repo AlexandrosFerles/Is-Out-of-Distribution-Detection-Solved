@@ -65,31 +65,23 @@ def _get_gts(dataset):
     return gts
 
 
-def _get_transforms(input_size, with_auto_augment=False):
+def _get_transforms():
 
-    if with_auto_augment:
-        training_transform = transforms.Compose([
-            transforms.Resize((input_size, input_size)),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomVerticalFlip(),
-            transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-            transforms.RandomRotation(45),
-            AutoAugment(),
-            Cutout(),
-            transforms.ToTensor()
-        ])
-    else:
-        training_transform = transforms.Compose([
-            transforms.Resize((input_size, input_size)),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomVerticalFlip(),
-            transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-            transforms.RandomRotation(45),
-            transforms.ToTensor()
-        ])
+    training_transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
+        transforms.RandomRotation(45),
+        AutoAugment(),
+        transforms.RandomCrop(224),
+        Cutout(),
+        transforms.ToTensor()
+    ])
 
     val_transform = transforms.Compose([
-        transforms.Resize((input_size, input_size)),
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
         transforms.ToTensor(),
     ])
 
@@ -488,6 +480,69 @@ def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/raid/ferles/7
     return ood_loader, ood_loader
 
 
+def _get_dataset(dataset, transforms, test=False):
+
+    transform_train, transform_test = transforms
+    if dataset == 'cifar10':
+        if not test:
+            trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset == 'cifar100':
+        if not test:
+            trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset=='mnist':
+        if not test:
+            trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset=='fashionmnist':
+        if not test:
+            trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+    elif dataset=='svhn':
+        if not test:
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
+        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
+    elif dataset=='stl':
+        if not test:
+            trainset = torchvision.datasets.STL10(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
+        else:
+            trainset = torchvision.datasets.STL10(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
+        testset = torchvision.datasets.STL10(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
+    elif dataset=='tinyimagenet':
+        if not test:
+            trainset = TinyImageNetDataset(transform=transform_train)
+        else:
+            trainset = TinyImageNetDataset(transform=transform_test)
+        testset = TinyImageNetDataset(train=False, transform=transform_test)
+    elif dataset == 'stanforddogs':
+        if not test:
+            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_train)
+        else:
+            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_test)
+        testset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', train=False, transform=transform_test)
+    elif dataset == 'nabirds':
+        if not test:
+            trainset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', transform=transform_train)
+        else:
+            trainset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', transform=transform_test)
+        testset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', train=False, transform=transform_test)
+    else:
+        raise NotImplementedError(f'{dataset} not implemented!')
+
+    return trainset, testset
+
+
 def _get_natural_image_transforms(dataset, resize):
 
     if 'cifar' in dataset:
@@ -599,51 +654,8 @@ def _get_natural_image_transforms(dataset, resize):
 
 def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
 
-    transform_train, transform_test = _get_natural_image_transforms(dataset, resize)
-    if dataset == 'cifar10':
-        if not test:
-            trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
-    elif dataset == 'cifar100':
-        if not test:
-            trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
-    elif dataset=='mnist':
-        if not test:
-            trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
-    elif dataset=='fashionmnist':
-        if not test:
-            trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
-    elif dataset=='svhn':
-        if not test:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
-        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
-    elif dataset=='stl':
-        if not test:
-            trainset = torchvision.datasets.STL10(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
-        else:
-            trainset = torchvision.datasets.STL10(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
-        testset = torchvision.datasets.STL10(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
-    elif dataset=='tinyimagenet':
-        if not test:
-            trainset = TinyImageNetDataset(transform=transform_train)
-        else:
-            trainset = TinyImageNetDataset(transform=transform_test)
-        testset = TinyImageNetDataset(train=False, transform=transform_test)
-    else:
-        raise NotImplementedError(f'{dataset} not implemented!')
+    transforms = _get_natural_image_transforms(dataset, resize)
+    trainset, testset = _get_dataset(dataset, transforms, test)
 
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=16)
 
@@ -705,22 +717,8 @@ def _get_fine_grained_transforms():
 
 def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
 
-    transform_train, transform_test = _get_fine_grained_transforms()
-    if dataset == 'stanforddogs':
-        if not test:
-            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_train)
-        else:
-            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_test)
-        testset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', train=False, transform=transform_test)
-    elif dataset == 'nabirds':
-        if not test:
-            trainset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', transform=transform_train)
-        else:
-            trainset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', transform=transform_test)
-        testset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', train=False, transform=transform_test)
-    else:
-        raise NotImplementedError(f'{dataset} not implemented!')
-
+    transforms = _get_fine_grained_transforms()
+    trainset, testset = _get_dataset(dataset, transforms, test)
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=16)
 
     if validation_test_split == 0:
@@ -803,4 +801,23 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
         point += step
 
     return train_ind_loaders, train_ood_loaders, test_ind_loaders, test_ood_loaders
+
+
+def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_dataset=None, batchsize=10, resize=True):
+
+    natural_datasets = ['cifar10', 'cifar100', 'svhn', 'tinyimagenet', 'mnist', 'fashionmnist', 'stl']
+    finegrained_datasets = ['stanforddogs', 'nabirds']
+    # dermatology_datasets = ['isic', 'dermofit']
+
+    if ind_dataset in natural_datasets:
+        _, transform_test = _get_natural_image_transforms(ind_dataset, resize)
+    elif ind_dataset in finegrained_datasets:
+        _, transform_test = _get_natural_image_transforms(ind_dataset, resize)
+    else:
+        _, transform_test = _get_transforms()
+
+    if ind_dataset in natural_datasets or finegrained_datasets:
+        val_ind_pickle_file = f'val_indices_{ind_dataset}.pickle'
+    if ood_dataset in natural_datasets or finegrained_datasets:
+        val_ood_pickle_file = f'val_indices_{ood_dataset}.pickle'
 
