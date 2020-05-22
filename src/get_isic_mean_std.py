@@ -16,6 +16,7 @@ mean = 0.
 std = 0.
 nb_samples = 0.
 for data in loader:
+    data = data[0]
     ipdb.set_trace()
     batch_samples = data.size(0)
     data = data.view(batch_samples, data.size(1), -1)
