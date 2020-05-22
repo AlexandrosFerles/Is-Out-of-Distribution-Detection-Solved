@@ -37,7 +37,7 @@ def build_model(args):
     if modelName == 'wideresnet':
       from models.WideResNet import WideResNet
       if not pretrained:
-        net = WideResNet(d=40, k=4, n_classes=out_classes, input_features=3, output_features=16, strides=[1, 1, 2, 2])
+        net = WideResNet(d=40, k=4, n_classes=out_classes, input_features=1, output_features=16, strides=[1, 1, 2, 2])
       else:
         net = WideResNet(d=40, k=4, n_classes=out_classes, input_features=3, output_features=16, strides=[1, 1, 2, 2])
       return net
