@@ -1,6 +1,7 @@
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 from torchvision import transforms
+import ipdb
 
 path = '/raid/ferles/ISIC2019/ISIC_2019_Training_Input'
 transform = transforms.Compose([
@@ -11,11 +12,11 @@ transform = transforms.Compose([
 dataset = ImageFolder(path, transform=transform)
 loader = DataLoader(dataset, batch_size=20)
 
-
 mean = 0.
 std = 0.
 nb_samples = 0.
 for data in loader:
+    ipdb.set_trace()
     batch_samples = data.size(0)
     data = data.view(batch_samples, data.size(1), -1)
     mean += data.mean(2).sum(0)
