@@ -307,7 +307,7 @@ class SubsetSequentialSampler(Sampler):
         return self.num_samples
 
 
-def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, input_size, gtFile, with_auto_augment=False, load_gts=True):
+def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFile, load_gts=True):
 
     training_transform, val_transform = _get_transforms()
 
@@ -339,18 +339,18 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, inpu
     return train_loader, val_loader, testset.csv_columns
 
 
-def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size, val_batch_size, input_size, gtFile, exclude_class, with_auto_augment=False, load_gts=True, mode='new'):
+def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size, val_batch_size, gtFile, exclude_class, load_gts=True):
 
-    training_transform, val_transform = _get_transforms(input_size=input_size, with_auto_augment=with_auto_augment)
+    training_transform, val_transform = _get_transforms()
 
     trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, exclude_class=exclude_class, ret_path=False)
     valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform, exclude_class=exclude_class)
 
     if load_gts:
-        gts = np.load(f'{abs_path}npzs/indexes/isic/gts_{exclude_class}_{mode}.npz')['arr_0']
+        gts = np.load(f'{abs_path}npzs/indexes/isic/gts_{exclude_class}.npz')['arr_0']
     else:
         gts = _get_gts(trainset)
-        np.savez(f'{abs_path}npzs/indexes/isic/gts_{exclude_class}_{mode}.npz', gts)
+        np.savez(f'{abs_path}npzs/indexes/isic/gts_{exclude_class}.npz', gts)
 
     indexes = np.array(list(range(gts.shape[0])))
     ros = RandomOverSampler()
