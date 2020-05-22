@@ -70,9 +70,7 @@ def _get_transforms():
     training_transform = transforms.Compose([
         transforms.Resize(256),
         transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),
         transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
-        transforms.RandomRotation(45),
         # AutoAugment(),
         transforms.RandomCrop(224),
         Cutout(),
