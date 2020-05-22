@@ -7,8 +7,8 @@
     "logFile": "custom_exclude_BKL_step_lr_cutout_eb0_new.csv",
     "gtFile": "custom_exclude_BKL_step_lr_cutout_gt_eb0_new.csv",
     "checkpointFile": "custom_exclude_BKL_step_lr_cutout_eb0",
-    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new.csv",
-    "testcsv": "/raid/ferles/ISIC2019/folds/ValFold1.csv",
+    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new_no_preproc.csv",
+    "testcsv": "/raid/ferles/ISIC2019/folds/Val_Fold_new_no_preproc.csv",
     "exclude_class": "BKL"
   }
 }
