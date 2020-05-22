@@ -543,28 +543,33 @@ def _get_dataset(dataset, transforms, test=False):
     return trainset, testset
 
 
-def _get_natural_image_transforms(dataset, resize):
+def _get_image_transforms(dataset, resize, grayscale=False):
 
     if 'cifar' in dataset:
         normalize_cifar = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 
         if resize:
-
             image_size = 224
-            transform_train = transforms.Compose([
-                transforms.Resize(256),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(image_size),
-                transforms.ToTensor(),
-                normalize_cifar,
-            ])
 
-            transform_test = transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(image_size),
-                transforms.ToTensor(),
-                normalize_cifar,
-            ])
+            if grayscale:
+
+                transform_train = transforms.Compose([
+                    transforms.Resize(256),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.RandomCrop(image_size),
+                    transforms.Grayscale(num_output_channels=1),
+                    transforms.ToTensor(),
+                    normalize_cifar,
+                ])
+
+                transform_test = transforms.Compose([
+                    transforms.Resize(256),
+                    transforms.CenterCrop(image_size),
+                    transforms.Grayscale(num_output_channels=1),
+                    transforms.ToTensor(),
+                    normalize_cifar,
+                ])
+
 
         else:
 
@@ -609,13 +614,14 @@ def _get_natural_image_transforms(dataset, resize):
         else:
 
             transform_train = transforms.Compose([
-                transforms.Resize(256),
+                transforms.Resize(32),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize,
             ])
 
             transform_test = transforms.Compose([
+                transforms.Resize(32),
                 transforms.ToTensor(),
                 normalize,
             ])
@@ -641,11 +647,13 @@ def _get_natural_image_transforms(dataset, resize):
         else:
 
             transform_train = transforms.Compose([
+                transforms.Resize(32),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
             ])
 
             transform_test = transforms.Compose([
+                transforms.Resize(32),
                 transforms.ToTensor(),
             ])
 
