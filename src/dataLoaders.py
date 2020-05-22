@@ -551,7 +551,7 @@ def _get_image_transforms(dataset, resize):
         if resize:
             image_size = 224
 
-                transform_train = transforms.Compose([
+            transform_train = transforms.Compose([
                     transforms.Resize(256),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomCrop(image_size),
@@ -560,7 +560,7 @@ def _get_image_transforms(dataset, resize):
                     normalize_cifar,
                 ])
 
-                transform_test = transforms.Compose([
+            transform_test = transforms.Compose([
                     transforms.Resize(256),
                     transforms.CenterCrop(image_size),
                     transforms.Grayscale(num_output_channels=1),
