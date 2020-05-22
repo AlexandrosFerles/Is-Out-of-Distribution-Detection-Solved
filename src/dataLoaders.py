@@ -870,3 +870,4 @@ def get_temp_data_loaders(batch_size=32):
     test_loader_ood = DataLoader(testset, batch_size=batch_size)
 
     return test_loader_ind, test_loader_ood
+
