@@ -4,7 +4,7 @@ import torch.optim as optim
 import numpy as np
 import os
 import argparse
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import StepLR, MultiStepLR
 from utils import build_model
 from dataLoaders import oversampling_loaders_custom, oversampling_loaders_exclude_class_custom_no_gts
 from utils import json_file_to_pyobj
@@ -105,20 +105,15 @@ def train(args):
         train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, exclude_class=exclude_class, with_auto_augment=True)
 
     model = build_model(args).to(device)
-    # optimizer = optim.Adam(model.parameters(), lr=5e-4)
-    optimizer = optim.Adam(model.parameters(), lr=0.0015)
-    scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
-
-    epochs = 20
+    epochs = 40
     criterion = nn.CrossEntropyLoss()
-
-    # use_scheduler = True
-    use_scheduler = False
+    optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+    scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
     best_auc, best_balanced_accuracy = 0, 0
     train_loss, val_loss, balanced_accuracies = [], [], []
 
-    early_stopping = False
+    early_stopping = True
     early_stopping_cnt = 0
         
     for epoch in tqdm(range(epochs)):
@@ -150,9 +145,6 @@ def train(args):
         train_loss.append(sum(loss_acc) / float(train_loader.__len__()))
         loss_acc.clear()
 
-        if use_scheduler:
-            scheduler.step()
-
         auc, balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
 
         if balanced_accuracy > best_balanced_accuracy:
@@ -164,6 +156,8 @@ def train(args):
                 early_stopping_cnt += 1
                 if early_stopping_cnt == 3:
                     break
+
+        scheduler.step()
 
 
 if __name__ == '__main__':
