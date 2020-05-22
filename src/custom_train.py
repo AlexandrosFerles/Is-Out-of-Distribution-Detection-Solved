@@ -133,11 +133,6 @@ def train(args):
             loss = criterion(outputs, _labels)
             loss_acc.append(loss.item())
             loss.backward()
-            # ce_loss = torch.nn.functional.cross_entropy(outputs, _labels, weight=torch.Tensor(frequencies), reduction='none')
-            # pt = torch.exp(-ce_loss)
-            # focal_loss = (1 * (1-pt)**1 * ce_loss).mean()
-            # loss_acc.append(focal_loss.item())
-            # focal_loss.backward()
             optimizer.step()
 
         wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
