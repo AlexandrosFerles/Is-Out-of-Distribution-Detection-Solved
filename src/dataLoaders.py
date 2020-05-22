@@ -551,8 +551,6 @@ def _get_image_transforms(dataset, resize):
         if resize:
             image_size = 224
 
-            if grayscale:
-
                 transform_train = transforms.Compose([
                     transforms.Resize(256),
                     transforms.RandomHorizontalFlip(),
@@ -569,7 +567,6 @@ def _get_image_transforms(dataset, resize):
                     transforms.ToTensor(),
                     normalize_cifar,
                 ])
-
 
         else:
 
