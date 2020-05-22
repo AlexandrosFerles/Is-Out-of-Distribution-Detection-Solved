@@ -97,8 +97,6 @@ def train(args):
     if use_wandb:
         wandb.init(name=checkpointFileName)
 
-    input_size = 224
-
     if exclude_class is None:
         train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName, load_gts=False)
     else:
