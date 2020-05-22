@@ -1,9 +1,15 @@
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
+from torchvision import transforms
 
 path = '/raid/ferles/ISIC2019/ISIC_2019_Training_Input'
-dataset = ImageFolder(path)
+dataset = ImageFolder(path, transform=transform)
 loader = DataLoader(dataset, batch_size=20)
+transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor()
+])
 
 mean = 0.
 std = 0.
