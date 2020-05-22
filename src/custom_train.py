@@ -100,9 +100,9 @@ def train(args):
     input_size = 224
 
     if exclude_class is None:
-        train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, load_gts=True)
+        train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName, load_gts=False)
     else:
-        train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, exclude_class=exclude_class, with_auto_augment=True, load_gts=True)
+        train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName, exclude_class=exclude_class, load_gts=False)
 
     model = build_model(args).to(device)
     epochs = 40
