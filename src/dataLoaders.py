@@ -73,7 +73,7 @@ def _get_transforms():
         transforms.RandomVerticalFlip(),
         transforms.ColorJitter(brightness=32. / 255., saturation=0.5),
         transforms.RandomRotation(45),
-        AutoAugment(),
+        # AutoAugment(),
         transforms.RandomCrop(224),
         Cutout(),
         transforms.ToTensor()
