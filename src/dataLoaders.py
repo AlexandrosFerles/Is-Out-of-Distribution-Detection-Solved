@@ -311,7 +311,7 @@ class SubsetSequentialSampler(Sampler):
 
 def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, input_size, gtFile, with_auto_augment=False, load_gts=True):
 
-    training_transform, val_transform = _get_transforms(input_size=input_size, with_auto_augment=with_auto_augment)
+    training_transform, val_transform = _get_transforms()
 
     trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, ret_path=False)
     testset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
