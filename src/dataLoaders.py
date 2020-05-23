@@ -316,7 +316,7 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFi
     training_transform, val_transform = _get_transforms()
 
     trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, ret_path=False)
-    valset = PandasDataSetWithPaths('ValFold1NoPreproc.csv', transform=val_transform, ret_path=False)
+    valset = PandasDataSetWithPaths('/raid/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, ret_path=False)
     testset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
 
     if load_gts:
@@ -350,7 +350,8 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     training_transform, val_transform = _get_transforms()
 
     trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, exclude_class=exclude_class, ret_path=False)
-    valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform, exclude_class=exclude_class)
+    valset = PandasDataSetWithPaths('/raid/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, ret_path=False)
+    testset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform, exclude_class=exclude_class)
 
     if load_gts:
         gts = np.load(f'{abs_path}npzs/indexes/isic/gts_{exclude_class}.npz')['arr_0']
@@ -369,13 +370,13 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     final_idx = _balance_order(idxs, labels, num_classes, batch_size=train_batch_size)
     sampler = SubsetSequentialSampler(indices=final_idx)
 
-    gpu_count = torch.cuda.device_count()
-    train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=16*gpu_count)
-    val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=16*gpu_count)
+    train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=16)
+    val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=16)
+    test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=16)
 
-    _create_gt_csv_file(loader=val_loader, columns=valset.csv_columns, gtFile=gtFile)
+    _create_gt_csv_file(loader=val_loader, columns=testset.csv_columns, gtFile=gtFile)
 
-    return train_loader, val_loader, valset.csv_columns
+    return train_loader, val_loader, test_loader, testset.csv_columns
 
 
 def _get_isic_loaders_ood(batch_size,
