@@ -153,5 +153,5 @@ if __name__ == '__main__':
     visible_divices = f"{args.device}, {args.device+1}"
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_divices
-    print(os.environ["CUDA_VISIBLE_DEVICES"] = visible_divices)
-    train(args)
+    print(os.environ["CUDA_VISIBLE_DEVICES"])
+    # train(args)
