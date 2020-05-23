@@ -32,7 +32,6 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    ipdb.set_trace()
     model = build_model(args, rot=True).to(device)
 
     dataset = args.dataset.lower()
