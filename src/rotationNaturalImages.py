@@ -25,7 +25,7 @@ def train(args):
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
     # wandb.init(name=f'rot_{training_configurations.checkpoint}')
-    device = torch.device(f'cuda:{args.device}')
+    device = torch.device(f'cuda:0')
 
     flag = False
     if training_configurations.train_pickle != 'None' and training_configurations.test_pickle != 'None':
