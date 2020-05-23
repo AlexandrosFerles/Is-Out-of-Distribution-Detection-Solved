@@ -77,7 +77,7 @@ def train(args):
             rot_inputs = np.concatenate((rot_inputs, np.rot90(rot_inputs, 1, axes=(2, 3)),
                                          np.rot90(rot_inputs, 2, axes=(2, 3)), np.rot90(rot_inputs, 3, axes=(2, 3))), 0)
 
-            rot_inputs = torch.FloatTensor(rot_inputs)
+            rot_inputs = torch.FloatTensor(rot_inputs).to(device)
 
             rot_preds = model(rot_inputs, rot=True)
             rot_loss = criterion(rot_preds, rot_gt)
@@ -95,51 +95,52 @@ def train(args):
         model.eval()
         correct, total = 0, 0
 
-        scheduler.step(epoch=epoch)
         with torch.no_grad():
 
-            for index, data in enumerate(testloader):
+            for data in val_loader:
                 images, labels = data
                 images = images.to(device)
                 labels = labels.to(device)
 
-                outputs = model(images)
-                t_ce_loss = criterion(outputs, labels)
-                rot_gt = torch.cat((torch.zeros(inputs.size(0)), torch.ones(inputs.size(0)),
-                                    2*torch.ones(inputs.size(0)), 3*torch.ones(inputs.size(0))), 0).long().to(device)
-
-                rot_inputs = inputs.detach().cpu().numpy()
-
-                rot_inputs = np.concatenate((rot_inputs, np.rot90(rot_inputs, 1, axes=(2, 3)),
-                                             np.rot90(rot_inputs, 2, axes=(2, 3)), np.rot90(rot_inputs, 3, axes=(2, 3))), 0)
-
-                rot_inputs = torch.FloatTensor(rot_inputs)
-                if torch.cuda.device_count() == 1:
-                    rot_inputs = rot_inputs.to(device)
-
-                rot_preds = model(rot_inputs, rot=True)
-                rot_loss = criterion(rot_preds, rot_gt)
-
-                t_loss = t_ce_loss + rot_loss
-                test_loss += t_loss.item()
-
+                if 'genOdin' in training_configurations.checkpoint:
+                    outputs, h, g = model(images)
+                else:
+                    outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-            epoch_accuracy = correct / total
-            test_set_loss = test_loss / testloader.__len__()
+            epoch_val_accuracy = correct / total
+            wandb.log({'Validation Set Accuracy': epoch_val_accuracy, 'epoch': epoch})
 
-            wandb.log({'Test Set Loss': test_set_loss, 'epoch': epoch})
-            wandb.log({'Test Set Accuracy': epoch_accuracy, 'epoch': epoch})
+        if epoch_val_accuracy > best_val_acc:
+            best_val_acc = epoch_val_accuracy
+            torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/rot_{training_configurations.checkpoint}.pth')
 
-        if epoch_accuracy > best_test_acc:
-            best_test_acc = epoch_accuracy
-            torch.save(model.state_dict(), 'checkpoints/eb0Cifar10rotationSeed1_no_loss_momentum.pth')
+            if best_val_acc - checkpoint_val_accuracy > 0.05:
+                checkpoint_val_accuracy = best_val_acc
+                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/rot_{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_val_acc}.pth')
 
-        if test_set_loss < best_test_set_loss:
-            best_test_set_loss = test_set_loss
-            torch.save(model.state_dict(), 'checkpoints/eb0Cifar10rotationBestLossSeed1_no_loss_momentum.pth')
+            correct, total = 0, 0
+
+            for data in testloader:
+                images, labels = data
+                images = images.to(device)
+                labels = labels.to(device)
+
+                if 'genOdin' in training_configurations.checkpoint:
+                    outputs, h, g = model(images)
+                else:
+                    outputs = model(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+            test_set_accuracy = correct / total
+
+        wandb.log({'Test Set Accuracy': test_set_accuracy, 'epoch': epoch})
+
+        scheduler.step(epoch=epoch)
 
 
 if __name__ == '__main__':
