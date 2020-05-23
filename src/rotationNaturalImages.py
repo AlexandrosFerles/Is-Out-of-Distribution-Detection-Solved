@@ -24,7 +24,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=f'rot{training_configurations.checkpoint}')
+    # wandb.init(name=f'rot{training_configurations.checkpoint}')
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -65,6 +65,7 @@ def train(args):
             labels = labels.to(device)
 
             optimizer.zero_grad()
+            ipdb.set_trace()
             outputs = model(inputs.to(f'cuda:{model.device_ids[0]}'))
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
