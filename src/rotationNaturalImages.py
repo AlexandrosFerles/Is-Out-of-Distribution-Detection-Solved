@@ -25,7 +25,7 @@ def train(args):
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
     wandb.init(name=f'rot_{training_configurations.checkpoint}')
-    device = torch.device(f'cuda:0')
+    device = torch.device(f'cuda')
 
     flag = False
     if training_configurations.train_pickle != 'None' and training_configurations.test_pickle != 'None':
@@ -62,6 +62,7 @@ def train(args):
         correct, total = 0, 0
         for index, data in enumerate(trainloader):
             inputs, labels = data
+            inputs = inputs.to(f'cuda:{model.device_ids[0]}')
             labels = labels.to(device)
 
             optimizer.zero_grad()
