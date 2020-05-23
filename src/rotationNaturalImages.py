@@ -66,7 +66,6 @@ def train(args):
 
             optimizer.zero_grad()
             outputs = model(inputs)
-            ipdb.set_trace()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
@@ -101,8 +100,9 @@ def train(args):
 
             for data in val_loader:
                 images, labels = data
+                images = images.to(device)
                 labels = labels.to(device)
-                outputs = model(images.to(f'cuda:{model.device_ids[0]}'))
+                outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
@@ -122,8 +122,9 @@ def train(args):
 
             for data in testloader:
                 images, labels = data
+                images = images.to(device)
                 labels = labels.to(device)
-                outputs = model(images.to(f'cuda:{model.device_ids[0]}'))
+                outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
