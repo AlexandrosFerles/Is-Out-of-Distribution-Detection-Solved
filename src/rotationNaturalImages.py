@@ -66,7 +66,7 @@ def train(args):
             labels = labels.to(device)
 
             optimizer.zero_grad()
-            outputs = model(inputs)
+            outputs = model(inputs.to(f'cuda:{model.device_ids[0]}'))
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
@@ -81,7 +81,7 @@ def train(args):
 
             rot_inputs = torch.FloatTensor(rot_inputs)
 
-            rot_preds = model(rot_inputs, rot=True)
+            rot_preds = model(rot_inputs.to(f'cuda:{model.device_ids[0]}'), rot=True)
             rot_loss = criterion(rot_preds, rot_gt)
 
             loss = ce_loss + rot_loss
@@ -101,10 +101,8 @@ def train(args):
 
             for data in val_loader:
                 images, labels = data
-                images = images.to(device)
                 labels = labels.to(device)
-
-                outputs = model(images)
+                outputs = model(images.to(f'cuda:{model.device_ids[0]}'))
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
@@ -124,13 +122,8 @@ def train(args):
 
             for data in testloader:
                 images, labels = data
-                images = images.to(device)
                 labels = labels.to(device)
-
-                if 'genOdin' in training_configurations.checkpoint:
-                    outputs, h, g = model(images)
-                else:
-                    outputs = model(images)
+                outputs = model(images.to(f'cuda:{model.device_ids[0]}'))
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
