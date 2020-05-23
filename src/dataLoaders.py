@@ -350,7 +350,7 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     training_transform, val_transform = _get_transforms()
 
     trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, exclude_class=exclude_class, ret_path=False)
-    valset = PandasDataSetWithPaths('/raid/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, ret_path=False)
+    valset = PandasDataSetWithPaths('/raid/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, exclude_class=exclude_class, ret_path=False)
     testset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform, exclude_class=exclude_class)
 
     if load_gts:
