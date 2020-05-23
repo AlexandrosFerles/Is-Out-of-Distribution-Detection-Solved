@@ -33,6 +33,7 @@ def train(args):
         flag = True
 
     model = build_model(args, rot=True)
+    ipdb.set_trace()
     model = nn.DataParallel(model).to(device)
 
     dataset = args.dataset.lower()
