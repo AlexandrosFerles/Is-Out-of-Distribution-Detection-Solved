@@ -32,7 +32,9 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
+    training_configurations.model = 'RotEfficientNet'
     model = build_model(args).to(device)
+    
     dataset = args.dataset.lower()
     if 'wide' in training_configurations.model.lower():
         resize = False

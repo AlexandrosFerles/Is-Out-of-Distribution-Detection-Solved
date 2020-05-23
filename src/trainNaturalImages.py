@@ -101,7 +101,6 @@ def train(args):
                 correct += (predicted == labels).sum().item()
 
             epoch_val_accuracy = correct / total
-
             wandb.log({'Validation Set Accuracy': epoch_val_accuracy, 'epoch': epoch})
 
         if epoch_val_accuracy > best_val_acc:
