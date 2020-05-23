@@ -24,7 +24,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=f'rot{training_configurations.checkpoint}')
+    # wandb.init(name=f'rot{training_configurations.checkpoint}')
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -34,6 +34,7 @@ def train(args):
 
     model = build_model(args, rot=True)
     model = nn.DataParallel(model).to(device)
+    ipdb.set_trace()
 
     dataset = args.dataset.lower()
     if 'wide' in training_configurations.model.lower():
@@ -78,7 +79,7 @@ def train(args):
             rot_inputs = np.concatenate((rot_inputs, np.rot90(rot_inputs, 1, axes=(2, 3)),
                                          np.rot90(rot_inputs, 2, axes=(2, 3)), np.rot90(rot_inputs, 3, axes=(2, 3))), 0)
 
-            rot_inputs = torch.FloatTensor(rot_inputs).to(device)
+            rot_inputs = torch.FloatTensor(rot_inputs)
 
             rot_preds = model(rot_inputs, rot=True)
             rot_loss = criterion(rot_preds, rot_gt)
@@ -153,5 +154,4 @@ if __name__ == '__main__':
     visible_divices = f"{args.device}, {args.device+1}"
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_divices
-    print(os.environ["CUDA_VISIBLE_DEVICES"])
-    # train(args)
+    train(args)
