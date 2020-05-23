@@ -34,7 +34,6 @@ def train(args):
 
     model = build_model(args, rot=True)
     model = nn.DataParallel(model).to(device)
-    ipdb.set_trace()
 
     dataset = args.dataset.lower()
     if 'wide' in training_configurations.model.lower():
