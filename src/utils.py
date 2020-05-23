@@ -24,12 +24,12 @@ def json_file_to_pyobj(filename):
     return json2obj(open(filename).read())
 
 
-def build_model(args):
+def build_model(args, rot=False):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
 
-    modelName = training_configurations.model.lower()
+    modelName = training_configurations.model.lower() if not rot else 'rot'+ training_configurations.model.lower()
     depth = int(training_configurations.depth)
     pretrained = True if training_configurations.pretrained == 'True' else False
     out_classes = training_configurations.out_classes

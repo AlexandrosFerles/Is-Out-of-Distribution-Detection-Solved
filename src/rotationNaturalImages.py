@@ -33,8 +33,7 @@ def train(args):
         flag = True
 
     ipdb.set_trace()
-    training_configurations.model = 'RotEfficientNet'
-    model = build_model(args).to(device)
+    model = build_model(args, rot=True).to(device)
 
     dataset = args.dataset.lower()
     if 'wide' in training_configurations.model.lower():
