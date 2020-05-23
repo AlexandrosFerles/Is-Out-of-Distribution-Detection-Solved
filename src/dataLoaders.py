@@ -340,7 +340,7 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFi
     val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=16)
     test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=16)
 
-    _create_gt_csv_file(loader=val_loader, columns=testset.csv_columns, gtFile=gtFile)
+    _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
 
     return train_loader, val_loader, test_loader, testset.csv_columns
 
@@ -374,7 +374,7 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=16)
     test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=16)
 
-    _create_gt_csv_file(loader=val_loader, columns=testset.csv_columns, gtFile=gtFile)
+    _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
 
     return train_loader, val_loader, test_loader, testset.csv_columns
 
