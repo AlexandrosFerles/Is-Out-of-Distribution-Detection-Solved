@@ -76,7 +76,7 @@ def _get_transforms():
         AutoAugment(),
         transforms.RandomCrop(224),
         Cutout(),
-        transforms.ToTensor()
+        transforms.ToTensor(),
         normalize,
     ])
 
