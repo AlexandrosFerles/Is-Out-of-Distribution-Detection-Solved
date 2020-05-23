@@ -111,7 +111,7 @@ def train(args):
     best_auc, best_balanced_accuracy = 0, 0
     train_loss, val_loss, balanced_accuracies = [], [], []
 
-    early_stopping = True
+    early_stopping = False
     early_stopping_cnt = 0
         
     for epoch in tqdm(range(epochs)):
