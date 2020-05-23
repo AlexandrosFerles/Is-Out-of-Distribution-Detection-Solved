@@ -3,7 +3,7 @@ from torch import nn as nn
 from torch import optim
 from torch.optim.lr_scheduler import MultiStepLR
 import numpy as np
-from Cifars import cifar10loaders
+from dataLoaders import natural_image_loaders
 from utils import build_model, json_file_to_pyobj
 import argparse
 import random
@@ -22,10 +22,10 @@ torch.cuda.manual_seed(global_seed)
 
 def train(args):
 
-    wandb.init(name='cifar10rotation')
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    device = torch.device('cuda:0')
+    wandb.init(name=f'rot{training_configurations.checkpoint}')
+    device = torch.device(f'cuda:{args.device}')
 
     flag = False
     if training_configurations.train_pickle != 'None' and training_configurations.test_pickle != 'None':
