@@ -32,6 +32,7 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
+    ipdb.set_trace()
     training_configurations.model = 'RotEfficientNet'
     model = build_model(args).to(device)
 
