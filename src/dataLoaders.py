@@ -67,6 +67,8 @@ def _get_gts(dataset):
 
 def _get_transforms():
 
+    normalize = transforms.Normalize((0.6796, 0.5284, 0.5193), (0.1200, 0.1413, 0.1538))
+
     training_transform = transforms.Compose([
         transforms.Resize(256),
         transforms.RandomHorizontalFlip(),
@@ -75,12 +77,14 @@ def _get_transforms():
         transforms.RandomCrop(224),
         Cutout(),
         transforms.ToTensor()
+        normalize,
     ])
 
     val_transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
+        normalize,
     ])
 
     return training_transform, val_transform
