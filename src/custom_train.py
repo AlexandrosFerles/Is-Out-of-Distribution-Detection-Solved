@@ -56,7 +56,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             ipdb.set_trace()
             _labels = torch.argmax(labels, dim=1)
             correct += (max_idx == _labels).sum().item()
-            total += max_idx.size[0]()
+            total += max_idx.size()[0]
             loss = criterion(outputs, _labels)
             loss_acc.append(loss.item())
 
