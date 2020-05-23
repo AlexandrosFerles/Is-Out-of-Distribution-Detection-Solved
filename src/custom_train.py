@@ -145,7 +145,7 @@ def train(args):
 
         if balanced_accuracy > best_balanced_accuracy:
             best_balanced_accuracy = balanced_accuracy
-            checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers//{checkpointFileName}-best-balanced-accuracy-model_{mode}_next.pth')
+            checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers/{checkpointFileName}-best-balanced-accuracy-model_{mode}_next.pth')
             torch.save(model.state_dict(), checkpointFile)
         else:
             if early_stopping:
