@@ -316,6 +316,7 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFi
     training_transform, val_transform = _get_transforms()
 
     trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, ret_path=False)
+    valset = PandasDataSetWithPaths('ValFold1NoPreproc.csv', transform=val_transform, ret_path=False)
     testset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
 
     if load_gts:
@@ -336,11 +337,12 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFi
     sampler = SubsetSequentialSampler(indices=final_idx)
 
     train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=16)
-    val_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=16)
+    val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=16)
+    test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=16)
 
     _create_gt_csv_file(loader=val_loader, columns=testset.csv_columns, gtFile=gtFile)
 
-    return train_loader, val_loader, testset.csv_columns
+    return train_loader, val_loader, test_loader, testset.csv_columns
 
 
 def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size, val_batch_size, gtFile, exclude_class, load_gts=True):
