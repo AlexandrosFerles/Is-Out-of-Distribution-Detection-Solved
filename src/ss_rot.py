@@ -4,7 +4,7 @@ import torch.optim as optim
 import numpy as np
 import os
 import argparse
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import StepLR, MultiStepLR
 from utils import build_model
 from dataLoaders import oversampling_loaders_exclude_class_custom_no_gts, oversampling_loaders_custom
 from utils import json_file_to_pyobj
@@ -119,16 +119,10 @@ def train(args):
     args.model = 'rotefficientnet'
     model = build_model(args)
     model = nn.DataParallel(model).to(device)
-    # optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    optimizer = optim.Adam(model.parameters(), lr=0.000015)
-    scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
-
-    epochs = 20
+    epochs = 40
     criterion = nn.CrossEntropyLoss()
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, epochs)
-
-    # use_scheduler = True
-    use_scheduler = False
+    optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+    scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
     best_auc, best_balanced_accuracy = 0, 0
     best_val_loss = 1e30
@@ -176,8 +170,6 @@ def train(args):
         wandb.log({'epoch': epoch}, commit=False)
         train_loss.append(sum(loss_acc) / float(train_loader.__len__()))
         loss_acc.clear()
-        if use_scheduler:
-            scheduler.step()
 
         val_loss, auc, balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
 
@@ -201,6 +193,8 @@ def train(args):
                 early_stopping_cnt +=1
                 if early_stopping_cnt == 3:
                     break
+
+        scheduler.step()
 
 
 if __name__ == '__main__':
