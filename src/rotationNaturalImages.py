@@ -66,7 +66,7 @@ def train(args):
 
             optimizer.zero_grad()
             ipdb.set_trace()
-            outputs = model(inputs.to(f'cuda:{model.device_ids[0]}'))
+            outputs = model(inputs)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
@@ -81,7 +81,7 @@ def train(args):
 
             rot_inputs = torch.FloatTensor(rot_inputs)
 
-            rot_preds = model(rot_inputs.to(f'cuda:{model.device_ids[0]}'), rot=True)
+            rot_preds = model(rot_inputs, rot=True)
             rot_loss = criterion(rot_preds, rot_gt)
 
             loss = ce_loss + rot_loss
