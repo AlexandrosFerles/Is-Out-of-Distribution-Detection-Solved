@@ -32,7 +32,6 @@ def train(args):
         flag = True
 
     model = build_model(args).to(device)
-
     dataset = args.dataset.lower()
 
     if 'wide' in training_configurations.model.lower():
@@ -52,7 +51,6 @@ def train(args):
         trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files, resize=resize)
 
     criterion = nn.CrossEntropyLoss()
-
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
     for epoch in tqdm(range(epochs)):

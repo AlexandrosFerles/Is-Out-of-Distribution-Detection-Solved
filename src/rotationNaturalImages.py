@@ -32,22 +32,26 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    model = nn.DataParallel(build_model(args)).to(device)
+    model = build_model(args).to(device)
+    dataset = args.dataset.lower()
+    if 'wide' in training_configurations.model.lower():
+        resize = False
+        epochs = 200
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
+        scheduler = MultiStepLR(optimizer, milestones=[60, 120, 160], gamma=0.2)
+    else:
+        resize = True
+        epochs = 40
+        optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+        scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
-    epochs = 90
-
-    if training_configurations.out_classes == 10:
-        if not flag:
-            trainloader, val_loader, testloader = cifar10loaders(train_batch_size=32, test_batch_size=16, validation_test_split=1000, save_to_pickle=True)
-        else:
-            trainloader, val_loader, testloader = cifar10loaders(train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
+    if not flag:
+        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True, resize=resize)
+    else:
+        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files, resize=resize)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
-
-    best_test_acc = 0
-    best_test_set_loss = 1e5
-    scheduler = MultiStepLR(optimizer, milestones=[30, 60, 80], gamma=0.1)
+    checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
     train_loss, test_loss = 0, 0
     for epoch in tqdm(range(epochs)):
