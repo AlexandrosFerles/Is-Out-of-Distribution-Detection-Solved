@@ -32,9 +32,9 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
         loss_acc = []
         criterion = nn.CrossEntropyLoss()
 
-        preds_acc, gts_acc = np.zeros(0), np.zeros(0)
-
         paths, results = [], []
+
+        correct, total = 0, 0
 
         for data in tqdm(test_loader):
             path, images, labels = data
@@ -54,10 +54,12 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
                 results.append([float(elem) for elem in temp])
 
             _labels = torch.argmax(labels, dim=1)
-            preds_acc = np.append(preds_acc, max_idx.detach().cpu().numpy())
-            gts_acc = np.append(gts_acc, _labels.detach().cpu().numpy())
+            correct += (max_idx == _labels).sum().item()
+            total += images.size()[0]
             loss = criterion(outputs, _labels)
             loss_acc.append(loss.item())
+
+        detection_accuracy = round(100*correct/total, 2)
 
         df = pd.DataFrame(columns=columns)
         
@@ -72,9 +74,10 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
         wandb.log({'Val Set Loss': val_loss, 'epoch': epoch})
         wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
+        wandb.log({'Detection Accuracy': detection_accuracy, 'epoch': epoch})
         wandb.log({'AUC': auc, 'epoch': epoch})
 
-    return auc, balanced_accuracy
+    return balanced_accuracy
 
 
 def train(args):
@@ -138,7 +141,7 @@ def train(args):
         train_loss.append(sum(loss_acc) / float(train_loader.__len__()))
         loss_acc.clear()
 
-        auc, balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
+        balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
 
         if balanced_accuracy > best_balanced_accuracy:
             best_balanced_accuracy = balanced_accuracy
