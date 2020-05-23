@@ -48,7 +48,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
             outputs = net(images)
             softmax_outputs = torch.softmax(outputs, 1)
-            max_idx = torch.argmax(softmax_outputs)
+            max_idx = torch.argmax(softmax_outputs, axis=1)
             for output in softmax_outputs:
                 temp = output.detach().cpu().numpy().tolist()
                 results.append([float(elem) for elem in temp])
