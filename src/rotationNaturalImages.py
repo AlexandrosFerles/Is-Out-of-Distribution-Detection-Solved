@@ -62,7 +62,6 @@ def train(args):
         correct, total = 0, 0
         for index, data in enumerate(trainloader):
             inputs, labels = data
-            inputs = inputs.to(f'cuda:{model.device_ids[0]}')
             labels = labels.to(device)
 
             optimizer.zero_grad()
