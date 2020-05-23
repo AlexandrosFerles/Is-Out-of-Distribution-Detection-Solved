@@ -32,7 +32,8 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    model = build_model(args, rot=True).to(device)
+    model = build_model(args, rot=True)
+    model = nn.DataParallel(model).to(device)
 
     dataset = args.dataset.lower()
     if 'wide' in training_configurations.model.lower():
@@ -47,9 +48,9 @@ def train(args):
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
     if not flag:
-        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True, resize=resize)
+        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=16, validation_test_split=1000, save_to_pickle=True, resize=resize)
     else:
-        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files, resize=resize)
+        trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=16, validation_test_split=1000, pickle_files=pickle_files, resize=resize)
 
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
@@ -61,7 +62,6 @@ def train(args):
         correct, total = 0, 0
         for index, data in enumerate(trainloader):
             inputs, labels = data
-            inputs = inputs.to(device)
             labels = labels.to(device)
 
             optimizer.zero_grad()
@@ -147,14 +147,15 @@ def train(args):
 
 if __name__ == '__main__':
 
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0, 5"
-
     parser = argparse.ArgumentParser(description='DL Dermatology models')
 
     parser.add_argument('--config', help='Training Configurations', required=True)
     parser.add_argument('--dataset', '--ds', default='cifar10', required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
-
     args = parser.parse_args()
+
+    visible_divices = f"{args.device}, {args.device+1}"
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = visible_divices
+
     train(args)
