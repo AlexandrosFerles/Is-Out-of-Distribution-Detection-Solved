@@ -23,7 +23,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=training_configurations.checkpoint)
+    # wandb.init(name=training_configurations.checkpoint)
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -44,6 +44,11 @@ def train(args):
         epochs = 40
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+
+    for param_group in optimizer.param_groups:
+        print(param_group['lr'])
+
+    ipdb.set_trace()
 
     if not flag:
         trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True, resize=resize)
