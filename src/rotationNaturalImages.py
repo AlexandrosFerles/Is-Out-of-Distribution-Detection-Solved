@@ -33,7 +33,6 @@ def train(args):
         flag = True
 
     model = build_model(args, rot=True)
-    ipdb.set_trace()
     model = nn.DataParallel(model).to(device)
 
     dataset = args.dataset.lower()
@@ -66,8 +65,8 @@ def train(args):
             labels = labels.to(device)
 
             optimizer.zero_grad()
-            ipdb.set_trace()
             outputs = model(inputs)
+            ipdb.set_trace()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
