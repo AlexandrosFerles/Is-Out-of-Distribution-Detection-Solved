@@ -34,7 +34,7 @@ def train(args):
 
     training_configurations.model = 'RotEfficientNet'
     model = build_model(args).to(device)
-    
+
     dataset = args.dataset.lower()
     if 'wide' in training_configurations.model.lower():
         resize = False
@@ -153,6 +153,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DL Dermatology models')
 
     parser.add_argument('--config', help='Training Configurations', required=True)
+    parser.add_argument('--dataset', '--ds', default='cifar10', required=False)
+    parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     args = parser.parse_args()
     train(args)
