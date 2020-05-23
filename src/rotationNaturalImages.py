@@ -65,7 +65,6 @@ def train(args):
             labels = labels.to(device)
 
             optimizer.zero_grad()
-
             outputs = model(inputs)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
@@ -104,10 +103,7 @@ def train(args):
                 images = images.to(device)
                 labels = labels.to(device)
 
-                if 'genOdin' in training_configurations.checkpoint:
-                    outputs, h, g = model(images)
-                else:
-                    outputs = model(images)
+                outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
@@ -157,5 +153,5 @@ if __name__ == '__main__':
     visible_divices = f"{args.device}, {args.device+1}"
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_divices
-
+    print(os.environ["CUDA_VISIBLE_DEVICES"] = visible_divices)
     train(args)
