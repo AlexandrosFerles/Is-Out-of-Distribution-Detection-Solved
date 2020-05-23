@@ -72,12 +72,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
         val_loss = sum(loss_acc) / float(test_loader.__len__())
 
-        wandb.log({'Val Set Loss': val_loss, 'epoch': epoch})
-        wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
-        wandb.log({'Detection Accuracy': detection_accuracy, 'epoch': epoch})
-        wandb.log({'AUC': auc, 'epoch': epoch})
-
-    return balanced_accuracy
+    return val_loss, auc, balanced_accuracy, detection_accuracy
 
 
 def train(args):
@@ -111,7 +106,7 @@ def train(args):
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
     scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
-    best_auc, best_balanced_accuracy = 0, 0
+    best_val_detection_accuracy = 0
     train_loss, val_loss, balanced_accuracies = [], [], []
 
     early_stopping = False
@@ -141,17 +136,39 @@ def train(args):
         train_loss.append(sum(loss_acc) / float(train_loader.__len__()))
         loss_acc.clear()
 
-        balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
+        with torch.no_grad():
+            correct, total = 0, 0
+            for data in tqdm(val_loader):
+                images, labels = data
+                images = images.to(device)
+                labels = labels.to(device)
 
-        if balanced_accuracy > best_balanced_accuracy:
-            best_balanced_accuracy = balanced_accuracy
-            checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers/{checkpointFileName}-best-balanced-accuracy-model_{mode}_next.pth')
+                outputs = model(images)
+                softmax_outputs = torch.softmax(outputs, 1)
+                max_idx = torch.argmax(softmax_outputs, axis=1)
+                _labels = torch.argmax(labels, dim=1)
+                correct += (max_idx == _labels).sum().item()
+                total += max_idx.size()[0]
+                loss = criterion(outputs, _labels)
+                loss_acc.append(loss.item())
+
+        val_detection_accuracy = round(100*correct/total, 2)
+
+        if val_detection_accuracy > best_val_detection_accuracy:
+            best_val_detection_accuracy = val_detection_accuracy
+            test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
+            checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers/{checkpointFileName}-best-model.pth')
             torch.save(model.state_dict(), checkpointFile)
         else:
             if early_stopping:
                 early_stopping_cnt += 1
                 if early_stopping_cnt == 3:
                     break
+
+        wandb.log({'Val Set Loss': val_loss, 'epoch': epoch})
+        wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
+        wandb.log({'Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
+        wandb.log({'AUC': auc, 'epoch': epoch})
 
         scheduler.step()
 
