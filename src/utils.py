@@ -33,6 +33,7 @@ def build_model(args, rot=False):
     depth = int(training_configurations.depth)
     pretrained = True if training_configurations.pretrained == 'True' else False
     out_classes = training_configurations.out_classes
+    print(out_classes)
 
     if modelName == 'wideresnet':
       from models.WideResNet import WideResNet
@@ -72,7 +73,7 @@ def build_model(args, rot=False):
             from efficientnet_pytorch.gen_odin_model import GenOdinEfficientNet
             model = GenOdinEfficientNet.from_pretrained('efficientnet-b{}'.format(depth), mode=gen_odin_mode)
             from efficientnet_pytorch.gen_odin_model import CosineSimilarity
-            model.__fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=out_classes)
+            model._fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=out_classes)
             net = deepcopy(model)
             for param in net.parameters():
                 param.requires_grad = True
