@@ -45,11 +45,22 @@ def train(args):
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
-    for param_group in optimizer.param_groups:
-        print(param_group['lr'])
+        outputs, _, _ = model(inputs)
 
-    ipdb.set_trace()
-
+    if 'genOdin' in training_configurations.checkpoint:
+        weight_decay=1e-4
+        optimizer = optim.SGD([
+            {'params': model._conv_stem.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._bn0.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._blocks.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._blocks.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._conv_head.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._bn1.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._fc_denominator.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._denominator_batch_norm.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._fc_nominator.parameters(), 'weight_decay':  0},
+        ], lr=1.25e-2, momentum=0.9, nesterov=True)
+        
     if not flag:
         trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True, resize=resize)
     else:
