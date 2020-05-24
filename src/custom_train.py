@@ -95,7 +95,6 @@ def train(args):
     exclude_class = training_configurations.exclude_class
     exclude_class = None if exclude_class == "None" else exclude_class
 
-    mode = args.mode
     if use_wandb:
         wandb.init(name=checkpointFileName)
 
