@@ -772,14 +772,6 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
         trainset_indices = pickle.load(train_pickle)
         valset_indices = pickle.load(val_pickle)
 
-    train_sampler = SubsetRandomSampler(trainset_indices)
-    test_sampler = SubsetRandomSampler(valset_indices)
-    if dataset=='svhn':
-        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16, drop_last=True)
-    else:
-        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
-    val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
-
     unique_labels = list(np.random.permutation(num_classes))
     step = len(unique_labels) // k
     point = 0
@@ -788,12 +780,22 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
     val_ind_loaders, val_ood_loaders = [], []
     test_ind_loaders, test_ood_loaders = [], []
 
+    if dataset == 'tinyimagenet':
+        gts = trainset.get_targets()
+        test_gts = testset.get_targets()
+    elif dataset == 'svhn' or dataset == 'stl':
+        gts = trainset.labels
+        test_gts = testset.labels
+    else:
+        gts = trainset.targets
+        test_gts = testset.targets
+
     while point < len(unique_labels):
 
         temp_labels = unique_labels[point: min(len(unique_labels), point+step)]
 
-        custom_trainset_ind = CustomEnsembleDatasetIn(trainset, remove_labels=temp_labels, keep_indices=trainset_indices)
-        custom_trainset_out = CustomEnsembleDatasetOut(trainset, remove_labels=temp_labels, keep_indices=trainset_indices)
+        custom_trainset_ind = CustomEnsembleDatasetIn(trainset, gts=gts, remove_labels=temp_labels, keep_indices=trainset_indices)
+        custom_trainset_out = CustomEnsembleDatasetOut(trainset, gts=gts, remove_labels=temp_labels, keep_indices=trainset_indices)
 
         train_ind_sampler = SubsetRandomSampler(custom_trainset_ind.keep_indices)
         train_ood_sampler = SubsetRandomSampler(custom_trainset_out.keep_indices)
@@ -804,8 +806,8 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
         train_ind_loaders.append(train_ind_loader)
         train_ood_loaders.append(train_ood_loader)
 
-        custom_valset_ind = CustomEnsembleDatasetIn(valset, remove_labels=temp_labels, keep_indices=valset_indices)
-        custom_valset_out = CustomEnsembleDatasetOut(valset, remove_labels=temp_labels, keep_indices=valset_indices)
+        custom_valset_ind = CustomEnsembleDatasetIn(valset, gts=gts, remove_labels=temp_labels, keep_indices=valset_indices)
+        custom_valset_out = CustomEnsembleDatasetOut(valset, gts=gts, remove_labels=temp_labels, keep_indices=valset_indices)
 
         val_ind_sampler = SubsetRandomSampler(custom_valset_ind.keep_indices)
         val_ood_sampler = SubsetRandomSampler(custom_valset_out.keep_indices)
@@ -817,8 +819,8 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
         val_ood_loaders.append(val_ood_loader)
 
         testset_indices = list(range(testset.__len__()))
-        custom_testset_ind = CustomEnsembleDatasetIn(testset, remove_labels=temp_labels, keep_indices=testset_indices)
-        custom_testset_out = CustomEnsembleDatasetOut(testset, remove_labels=temp_labels, keep_indices=testset_indices)
+        custom_testset_ind = CustomEnsembleDatasetIn(testset, gts=test_gts, remove_labels=temp_labels, keep_indices=testset_indices)
+        custom_testset_out = CustomEnsembleDatasetOut(testset, gts=test_gts, remove_labels=temp_labels, keep_indices=testset_indices)
 
         test_ind_sampler = SubsetRandomSampler(custom_testset_ind.keep_indices)
         test_ood_sampler = SubsetRandomSampler(custom_testset_out.keep_indices)
