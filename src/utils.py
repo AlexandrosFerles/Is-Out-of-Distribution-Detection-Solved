@@ -71,6 +71,8 @@ def build_model(args, rot=False):
         if depth in range(8):
             from efficientnet_pytorch.gen_odin_model import GenOdinEfficientNet
             model = GenOdinEfficientNet.from_pretrained('efficientnet-b{}'.format(depth), mode=gen_odin_mode)
+            from efficientnet_pytorch.gen_odin_model import CosineSimilarity
+            model.__fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=out_classes)
             net = deepcopy(model)
             for param in net.parameters():
                 param.requires_grad = True
