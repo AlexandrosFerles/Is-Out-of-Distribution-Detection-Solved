@@ -108,7 +108,7 @@ def train(args):
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
     scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
-    best_val_detection_accuracy = 0
+    best_val_detection_accuracy, test_detection_accuracy = 0, 0
     train_loss, val_loss, balanced_accuracies = [], [], []
 
     early_stopping = False
