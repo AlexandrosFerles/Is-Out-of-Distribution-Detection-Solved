@@ -127,7 +127,7 @@ def train(args):
             labels = labels.to(device)
             optimizer.zero_grad()
 
-            if 'genOdin' in training_configurations.checkpoint:
+            if 'genodin' in training_configurations.checkpointFile.lower():
                 outputs, _, _ = model(inputs)
             else:
                 outputs = model(inputs)
@@ -150,7 +150,7 @@ def train(args):
                 images = images.to(device)
                 labels = labels.to(device)
 
-                if 'genOdin' in training_configurations.checkpoint:
+                if 'genodin' in training_configurations.checkpointFile.lower():
                     outputs, _, _ = model(images)
                 else:
                     outputs = model(images)
@@ -167,7 +167,7 @@ def train(args):
 
         if val_detection_accuracy > best_val_detection_accuracy:
             best_val_detection_accuracy = val_detection_accuracy
-            if 'genOdin' in training_configurations.checkpoint:
+            if 'genodin' in training_configurations.checkpointFile.lower():
                 test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName, gen=True)
             else:
                 test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
