@@ -9,6 +9,7 @@ import argparse
 import os
 from tqdm import tqdm
 import random
+from efficientnet_pytorch.gen_odin_model import CosineSimilarity
 import ipdb
 
 abs_path = '/home/ferles/medusa/src/'
@@ -31,7 +32,10 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    model = build_model(args).to(device)
+    model = build_model(args)
+    model._fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=training_configurations.out_classes)
+    model = model.to(device)
+
     dataset = args.dataset.lower()
 
     if 'wide' in training_configurations.model.lower():
@@ -78,7 +82,6 @@ def train(args):
 
             optimizer.zero_grad()
 
-            ipdb.set_trace()
             if 'genOdin' in training_configurations.checkpoint:
                 outputs, _, _ = model(inputs)
             else:
