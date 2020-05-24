@@ -90,6 +90,7 @@ def train(args):
             loss.backward()
             optimizer.step()
 
+        scheduler.step()
         train_accuracy = correct / total
         wandb.log({'epoch': epoch}, commit=False)
         wandb.log({'Train Set Loss': train_loss / trainloader.__len__(), 'epoch': epoch})
@@ -142,8 +143,6 @@ def train(args):
             test_set_accuracy = correct / total
 
         wandb.log({'Test Set Accuracy': test_set_accuracy, 'epoch': epoch})
-
-        scheduler.step(epoch=epoch)
 
 
 if __name__ == '__main__':
