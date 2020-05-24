@@ -6,7 +6,7 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 555,
-    "checkpoint": "GenNabirds",
+    "checkpoint": "GenOdinNabirds",
     "gen_odin_mode": 2,
     "train_pickle": "train_indices_nabirds.pickle",
     "test_pickle": "val_indices_nabirds.pickle"
