@@ -344,9 +344,9 @@ class ISIC19TestSet(data.Dataset):
 
 class CustomEnsembleDatasetIn(data.Dataset):
 
-    def __init__(self, dataset, remove_labels, keep_indices, transform=None):
+    def __init__(self, dataset, gts, remove_labels, keep_indices, transform=None):
 
-        remove_label_indices = [i for i, x in enumerate(dataset.targets) if x in remove_labels]
+        remove_label_indices = [i for i, x in enumerate(gts) if x in remove_labels]
         keep_indices = list(set(keep_indices) - set(remove_label_indices))
 
         self.keep_indices = keep_indices
@@ -367,9 +367,9 @@ class CustomEnsembleDatasetIn(data.Dataset):
 
 class CustomEnsembleDatasetOut(data.Dataset):
 
-    def __init__(self, dataset, remove_labels, keep_indices, transform=None):
+    def __init__(self, dataset, gts, remove_labels, keep_indices, transform=None):
 
-        remove_label_indices = [i for i, x in enumerate(dataset.targets) if x not in remove_labels]
+        remove_label_indices = [i for i, x in enumerate(gts) if x not in remove_labels]
         keep_indices = list(set(keep_indices) - set(remove_label_indices))
 
         self.keep_indices = keep_indices
