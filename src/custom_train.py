@@ -32,8 +32,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
         loss_acc = []
         criterion = nn.CrossEntropyLoss()
 
-        paths, results = [], []
-
+        # paths, results = [], []
         correct, total = 0, 0
 
         for data in tqdm(test_loader):
@@ -41,10 +40,10 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             images = images.to(device)
             labels = labels.to(device)
 
-            for i in range(len(path)):
-                temp = path[i]
-                temp = temp.split('/')[-1].split('.jpg')[0]
-                paths.append(temp)
+            # for i in range(len(path)):
+            #     temp = path[i]
+            #     temp = temp.split('/')[-1].split('.jpg')[0]
+            #     paths.append(temp)
 
             if gen:
                 outputs, _, _ = net(images)
@@ -53,9 +52,9 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
             softmax_outputs = torch.softmax(outputs, 1)
             max_idx = torch.argmax(softmax_outputs, axis=1)
-            for output in softmax_outputs:
-                temp = output.detach().cpu().numpy().tolist()
-                results.append([float(elem) for elem in temp])
+            # for output in softmax_outputs:
+            #     temp = output.detach().cpu().numpy().tolist()
+            #     results.append([float(elem) for elem in temp])
 
             _labels = torch.argmax(labels, dim=1)
             correct += (max_idx == _labels).sum().item()
@@ -64,19 +63,19 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
             loss_acc.append(loss.item())
 
         detection_accuracy = round(100*correct/total, 2)
-
-        df = pd.DataFrame(columns=columns)
+        # df = pd.DataFrame(columns=columns)
         
-        for idx, (path, result) in enumerate(zip(paths, results)):
-            df.loc[idx] = [path] + result
-
-        df.to_csv(os.path.join(abs_path, 'csvs', f'TemporaryResults-{gtFile}'), index=False)
-        os.system(f'isic-challenge-scoring classification {os.path.join(abs_path, "csvs", gtFile)} {os.path.join(abs_path, "csvs", f"TemporaryResults-{gtFile}")} > {os.path.join(abs_path, "txts", gtFile.split(".csv")[0]+"results.txt")}')
-        auc, balanced_accuracy = wandb_table(f'{os.path.join(abs_path, "txts", gtFile.split(".csv")[0]+"results.txt")}', epoch, num_classes)
+        # for idx, (path, result) in enumerate(zip(paths, results)):
+        #     df.loc[idx] = [path] + result
+        #
+        # df.to_csv(os.path.join(abs_path, 'csvs', f'TemporaryResults-{gtFile}'), index=False)
+        # os.system(f'isic-challenge-scoring classification {os.path.join(abs_path, "csvs", gtFile)} {os.path.join(abs_path, "csvs", f"TemporaryResults-{gtFile}")} > {os.path.join(abs_path, "txts", gtFile.split(".csv")[0]+"results.txt")}')
+        # auc, balanced_accuracy = wandb_table(f'{os.path.join(abs_path, "txts", gtFile.split(".csv")[0]+"results.txt")}', epoch, num_classes)
 
         val_loss = sum(loss_acc) / float(test_loader.__len__())
 
-    return val_loss, auc, balanced_accuracy, detection_accuracy
+    # return val_loss, auc, balanced_accuracy, detection_accuracy
+    return val_loss, detection_accuracy
 
 
 def train(args):
@@ -167,9 +166,11 @@ def train(args):
         if val_detection_accuracy > best_val_detection_accuracy:
             best_val_detection_accuracy = val_detection_accuracy
             if 'genodin' in training_configurations.checkpointFile.lower():
-                test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName, gen=True)
+                # test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName, gen=True)
+                test_loss, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName, gen=True)
             else:
-                test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
+                # test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
+                test_loss, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
             checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers/{checkpointFileName}-best-model.pth')
             torch.save(model.state_dict(), checkpointFile)
         else:
@@ -179,9 +180,9 @@ def train(args):
                     break
 
         wandb.log({'Val Set Loss': val_loss, 'epoch': epoch})
-        wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
+        # wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
         wandb.log({'Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
-        wandb.log({'AUC': auc, 'epoch': epoch})
+        # wandb.log({'AUC': auc, 'epoch': epoch})
 
         scheduler.step()
 
