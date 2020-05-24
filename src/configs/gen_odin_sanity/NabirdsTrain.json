@@ -7,7 +7,7 @@
     "resolutionIncrease": "False",
     "out_classes": 555,
     "checkpoint": "GenNabirds",
-    "train_pickle": "None",
-    "test_pickle": "None"
+    "train_pickle": "train_indices_nabirds.pickle",
+    "test_pickle": "val_indices_nabirds.pickle"
   }
 }
