@@ -5,7 +5,7 @@
     "pretrained": "True",
     "freeze": "False",
     "resolutionIncrease": "False",
-    "out_classes": 10,
+    "out_classes": 100,
     "checkpoint": "genOdinCifar100",
     "gen_odin_mode": 2,
     "train_pickle": "train_indices_cifar100.pickle",
