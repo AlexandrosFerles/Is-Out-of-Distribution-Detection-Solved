@@ -31,10 +31,7 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    model = build_model(args)
-    ipdb.set_trace()
-    # if training_configurations.out_classes != 10:
-    #     model._fc_denominator = torch.nn.Linear(model._fc_nominator, training_configurations.out_classes)
+    model = build_model(args).to(device)
     dataset = args.dataset.lower()
 
     if 'wide' in training_configurations.model.lower():
