@@ -23,7 +23,7 @@ torch.manual_seed(global_seed)
 torch.cuda.manual_seed(global_seed)
 
 
-def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile):
+def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile, gen=False):
 
     with torch.no_grad():
 
@@ -46,7 +46,10 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
                 temp = temp.split('/')[-1].split('.jpg')[0]
                 paths.append(temp)
 
-            outputs = net(images)
+            if gen:
+                outputs, _, _ = net(images)
+            else:
+                outputs = net(images)
             softmax_outputs = torch.softmax(outputs, 1)
             max_idx = torch.argmax(softmax_outputs, axis=1)
             for output in softmax_outputs:
@@ -123,7 +126,10 @@ def train(args):
             labels = labels.to(device)
             optimizer.zero_grad()
 
-            outputs = model(inputs)
+            if 'genOdin' in training_configurations.checkpoint:
+                outputs, _, _ = model(inputs)
+            else:
+                outputs = model(inputs)
 
             _labels = torch.argmax(labels, dim=1)
             loss = criterion(outputs, _labels)
@@ -143,7 +149,11 @@ def train(args):
                 images = images.to(device)
                 labels = labels.to(device)
 
-                outputs = model(images)
+                if 'genOdin' in training_configurations.checkpoint:
+                    outputs, _, _ = model(images)
+                else:
+                    outputs = model(images)
+
                 softmax_outputs = torch.softmax(outputs, 1)
                 max_idx = torch.argmax(softmax_outputs, axis=1)
                 _labels = torch.argmax(labels, dim=1)
@@ -156,7 +166,10 @@ def train(args):
 
         if val_detection_accuracy > best_val_detection_accuracy:
             best_val_detection_accuracy = val_detection_accuracy
-            test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
+            if 'genOdin' in training_configurations.checkpoint:
+                test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName, gen=True)
+            else:
+                test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
             checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers/{checkpointFileName}-best-model.pth')
             torch.save(model.state_dict(), checkpointFile)
         else:
