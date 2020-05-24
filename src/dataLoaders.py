@@ -761,23 +761,32 @@ def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32,
         return trainloader, val_loader, testloader
 
 
-def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_classes=10, pickle_files=None, resize=True):
+def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch_size=32, test_batch_size=32, test=False, resize=True):
 
-    transform_train_cifar, transform_test_cifar = _get_cifar_transforms(resize)
-    trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train_cifar)
-    testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test_cifar)
+    transforms = _get_image_transforms(dataset, resize)
+    trainset, testset = _get_dataset(dataset, transforms, test)
+    from copy import deepcopy
+    valset = deepcopy(trainset)
 
-    if pickle_files is not None:
-        trainpickle, _ = pickle_files
-        with open(trainpickle, 'rb') as train_pickle:
-            trainset_indices = pickle.load(train_pickle)
-            trainset_indices = list(trainset_indices)
+    trainpickle, valpickle = pickle_files
+    with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
+        trainset_indices = pickle.load(train_pickle)
+        valset_indices = pickle.load(val_pickle)
+
+    train_sampler = SubsetRandomSampler(trainset_indices)
+    test_sampler = SubsetRandomSampler(valset_indices)
+    if dataset=='svhn':
+        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16, drop_last=True)
+    else:
+        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=16)
+    val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=16)
 
     unique_labels = list(np.random.permutation(num_classes))
     step = len(unique_labels) // k
     point = 0
 
     train_ind_loaders, train_ood_loaders = [], []
+    val_ind_loaders, val_ood_loaders = [], []
     test_ind_loaders, test_ood_loaders = [], []
 
     while point < len(unique_labels):
@@ -796,6 +805,18 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
         train_ind_loaders.append(train_ind_loader)
         train_ood_loaders.append(train_ood_loader)
 
+        custom_valset_ind = CustomEnsembleDatasetIn(valset, remove_labels=temp_labels, keep_indices=valset_indices)
+        custom_valset_out = CustomEnsembleDatasetOut(valset, remove_labels=temp_labels, keep_indices=valset_indices)
+
+        val_ind_sampler = SubsetRandomSampler(custom_valset_ind.keep_indices)
+        val_ood_sampler = SubsetRandomSampler(custom_valset_out.keep_indices)
+
+        val_ind_loader = DataLoader(custom_valset_ind, batch_size=val_batch_size, sampler=val_ind_sampler)
+        val_ood_loader = DataLoader(custom_valset_out, batch_size=val_batch_size, sampler=val_ood_sampler)
+
+        val_ind_loaders.append(val_ind_loader)
+        val_ood_loaders.append(val_ood_loader)
+
         testset_indices = list(range(testset.__len__()))
         custom_testset_ind = CustomEnsembleDatasetIn(testset, remove_labels=temp_labels, keep_indices=testset_indices)
         custom_testset_out = CustomEnsembleDatasetOut(testset, remove_labels=temp_labels, keep_indices=testset_indices)
@@ -811,7 +832,7 @@ def create_ensemble_loaders(train_batch_size=32, test_batch_size=32, k=5, num_cl
 
         point += step
 
-    return train_ind_loaders, train_ood_loaders, test_ind_loaders, test_ood_loaders
+    return train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loader, test_ind_loaders, test_ood_loaders
 
 
 def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=None, batch_size=32, resize=True):
