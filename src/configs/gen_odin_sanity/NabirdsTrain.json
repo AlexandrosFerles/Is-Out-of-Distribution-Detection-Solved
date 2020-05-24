@@ -1,6 +1,6 @@
 {
   "training":{
-    "model": "GenEfficientNet",
+    "model": "GenOdinEfficientNet",
     "depth": "0",
     "pretrained": "True",
     "freeze": "False",
