@@ -23,7 +23,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=training_configurations.checkpoint)
+    # wandb.init(name=training_configurations.checkpoint)
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -31,7 +31,10 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    model = build_model(args).to(device)
+    model = build_model(args)
+    ipdb.set_trace()
+    # if training_configurations.out_classes != 10:
+    #     model._fc_denominator = torch.nn.Linear(model._fc_nominator, training_configurations.out_classes)
     dataset = args.dataset.lower()
 
     if 'wide' in training_configurations.model.lower():
