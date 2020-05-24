@@ -37,7 +37,6 @@ def train(args):
     b = 0.2
     m = 0.4
 
-
     epochs = 40
     model = build_model(args).to(device)
     optimizer = optim.SGD(model.parameters(), lr=1.25e-02, momentum=0.9, nesterov=True, weight_decay=1e-4)
@@ -130,7 +129,7 @@ def train(args):
 
                 test_epoch_accuracy = correct / total
 
-        wandb.log({f'Test Set Accuracy {index}': test_epoch_accuracy, 'epoch': epoch})
+            wandb.log({f'Test Set Accuracy {index}': test_epoch_accuracy, 'epoch': epoch})
 
     scheduler.step()
 
