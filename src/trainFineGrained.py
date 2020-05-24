@@ -82,7 +82,7 @@ def train(args):
             optimizer.zero_grad()
 
             ipdb.set_trace()
-            if 'genOdin' in training_configurations.checkpoint.lower():
+            if 'genodin' in training_configurations.checkpoint.lower():
                 outputs, h, g = model(inputs)
             else:
                 outputs = model(inputs)
@@ -109,7 +109,7 @@ def train(args):
                 images = images.to(device)
                 labels = labels.to(device)
 
-                if 'genOdin' in training_configurations.checkpoint.lower():
+                if 'genodin' in training_configurations.checkpoint.lower():
                     outputs, h, g = model(images)
                 else:
                     outputs = model(images)
@@ -136,7 +136,7 @@ def train(args):
                 images = images.to(device)
                 labels = labels.to(device)
 
-                if 'genOdin' in training_configurations.checkpoint.lower():
+                if 'genodin' in training_configurations.checkpoint.lower():
                     outputs, h, g = model(images)
                 else:
                     outputs = model(images)
