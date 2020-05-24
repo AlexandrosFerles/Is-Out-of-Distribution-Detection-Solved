@@ -51,7 +51,6 @@ def train(args):
             {'params': model._conv_stem.parameters(), 'weight_decay':  weight_decay},
             {'params': model._bn0.parameters(), 'weight_decay':  weight_decay},
             {'params': model._blocks.parameters(), 'weight_decay':  weight_decay},
-            {'params': model._blocks.parameters(), 'weight_decay':  weight_decay},
             {'params': model._conv_head.parameters(), 'weight_decay':  weight_decay},
             {'params': model._bn1.parameters(), 'weight_decay':  weight_decay},
             {'params': model._fc_denominator.parameters(), 'weight_decay':  weight_decay},
