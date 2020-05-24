@@ -370,7 +370,10 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     sampler = SubsetSequentialSampler(indices=final_idx)
 
     train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=16)
-    val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=16)
+    if 'gen' in gtFile.lower() and exclude_class=='DF':
+        val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=16, drop_last=True)
+    else:
+        val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=16)
     test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=16)
 
     _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
