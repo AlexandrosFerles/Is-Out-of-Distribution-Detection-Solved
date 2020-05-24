@@ -162,7 +162,7 @@ def train(args):
                 loss_acc.append(loss.item())
 
         val_detection_accuracy = round(100*correct/total, 2)
-        wandb.log({'Validation Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
+        wandb.log({'Validation Detection Accuracy': val_detection_accuracy, 'epoch': epoch})
 
         if val_detection_accuracy > best_val_detection_accuracy:
             best_val_detection_accuracy = val_detection_accuracy
