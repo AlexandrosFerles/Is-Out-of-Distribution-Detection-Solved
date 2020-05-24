@@ -70,7 +70,7 @@ def build_model(args, rot=False):
         gen_odin_mode = training_configurations.gen_odin_mode
         if depth in range(8):
             from efficientnet_pytorch.gen_odin_model import GenOdinEfficientNet
-            model = GenOdinEfficientNet.from_pretrained('efficientnet-b{}'.format(depth), mode=gen_odin_mode)
+            model = GenOdinEfficientNet.from_pretrained('efficientnet-b{}'.format(depth), num_classes=training_configurations.out_classes, mode=gen_odin_mode)
             net = deepcopy(model)
             for param in net.parameters():
                 param.requires_grad = True

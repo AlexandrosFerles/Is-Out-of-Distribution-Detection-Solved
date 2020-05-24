@@ -78,6 +78,7 @@ def train(args):
 
             optimizer.zero_grad()
 
+            ipdb.set_trace()
             if 'genOdin' in training_configurations.checkpoint:
                 outputs, _, _ = model(inputs)
             else:
