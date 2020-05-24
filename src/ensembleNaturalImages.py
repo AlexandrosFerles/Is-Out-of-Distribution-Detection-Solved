@@ -130,7 +130,7 @@ def train(args):
 
                 test_epoch_accuracy = correct / total
 
-        wandb.log({f'Test Set Accuracy {index}': val_epoch_accuracy, 'epoch': epoch})
+        wandb.log({f'Test Set Accuracy {index}': test_epoch_accuracy, 'epoch': epoch})
 
     scheduler.step()
 
