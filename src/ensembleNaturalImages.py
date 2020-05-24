@@ -111,7 +111,7 @@ def train(args):
                     correct += (predicted == labels).sum().item()
 
                 val_epoch_accuracy = correct / total
-                wandb.log({f'Val Set Accuracy {index}': val_epoch_accuracy, 'epoch': epoch})
+                wandb.log({f'Validation Set Accuracy {index}': val_epoch_accuracy, 'epoch': epoch})
 
             if val_epoch_accuracy > best_val_acc:
                 best_val_acc = val_epoch_accuracy
@@ -130,7 +130,7 @@ def train(args):
 
                 test_epoch_accuracy = correct / total
 
-        wandb.log({f'Val Set Accuracy {index}': val_epoch_accuracy, 'epoch': epoch})
+        wandb.log({f'Test Set Accuracy {index}': val_epoch_accuracy, 'epoch': epoch})
 
     scheduler.step()
 
