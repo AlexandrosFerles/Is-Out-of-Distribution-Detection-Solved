@@ -81,7 +81,6 @@ def train(args):
 
             optimizer.zero_grad()
 
-            ipdb.set_trace()
             if 'genodin' in training_configurations.checkpoint.lower():
                 outputs, h, g = model(inputs)
             else:
