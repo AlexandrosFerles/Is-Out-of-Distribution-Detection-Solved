@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 import torchvision
 from torch.utils.data import DataLoader, TensorDataset, ConcatDataset
 from torchvision import transforms, datasets
@@ -6,10 +7,8 @@ from torchvision.transforms import functional as Ftransforms
 from torchvision.datasets import ImageFolder
 from torch.utils.data.sampler import SubsetRandomSampler, Sampler
 import torch.nn.functional as F
-import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 from imblearn.over_sampling import RandomOverSampler
-import numbers
 from tqdm import tqdm
 from auto_augment import AutoAugment, Cutout
 from Datasets import *
