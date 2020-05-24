@@ -29,14 +29,14 @@ def train(args):
     wandb.init(name=training_configurations.checkpoint+'Ensemble')
     device = torch.device(f'cuda:{args.device}')
 
+    dataset = args.dataset.lower()
     pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
-    train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loaders, test_ind_loaders, test_ood_loaders = create_ensemble_loaders(pickle_files=pickle_files)
+    train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loaders, test_ind_loaders, test_ood_loaders = create_ensemble_loaders(dataset, num_classes=training_configurations.out_classes, pickle_files=pickle_files)
 
     criterion = nn.CrossEntropyLoss()
     b = 0.2
     m = 0.4
 
-    dataset = args.dataset.lower()
 
     epochs = 40
     model = build_model(args).to(device)
