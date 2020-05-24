@@ -6,7 +6,7 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 120,
-    "checkpoint": "GenStanfordDogs",
+    "checkpoint": "GenOdinStanfordDogs",
     "gen_odin_mode": 2,
     "train_pickle": "train_indices_stanforddogs.pickle",
     "test_pickle": "val_indices_stanforddogs.pickle"
