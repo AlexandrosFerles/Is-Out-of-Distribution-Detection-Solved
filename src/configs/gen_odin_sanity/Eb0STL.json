@@ -8,7 +8,7 @@
     "out_classes": 10,
     "checkpoint": "genOdinSTL",
     "gen_odin_mode": 2,
-    "train_pickle": "None",
-    "test_pickle": "None"
+    "train_pickle": "train_indices_stl.pickle",
+    "test_pickle": "val_indices_stl.pickle"
   }
 }
