@@ -8,6 +8,8 @@
     "out_classes": 8,
     "logFile": "gen_odin_eb0_extended.csv",
     "gtFile": "gen_odin_eb0_extended.csv",
+    "gen_odin_mode": 2,
+    "gen_odin_mode": 2,
     "checkpointFile": "GenOdinISICeb0",
     "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new_no_preproc.csv",
     "testcsv": "/raid/ferles/ISIC2019/folds/Val_Fold_new_no_preproc.csv",
