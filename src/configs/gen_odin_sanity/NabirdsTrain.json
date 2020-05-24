@@ -1,0 +1,13 @@
+{
+  "training":{
+    "model": "GenEfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 555,
+    "checkpoint": "GenNabirds",
+    "train_pickle": "None",
+    "test_pickle": "None"
+  }
+}
