@@ -811,8 +811,8 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
         val_ind_sampler = SubsetRandomSampler(custom_valset_ind.keep_indices)
         val_ood_sampler = SubsetRandomSampler(custom_valset_out.keep_indices)
 
-        val_ind_loader = DataLoader(custom_valset_ind, batch_size=val_batch_size, sampler=val_ind_sampler)
-        val_ood_loader = DataLoader(custom_valset_out, batch_size=val_batch_size, sampler=val_ood_sampler)
+        val_ind_loader = DataLoader(custom_valset_ind, batch_size=test_batch_size, sampler=val_ind_sampler)
+        val_ood_loader = DataLoader(custom_valset_out, batch_size=test_batch_size, sampler=val_ood_sampler)
 
         val_ind_loaders.append(val_ind_loader)
         val_ood_loaders.append(val_ood_loader)
