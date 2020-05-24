@@ -23,7 +23,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    # wandb.init(name=training_configurations.checkpoint)
+    wandb.init(name=training_configurations.checkpoint)
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -60,7 +60,7 @@ def train(args):
             {'params': model._denominator_batch_norm.parameters(), 'weight_decay':  weight_decay},
             {'params': model._fc_nominator.parameters(), 'weight_decay':  0},
         ], lr=1.25e-2, momentum=0.9, nesterov=True)
-        
+
     if not flag:
         trainloader, val_loader, testloader = natural_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True, resize=resize)
     else:
