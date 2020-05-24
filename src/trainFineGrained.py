@@ -33,8 +33,8 @@ def train(args):
         flag = True
 
     model = build_model(args)
-    if 'gen' in training_configurations.checkpoint:
-        model._fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=training_configurations.out_classes)
+    # if 'gen' in training_configurations.checkpoint:
+    #     model._fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=training_configurations.out_classes)
     model = model.to(device)
     dataset = args.dataset.lower()
 
