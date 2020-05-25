@@ -197,7 +197,7 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3, 4, 5, 6, 7"
 
     parser = argparse.ArgumentParser(description='DL Custom Sets Train')
-    parser.add_argument('--config', help='Training Configurations', required=True)
+    parser.add_argument('--config', '--c', help='Training Configurations', required=True)
     parser.add_argument('--device', '--dv', help='GPU device', default=0, required=False)
     parser.add_argument('--saved_epoch', '--se',  type=int, default=-1, required=False)
     parser.add_argument('--checkpoint', '--ck',  required=False)
