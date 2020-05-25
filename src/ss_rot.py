@@ -206,7 +206,7 @@ def train(args):
 
             if val_detection_accuracy > best_val_detection_accuracy:
                 best_val_detection_accuracy = val_detection_accuracy
-                test_loss, test_detection_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
+                test_loss, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
             else:
                 if early_stopping:
                     early_stopping_cnt +=1
