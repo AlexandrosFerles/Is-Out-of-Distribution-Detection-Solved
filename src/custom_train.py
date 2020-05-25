@@ -173,7 +173,10 @@ def train(args):
                 # test_loss, auc, balanced_accuracy, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
                 test_loss, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
             checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers/{checkpointFileName}-best-model.pth')
-            torch.save(model.state_dict(), checkpointFile)
+            if os.path.exists(checkpointFile):
+                torch.save(model.state_dict(), checkpointFile)
+            else:
+                torch.save(model.state_dict(), checkpointFile.replace('raid', 'home'))
         else:
             if early_stopping:
                 early_stopping_cnt += 1
@@ -196,7 +199,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DL Custom Sets Train')
     parser.add_argument('--config', help='Training Configurations', required=True)
     parser.add_argument('--device', '--dv', help='GPU device', default=0, required=False)
-    parser.add_argument('--mode', '--md',  default='new', required=False)
+    parser.add_argument('--saved_epoch', '--se',  type=int, default=-1, required=False)
+    parser.add_argument('--checkpoint', '--ck',  required=False)
 
     args = parser.parse_args()
     train(args)
