@@ -9,7 +9,6 @@ import argparse
 import os
 from tqdm import tqdm
 import random
-from efficientnet_pytorch.gen_odin_model import CosineSimilarity
 import ipdb
 
 abs_path = '/home/ferles/medusa/src/'
@@ -33,8 +32,6 @@ def train(args):
         flag = True
 
     model = build_model(args)
-    # if 'gen' in training_configurations.checkpoint:
-    #     model._fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=training_configurations.out_classes)
     model = model.to(device)
     dataset = args.dataset.lower()
 
@@ -75,6 +72,30 @@ def train(args):
         correct, total = 0, 0
         train_loss = 0
         for data in tqdm(trainloader):
+
+            if epoch < 5:
+                model.eval()
+                correct, total = 0, 0
+
+                with torch.no_grad():
+
+                    for data in testloader:
+                        images, labels = data
+                        images = images.to(device)
+                        labels = labels.to(device)
+
+                        if 'genodin' in training_configurations.checkpoint.lower():
+                            outputs, h, g = model(images)
+                        else:
+                            outputs = model(images)
+                        _, predicted = torch.max(outputs.data, 1)
+                        total += labels.size(0)
+                        correct += (predicted == labels).sum().item()
+
+                    acc = correct / total
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
+
+            model.train()
             inputs, labels = data
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -122,11 +143,15 @@ def train(args):
 
         if epoch_val_accuracy > best_val_acc:
             best_val_acc = epoch_val_accuracy
-            torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
 
-            if best_val_acc - checkpoint_val_accuracy > 0.05:
-                checkpoint_val_accuracy = best_val_acc
-                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_val_acc}.pth')
+            if os.path.exists('/raid/ferles/'):
+                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+            else:
+                torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+
+            # if best_val_acc - checkpoint_val_accuracy > 0.05:
+            #     checkpoint_val_accuracy = best_val_acc
+            #     torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_val_acc}.pth')
 
             correct, total = 0, 0
 
