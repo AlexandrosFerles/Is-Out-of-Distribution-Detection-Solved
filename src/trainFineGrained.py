@@ -93,8 +93,10 @@ def train(args):
                         correct += (predicted == labels).sum().item()
 
                     acc = correct / total
-                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
-
+                    if os.path.exists('/raid/ferles/'):
+                        torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
+                    else:
+                        torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
             model.train()
             inputs, labels = data
             inputs = inputs.to(device)
