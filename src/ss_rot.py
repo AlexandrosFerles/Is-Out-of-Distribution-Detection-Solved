@@ -33,7 +33,7 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
         criterion = nn.CrossEntropyLoss()
 
         # paths, results = [], []
-        correct, total = 0
+        correct, total = 0, 0
 
         for data in tqdm(test_loader):
             path, images, labels = data
