@@ -6,11 +6,11 @@
     "freeze": "False",
     "resolutionIncrease": "False",
     "out_classes": 7,
-    "logFile": "exclude_AK_step_lr_cutout_eb0_rot.csv",
+    "logFile": "exclude_AK_rot.csv",
     "gtFile": "exclude_AK_step_lr_cutout_gt_eb0_rot.csv",
-    "checkpointFile": "exclude_AK_step_lr_cutout_eb0_rot",
-    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new.csv",
-    "testcsv": "/raid/ferles/ISIC2019/folds/Val_Fold_new.csv",
+    "checkpointFile": "exclude_AK_rot",
+    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new_no_preproc.csv",
+    "testcsv": "/raid/ferles/ISIC2019/folds/Val_Fold_new_no_preproc.csv",
     "exclude_class": "AK"
   }
 }

@@ -9,8 +9,8 @@
     "logFile": "eb0_rot.csv",
     "gtFile": "eb0_rot.csv",
     "checkpointFile": "eb0_rot",
-    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new.csv",
-    "testcsv": "/raid/ferles/ISIC2019/folds/Val_Fold_new.csv",
+    "traincsv": "/raid/ferles/ISIC2019/folds/Train_Fold_new_no_preproc.csv",
+    "testcsv": "/raid/ferles/ISIC2019/folds/Val_Fold_new_no_preproc.csv",
     "exclude_class": "None"
   }
 }
