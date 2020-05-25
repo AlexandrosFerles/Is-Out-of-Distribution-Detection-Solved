@@ -116,6 +116,7 @@ def train(args):
                 torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/rot_{training_configurations.checkpoint}.pth')
             else:
                 torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/rot_{training_configurations.checkpoint}.pth')
+                
             correct, total = 0, 0
 
             for data in testloader:
