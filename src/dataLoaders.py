@@ -290,7 +290,7 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile
     valset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
     val_loader = DataLoader(valset, batch_size=1)
 
-    _create_gt_csv_file(loader=val_loader, columns=valset.csv_columns, gtFile=gtFile)
+    # _create_gt_csv_file(loader=val_loader, columns=valset.csv_columns, gtFile=gtFile)
 
     return train_loader, val_loader, valset.csv_columns
 
@@ -344,7 +344,7 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFi
     val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=4)
     test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=4)
 
-    _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
+    # _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
 
     return train_loader, val_loader, test_loader, testset.csv_columns
 
@@ -386,7 +386,7 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
         val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=4)
     test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=4)
 
-    _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
+    # _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
 
     return train_loader, val_loader, test_loader, testset.csv_columns
 
