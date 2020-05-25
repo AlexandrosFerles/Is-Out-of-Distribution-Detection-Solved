@@ -392,7 +392,10 @@ class TinyImageNetDataset(data.Dataset):
 
     def __init__(self, root='/raid/ferles/tiny-imagenet-200', train=True, transform=None):
         self.train = train
-        self.root = root
+        if os.path.exists(root):
+            self.root = root
+        else:
+            self.root = root.replace('raid', 'home')
         self.transform = transform
         self.train_dir = os.path.join(self.root, "train")
         self.val_dir = os.path.join(self.root, "val")
