@@ -501,9 +501,13 @@ def _get_dataset(dataset, transforms, test=False):
 
     if os.path.exists('/raid/ferles/data'):
         root = '/raid/ferles/data'
+        dogs_root = '/raid/ferles/Dogs/Stanford/'
+        birds_root = '/raid/ferles/Birds/nabirds/'
     else:
         root = '/home/ferles/data'
-        
+        dogs_root = '/home/ferles/Dogs/Stanford/'
+        birds_root = '/home/ferles/Birds/nabirds/'
+
     transform_train, transform_test = transforms
     if dataset == 'cifar10':
         if not test:
@@ -549,16 +553,16 @@ def _get_dataset(dataset, transforms, test=False):
         testset = TinyImageNetDataset(train=False, transform=transform_test)
     elif dataset == 'stanforddogs':
         if not test:
-            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_train)
+            trainset = GenericImageFolderDataset(root=dogs_root, transform=transform_train)
         else:
-            trainset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', transform=transform_test)
-        testset = GenericImageFolderDataset(root='/raid/ferles/Dogs/Stanford/', train=False, transform=transform_test)
+            trainset = GenericImageFolderDataset(root=dogs_root, transform=transform_test)
+        testset = GenericImageFolderDataset(root=dogs_root, train=False, transform=transform_test)
     elif dataset == 'nabirds':
         if not test:
-            trainset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', transform=transform_train)
+            trainset = GenericImageFolderDataset(root=birds_root, transform=transform_train)
         else:
-            trainset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', transform=transform_test)
-        testset = GenericImageFolderDataset(root='/raid/ferles/Birds/nabirds/', train=False, transform=transform_test)
+            trainset = GenericImageFolderDataset(root=birds_root, transform=transform_test)
+        testset = GenericImageFolderDataset(root=birds_root, train=False, transform=transform_test)
     else:
         raise NotImplementedError(f'{dataset} not implemented!')
 
