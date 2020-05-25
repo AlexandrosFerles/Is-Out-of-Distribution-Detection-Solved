@@ -361,6 +361,7 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
         trainset = PandasDataSetWithPaths(csvfiles[0].replace('raid', 'home'), transform=training_transform, exclude_class=exclude_class, ret_path=False)
         valset = PandasDataSetWithPaths('/home/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, exclude_class=exclude_class, ret_path=False)
         testset = PandasDataSetWithPaths(csvfiles[1].replace('raid', 'home'), transform=val_transform, exclude_class=exclude_class)
+
     if load_gts:
         gts = np.load(f'{abs_path}npzs/indexes/isic/gts_{exclude_class}.npz')['arr_0']
     else:
@@ -379,7 +380,7 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     sampler = SubsetSequentialSampler(indices=final_idx)
 
     train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=4)
-    if 'gen' in gtFile.lower() and exclude_class=='DF':
+    if 'gen' in gtFile.lower() and exclude_class == 'DF':
         val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=4, drop_last=True)
     else:
         val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=4)
@@ -498,43 +499,48 @@ def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/raid/ferles/7
 
 def _get_dataset(dataset, transforms, test=False):
 
+    if os.path.exists('/raid/ferles/data'):
+        root = '/raid/ferles/data'
+    else:
+        root = '/home/ferles/data'
+        
     transform_train, transform_test = transforms
     if dataset == 'cifar10':
         if not test:
-            trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+            trainset = torchvision.datasets.CIFAR10(root=root, train=True, download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.CIFAR10(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+            trainset = torchvision.datasets.CIFAR10(root=root, train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.CIFAR10(root=root, train=False, download=True, transform=transform_test)
     elif dataset == 'cifar100':
         if not test:
-            trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+            trainset = torchvision.datasets.CIFAR100(root=root, train=True, download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.CIFAR100(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+            trainset = torchvision.datasets.CIFAR100(root=root, train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.CIFAR100(root=root, train=False, download=True, transform=transform_test)
     elif dataset=='mnist':
         if not test:
-            trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+            trainset = torchvision.datasets.MNIST(root=root, train=True, download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.MNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+            trainset = torchvision.datasets.MNIST(root=root, train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.MNIST(root=root, train=False, download=True, transform=transform_test)
     elif dataset=='fashionmnist':
         if not test:
-            trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_train)
+            trainset = torchvision.datasets.FashionMNIST(root=root, train=True, download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=True, download=True, transform=transform_test)
-        testset = torchvision.datasets.FashionMNIST(root='/raid/ferles/data', train=False, download=True, transform=transform_test)
+            trainset = torchvision.datasets.FashionMNIST(root=root, train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.FashionMNIST(root=root, train=False, download=True, transform=transform_test)
     elif dataset=='svhn':
         if not test:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
+            trainset = torchvision.datasets.SVHN(root=root, split='train', download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
-        testset = torchvision.datasets.SVHN(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
+            trainset = torchvision.datasets.SVHN(root=root, split='train', download=True, transform=transform_test)
+        testset = torchvision.datasets.SVHN(root=root, split='test', download=True, transform=transform_test)
     elif dataset=='stl':
         if not test:
-            trainset = torchvision.datasets.STL10(root='/raid/ferles/data', split='train', download=True, transform=transform_train)
+            trainset = torchvision.datasets.STL10(root=root, split='train', download=True, transform=transform_train)
         else:
-            trainset = torchvision.datasets.STL10(root='/raid/ferles/data', split='train', download=True, transform=transform_test)
-        testset = torchvision.datasets.STL10(root='/raid/ferles/data', split='test', download=True, transform=transform_test)
+            trainset = torchvision.datasets.STL10(root=root, split='train', download=True, transform=transform_test)
+        testset = torchvision.datasets.STL10(root=root, split='test', download=True, transform=transform_test)
     elif dataset=='tinyimagenet':
         if not test:
             trainset = TinyImageNetDataset(transform=transform_train)
@@ -846,73 +852,4 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
         point += step
 
     return train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loader, test_ind_loaders, test_ood_loaders
-
-
-def get_ood_detection_data_loaders(ind_dataset, ood_dataset, val_ood_dataset=None, batch_size=32, resize=True):
-
-    natural_datasets = ['cifar10', 'cifar100', 'svhn', 'tinyimagenet', 'mnist', 'fashionmnist', 'stl']
-    finegrained_datasets = ['stanforddogs', 'nabirds']
-    # dermatology_datasets = ['isic', 'dermofit']
-
-    if ind_dataset in natural_datasets:
-        transforms = _get_natural_image_transforms(ind_dataset, resize)
-    elif ood_dataset in finegrained_datasets:
-        transforms = _get_natural_image_transforms(ind_dataset, resize)
-    else:
-        transforms = _get_transforms()
-
-    if ind_dataset in natural_datasets or finegrained_datasets:
-        trainset_ind, testset_ind = _get_dataset(ind_dataset, transforms, test=True)
-        with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_index_pickle, \
-                open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_index_pickle:
-            train_indexes = pickle.load(train_index_pickle)
-            val_indexes = pickle.load(val_index_pickle)
-        train_sampler = SubsetRandomSampler(train_indexes)
-        val_sampler = SubsetRandomSampler(val_indexes)
-        train_loader_ind = DataLoader(trainset_ind, batch_size=batch_size, sampler=train_sampler)
-        val_loader_ind = DataLoader(trainset_ind, batch_size=batch_size, sampler=val_sampler)
-        test_loader_ind = DataLoader(testset_ind, batch_size=batch_size)
-    else:
-        #TODO
-        pass
-
-    if ood_dataset in natural_datasets or finegrained_datasets:
-        trainset_ood, testset_ood = _get_dataset(ood_dataset, transforms, test=True)
-        with open(f'val_indices_{ood_dataset}.pickle', 'rb') as index_pickle:
-            oodexes = pickle.load(index_pickle)
-        val_sampler = SubsetRandomSampler(oodexes)
-        val_loader_ood = DataLoader(trainset_ood, batch_size=batch_size, sampler=val_sampler)
-        test_loader_ood = DataLoader(testset_ood, batch_size=batch_size)
-    else:
-        #TODO
-        pass
-
-    if val_ood_dataset is not None:
-        if val_ood_dataset in natural_datasets or finegrained_datasets:
-            trainset_val_ood, testset_val_ood = _get_dataset(val_ood_dataset, transforms, test=True)
-            with open(f'val_indices_{val_ood_dataset}.pickle', 'rb') as index_pickle:
-                val_oodexes = pickle.load(index_pickle)
-            val_sampler = SubsetRandomSampler(val_oodexes)
-            val_loader_val_ood = DataLoader(trainset_val_ood, batch_size=batch_size, sampler=val_sampler)
-            test_loader_val_ood = DataLoader(testset_val_ood, batch_size=batch_size)
-        else:
-            #TODO
-            pass
-        return train_loader_ind, val_loader_ind, test_loader_ind, val_loader_ood, test_loader_ood, val_loader_val_ood, test_loader_val_ood
-    else:
-        return train_loader_ind, val_loader_ind, test_loader_ind, val_loader_ood, test_loader_ood
-
-
-def get_temp_data_loaders(batch_size=32):
-
-    ind_dataset = 'cifar10'
-    transforms = _get_natural_image_transforms(ind_dataset, resize=False)
-
-    trainset_ind, testset_ind = _get_dataset(ind_dataset, transforms, test=True)
-    test_loader_ind = DataLoader(testset_ind, batch_size=batch_size)
-
-    testset = ImageFolder(root='/raid/ferles/ood_benchmark/Imagenet_resize', transform=transforms[1])
-    test_loader_ood = DataLoader(testset, batch_size=batch_size)
-
-    return test_loader_ind, test_loader_ood
 
