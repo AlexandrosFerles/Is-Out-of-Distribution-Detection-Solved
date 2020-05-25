@@ -554,6 +554,7 @@ class GenericImageFolderDataset(data.Dataset):
         return self.len_dataset
 
     def __getitem__(self, idx):
+        print(self.root)
         try:
             img_path, tgt = self.images[idx]
         except IndexError:
