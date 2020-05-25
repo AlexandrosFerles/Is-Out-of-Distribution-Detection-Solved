@@ -554,7 +554,10 @@ class GenericImageFolderDataset(data.Dataset):
         return self.len_dataset
 
     def __getitem__(self, idx):
-        img_path, tgt = self.images[idx]
+        try:
+            img_path, tgt = self.images[idx]
+        except IndexError:
+            print(idx)
         with open(img_path, 'rb') as f:
             sample = Image.open(img_path)
             sample = sample.convert('RGB')
