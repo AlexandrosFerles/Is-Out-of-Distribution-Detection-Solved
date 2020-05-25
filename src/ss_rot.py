@@ -149,7 +149,7 @@ def train(args):
         loss_acc = []
 
         for data in tqdm(train_loader):
-            path, inputs, labels = data
+            inputs, labels = data
             labels = labels.to(device)
             optimizer.zero_grad()
 
