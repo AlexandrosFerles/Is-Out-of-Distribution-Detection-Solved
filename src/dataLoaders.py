@@ -897,9 +897,6 @@ def fine_grained_image_loaders_subset(dataset, subset_index, train_batch_size=32
     trainset, testset = _get_subset(dataset, subset_index, transforms, test)
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
-    indexes = list(range(trainset.__len__()))
-    gts = trainset.get_targets()
-
     if validation_test_split == 0:
         trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
         return trainloader, testloader
@@ -907,6 +904,8 @@ def fine_grained_image_loaders_subset(dataset, subset_index, train_batch_size=32
         if pickle_files is None:
             gts = trainset.get_targets()
             indexes = list(range(trainset.__len__()))
+
+            print(f"gts: {gts}")
 
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
             trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
