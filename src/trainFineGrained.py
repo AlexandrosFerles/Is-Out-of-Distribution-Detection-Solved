@@ -2,7 +2,7 @@ import torch
 from torch import nn as nn
 from torch.optim.lr_scheduler import MultiStepLR
 from torch import optim
-from dataLoaders import fine_grained_image_loaders
+from dataLoaders import fine_grained_image_loaders, fine_grained_image_loaders_subset
 from utils import build_model, json_file_to_pyobj
 import wandb
 import argparse
@@ -44,10 +44,19 @@ def train(args):
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
+    flag = False
     if not flag:
-        trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
+        if args.subset_index is None:
+            trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
+        else:
+            trainloader, val_loader, testloader = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, save_to_pickle=True)
     else:
-        trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
+        if args.subset_index is None:
+            trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, pickle_files=pickle_files)
+        else:
+            pickle_files[0] = pickle_files[0].split(".pickle")[0]+f"_subset_{args.subset_index}.pickle"
+            pickle_files[1] = pickle_files[1].split(".pickle")[0]+f"_subset_{args.subset_index}.pickle"
+            trainloader, val_loader, testloader = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, save_to_pickle=pickle_files)
 
         if 'genOdin' in training_configurations.checkpoint:
             weight_decay=1e-4
@@ -187,6 +196,7 @@ if __name__ == '__main__':
     parser.add_argument('--config', help='Training Configurations', required=True)
     parser.add_argument('--dataset', '--ds', default='stanforddogs', required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
+    parser.add_argument('--subset_index', '--sub', type=int, default=None, required=False)
 
     args = parser.parse_args()
     train(args)
