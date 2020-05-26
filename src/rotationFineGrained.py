@@ -1,4 +1,5 @@
 import torch
+import numpy as np 
 from torch import nn as nn
 from torch.optim.lr_scheduler import MultiStepLR
 from torch import optim
@@ -82,7 +83,7 @@ def train(args):
         for index, data in enumerate(trainloader):
             inputs, labels = data
             labels = labels.to(device)
-    
+
             optimizer.zero_grad()
             outputs = model(inputs)
             _, predicted = torch.max(outputs.data, 1)
