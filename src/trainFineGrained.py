@@ -74,6 +74,7 @@ def train(args):
         for data in tqdm(trainloader):
 
             model.train()
+
             inputs, labels = data
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -100,13 +101,10 @@ def train(args):
 
                     for v_data in testloader:
                         v_images, v_labels = v_data
-                        images = v_images.to(device)
+                        v_images = v_images.to(device)
                         labels = v_labels.to(device)
 
-                        if 'genodin' in training_configurations.checkpoint.lower():
-                            outputs, h, g = model(images)
-                        else:
-                            v_outputs = model(v_images)
+                        v_outputs = model(v_images)
                         _, v_predicted = torch.max(v_outputs.data, 1)
                         v_total += v_labels.size(0)
                         v_correct += (predicted == labels).sum().item()
