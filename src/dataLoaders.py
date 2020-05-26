@@ -569,6 +569,40 @@ def _get_dataset(dataset, transforms, test=False):
     return trainset, testset
 
 
+def _get_subset(dataset, subset_index, transforms, test=False):
+
+    if os.path.exists('/raid/ferles'):
+        if dataset == 'stanforddogs':
+            root = f'/raid/ferles/Dogs/Stanford/Dataset{subset_index}'
+        elif dataset == 'nabirds':
+            root = f'/raid/ferles/Birds/nabirds/Dataset{subset_index}'
+        else:
+            raise NotImplementedError(f'{dataset} not implemented!')
+    else:
+        if dataset == 'stanforddogs':
+            root = f'/home/ferles/Dogs/Stanford/Dataset{subset_index}'
+        elif dataset == 'nabirds':
+            root = f'/home/ferles/Birds/nabirds/Dataset{subset_index}'
+        else:
+            raise NotImplementedError(f'{dataset} not implemented!')
+
+    transform_train, transform_test = transforms
+    if dataset == 'stanforddogs':
+        if not test:
+            trainset = GenericImageFolderDataset(root=root, transform=transform_train)
+        else:
+            trainset = GenericImageFolderDataset(root=root, transform=transform_test)
+        testset = GenericImageFolderDataset(root=root, train=False, transform=transform_test)
+    elif dataset == 'nabirds':
+        if not test:
+            trainset = GenericImageFolderDataset(root=root, transform=transform_train)
+        else:
+            trainset = GenericImageFolderDataset(root=root, transform=transform_test)
+        testset = GenericImageFolderDataset(root=root, train=False, transform=transform_test)
+
+    return trainset, testset
+
+
 def _get_image_transforms(dataset, resize):
 
     if 'cifar' in dataset:
@@ -857,78 +891,36 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
 
     return train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loaders, test_ind_loaders, test_ood_loaders
 
+def fine_grained_image_loaders_subset(dataset, subset_index, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None):
 
-def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch_size=32, test_batch_size=32, test=False, resize=True):
+    transforms = _get_fine_grained_transforms()
+    trainset, testset = _get_subset(dataset, subset_index, transforms, test)
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
-    transforms = _get_image_transforms(dataset, resize)
-    trainset, testset = _get_dataset(dataset, transforms, test)
-    from copy import deepcopy
-    valset = deepcopy(trainset)
-
-    trainpickle, valpickle = pickle_files
-    with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
-        trainset_indices = pickle.load(train_pickle)
-        valset_indices = pickle.load(val_pickle)
-
-    unique_labels = list(np.random.permutation(num_classes))
-    step = len(unique_labels) // k
-    point = 0
-
-    train_ind_loaders, train_ood_loaders = [], []
-    val_ind_loaders, val_ood_loaders = [], []
-    test_ind_loaders, test_ood_loaders = [], []
-
-    if dataset == 'tinyimagenet':
-        gts = trainset.get_targets()
-        test_gts = testset.get_targets()
-    elif dataset == 'svhn' or dataset == 'stl':
-        gts = trainset.labels
-        test_gts = testset.labels
+    if validation_test_split == 0:
+        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
+        return trainloader, testloader
     else:
-        gts = trainset.targets
-        test_gts = testset.targets
+        if pickle_files is None:
+            gts = trainset.get_targets()
+            indexes = list(range(trainset.__len__()))
 
-    while point < len(unique_labels):
+            splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
+            trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
 
-        temp_labels = unique_labels[point: min(len(unique_labels), point+step)]
+            if save_to_pickle:
+                with open(f'train_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as val_pickle:
+                    pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            trainpickle, valpickle = pickle_files
+            with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
+                trainset_indices = pickle.load(train_pickle)
+                valset_indices = pickle.load(val_pickle)
 
-        custom_trainset_ind = CustomEnsembleDatasetIn(trainset, gts=gts, remove_labels=temp_labels, keep_indices=trainset_indices)
-        custom_trainset_out = CustomEnsembleDatasetOut(trainset, gts=gts, remove_labels=temp_labels, keep_indices=trainset_indices)
+        train_sampler = SubsetRandomSampler(trainset_indices)
+        test_sampler = SubsetRandomSampler(valset_indices)
+        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=4)
+        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=4)
 
-        train_ind_sampler = SubsetRandomSampler(custom_trainset_ind.keep_indices)
-        train_ood_sampler = SubsetRandomSampler(custom_trainset_out.keep_indices)
-
-        train_ind_loader = DataLoader(custom_trainset_ind, batch_size=train_batch_size, sampler=train_ind_sampler)
-        train_ood_loader = DataLoader(custom_trainset_out, batch_size=train_batch_size, sampler=train_ood_sampler)
-
-        train_ind_loaders.append(train_ind_loader)
-        train_ood_loaders.append(train_ood_loader)
-
-        custom_valset_ind = CustomEnsembleDatasetIn(valset, gts=gts, remove_labels=temp_labels, keep_indices=valset_indices)
-        custom_valset_out = CustomEnsembleDatasetOut(valset, gts=gts, remove_labels=temp_labels, keep_indices=valset_indices)
-
-        val_ind_sampler = SubsetRandomSampler(custom_valset_ind.keep_indices)
-        val_ood_sampler = SubsetRandomSampler(custom_valset_out.keep_indices)
-
-        val_ind_loader = DataLoader(custom_valset_ind, batch_size=test_batch_size, sampler=val_ind_sampler)
-        val_ood_loader = DataLoader(custom_valset_out, batch_size=test_batch_size, sampler=val_ood_sampler)
-
-        val_ind_loaders.append(val_ind_loader)
-        val_ood_loaders.append(val_ood_loader)
-
-        testset_indices = list(range(testset.__len__()))
-        custom_testset_ind = CustomEnsembleDatasetIn(testset, gts=test_gts, remove_labels=temp_labels, keep_indices=testset_indices)
-        custom_testset_out = CustomEnsembleDatasetOut(testset, gts=test_gts, remove_labels=temp_labels, keep_indices=testset_indices)
-
-        test_ind_sampler = SubsetRandomSampler(custom_testset_ind.keep_indices)
-        test_ood_sampler = SubsetRandomSampler(custom_testset_out.keep_indices)
-
-        test_ind_loader = DataLoader(custom_testset_ind, batch_size=test_batch_size, sampler=test_ind_sampler)
-        test_ood_loader = DataLoader(custom_testset_out, batch_size=test_batch_size, sampler=test_ood_sampler)
-
-        test_ind_loaders.append(test_ind_loader)
-        test_ood_loaders.append(test_ood_loader)
-
-        point += step
-
-    return train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loader, test_ind_loaders, test_ood_loaders
+        return trainloader, val_loader, testloader

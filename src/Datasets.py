@@ -366,6 +366,29 @@ class CustomEnsembleDatasetIn(data.Dataset):
         return self.dataset.__len__()
 
 
+class CustomEnsembleDatasetInGeneric(data.Dataset):
+
+    def __init__(self, dataset, gts, remove_labels, keep_indices, transform=None):
+
+        remove_label_indices = [i for i, x in enumerate(gts) if x in remove_labels]
+        keep_indices = list(set(keep_indices) - set(remove_label_indices))
+
+        self.keep_indices = keep_indices
+        self.dataset = dataset
+        self.transform = transform
+
+    def __getitem__(self, index):
+
+        x, y = self.dataset[index]
+        if self.transform is None:
+            return x, y
+        else:
+            return self.transform(x), y
+
+    def __len__(self):
+        return self.dataset.__len__()
+
+
 class CustomEnsembleDatasetOut(data.Dataset):
 
     def __init__(self, dataset, gts, remove_labels, keep_indices, transform=None):
