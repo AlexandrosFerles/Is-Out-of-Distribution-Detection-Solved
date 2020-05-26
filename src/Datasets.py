@@ -547,9 +547,8 @@ class GenericImageFolderDataset(data.Dataset):
                     else:
                         dic[f'/home/ferles/Dogs/Stanford/Test/{key}'] = value
 
-        self.tgt_idx_to_class = dic
-        print(self.tgt_idx_to_class)
-        self.class_to_tgt_idx = {v: k for k, v in dic.items()}
+        self.tgt_idx_to_class = {v: k for k, v in dic.items()}
+        self.class_to_tgt_idx = dic
 
     def _make_dataset(self, dir):
         self.images = []
