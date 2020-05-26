@@ -897,6 +897,9 @@ def fine_grained_image_loaders_subset(dataset, subset_index, train_batch_size=32
     trainset, testset = _get_subset(dataset, subset_index, transforms, test)
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
+    index = list(range(trainset.__len__()))
+    gte = trainset.get_targets()
+
     if validation_test_split == 0:
         trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
         return trainloader, testloader
