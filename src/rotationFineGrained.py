@@ -47,9 +47,9 @@ def train(args):
 
     if not flag:
         if args.subset_index is None:
+            ipdb.set_trace()
             trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
         else:
-            ipdb.set_trace()
             trainloader, val_loader, testloader = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, save_to_pickle=True)
     else:
         if args.subset_index is None:
