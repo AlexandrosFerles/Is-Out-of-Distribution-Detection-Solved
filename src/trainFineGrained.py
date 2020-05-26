@@ -156,10 +156,15 @@ def train(args):
             best_val_acc = epoch_val_accuracy
 
             if os.path.exists('/raid/ferles/'):
-
-                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                if args.subset_index is None:
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                else:
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_subset_{args.subset_index}.pth')
             else:
-                torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                if args.subset_index is None:
+                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                else:
+                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_subset_{args.subset_index}.pth')
 
             # if best_val_acc - checkpoint_val_accuracy > 0.05:
             #     checkpoint_val_accuracy = best_val_acc
