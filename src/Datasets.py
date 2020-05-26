@@ -7,6 +7,7 @@ import random
 from glob import glob as glob
 import os
 import sys
+import pickle
 import ipdb
 
 
@@ -527,9 +528,19 @@ class GenericImageFolderDataset(data.Dataset):
 
         self.len_dataset = num_images
 
-        self.tgt_idx_to_class = {i: classes[i] for i in range(len(classes))}
+        if os.path.exists('raid/ferles/'):
+            dic = {}
+            with open('/raid/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
+                temp_dic = pickle.load(dic_pickle)
+                for key, value in temp_dic.items():
+                    if self.train:
+                        dic[f'/raid/ferles/Dogs/Stanford/Train/{key}'] = value
+                    else:
+                        dic[f'/raid/ferles/Dogs/Stanford/Test/{key}'] = value
+
+        self.tgt_idx_to_class = dic
         print(self.tgt_idx_to_class)
-        self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}
+        self.class_to_tgt_idx = {v: k for k, v in dic.items()}
 
     def _make_dataset(self, dir):
         self.images = []
