@@ -528,6 +528,7 @@ class GenericImageFolderDataset(data.Dataset):
         self.len_dataset = num_images
 
         self.tgt_idx_to_class = {i: classes[i] for i in range(len(classes))}
+        print(self.tgt_idx_to_class)
         self.class_to_tgt_idx = {classes[i]: i for i in range(len(classes))}
 
     def _make_dataset(self, dir):
@@ -565,3 +566,4 @@ class GenericImageFolderDataset(data.Dataset):
             sample = self.transform[0](sample)
 
         return sample, tgt
+
