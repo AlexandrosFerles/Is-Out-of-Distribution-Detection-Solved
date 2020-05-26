@@ -73,30 +73,6 @@ def train(args):
         train_loss = 0
         for data in tqdm(trainloader):
 
-            if epoch < 5:
-                model.eval()
-                correct, total = 0, 0
-
-                with torch.no_grad():
-
-                    for data in testloader:
-                        images, labels = data
-                        images = images.to(device)
-                        labels = labels.to(device)
-
-                        if 'genodin' in training_configurations.checkpoint.lower():
-                            outputs, h, g = model(images)
-                        else:
-                            outputs = model(images)
-                        _, predicted = torch.max(outputs.data, 1)
-                        total += labels.size(0)
-                        correct += (predicted == labels).sum().item()
-
-                    acc = correct / total
-                    if os.path.exists('/raid/ferles/'):
-                        torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
-                    else:
-                        torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
             model.train()
             inputs, labels = data
             inputs = inputs.to(device)
@@ -115,6 +91,31 @@ def train(args):
             train_loss += loss.item()
             loss.backward()
             optimizer.step()
+
+            if epoch < 2:
+                model.eval()
+                v_correct, v_total = 0, 0
+
+                with torch.no_grad():
+
+                    for v_data in testloader:
+                        v_images, v_labels = v_data
+                        images = v_images.to(device)
+                        labels = v_labels.to(device)
+
+                        if 'genodin' in training_configurations.checkpoint.lower():
+                            outputs, h, g = model(images)
+                        else:
+                            v_outputs = model(v_images)
+                        _, v_predicted = torch.max(v_outputs.data, 1)
+                        v_total += v_labels.size(0)
+                        v_correct += (predicted == labels).sum().item()
+
+                    acc = v_correct / v_total
+                    if os.path.exists('/raid/ferles/'):
+                        torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
+                    else:
+                        torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
 
         train_accuracy = correct / total
         wandb.log({'epoch': epoch}, commit=False)
