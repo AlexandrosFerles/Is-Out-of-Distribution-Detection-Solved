@@ -551,7 +551,7 @@ class GenericImageFolderDataset(data.Dataset):
 
         self.len_dataset = num_images
 
-        if os.path.exists('raid/ferles/'):
+        if os.path.exists('/raid/ferles/'):
             dic = {}
             with open('/raid/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
                 temp_dic = pickle.load(dic_pickle)
