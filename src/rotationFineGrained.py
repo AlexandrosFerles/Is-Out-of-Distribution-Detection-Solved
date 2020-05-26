@@ -1,5 +1,5 @@
 import torch
-import numpy as np 
+import numpy as np
 from torch import nn as nn
 from torch.optim.lr_scheduler import MultiStepLR
 from torch import optim
@@ -81,6 +81,7 @@ def train(args):
         correct, total = 0, 0
         train_loss = 0
         for index, data in enumerate(trainloader):
+
             inputs, labels = data
             labels = labels.to(device)
 
@@ -108,10 +109,10 @@ def train(args):
             optimizer.step()
             train_loss += loss.item()
 
-    train_accuracy = correct / total
-    wandb.log({'epoch': epoch}, commit=False)
-    wandb.log({'Train Set Loss': train_loss / trainloader.__len__(), 'epoch': epoch})
-    wandb.log({'Train Set Accuracy': train_accuracy, 'epoch': epoch})
+        train_accuracy = correct / total
+        wandb.log({'epoch': epoch}, commit=False)
+        wandb.log({'Train Set Loss': train_loss / trainloader.__len__(), 'epoch': epoch})
+        wandb.log({'Train Set Accuracy': train_accuracy, 'epoch': epoch})
 
         model.eval()
         correct, total = 0, 0
@@ -122,36 +123,26 @@ def train(args):
                 images, labels = data
                 images = images.to(device)
                 labels = labels.to(device)
-
-                if 'genodin' in training_configurations.checkpoint.lower():
-                    outputs, h, g = model(images)
-                else:
-                    outputs = model(images)
+                outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
             epoch_val_accuracy = correct / total
-
             wandb.log({'Validation Set Accuracy': epoch_val_accuracy, 'epoch': epoch})
 
         if epoch_val_accuracy > best_val_acc:
             best_val_acc = epoch_val_accuracy
-
             if os.path.exists('/raid/ferles/'):
                 if args.subset_index is None:
-                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/rot_{training_configurations.checkpoint}.pth')
                 else:
-                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_subset_{args.subset_index}.pth')
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/rot_{training_configurations.checkpoint}_subset_{args.subset_index}.pth')
             else:
                 if args.subset_index is None:
-                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/rot_{training_configurations.checkpoint}.pth')
                 else:
-                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_subset_{args.subset_index}.pth')
-
-            # if best_val_acc - checkpoint_val_accuracy > 0.05:
-            #     checkpoint_val_accuracy = best_val_acc
-            #     torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_val_acc}.pth')
+                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/rot_{training_configurations.checkpoint}_subset_{args.subset_index}.pth')
 
             correct, total = 0, 0
 
@@ -159,11 +150,7 @@ def train(args):
                 images, labels = data
                 images = images.to(device)
                 labels = labels.to(device)
-
-                if 'genodin' in training_configurations.checkpoint.lower():
-                    outputs, h, g = model(images)
-                else:
-                    outputs = model(images)
+                outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
@@ -177,15 +164,15 @@ def train(args):
 
 if __name__ == '__main__':
 
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3, 4, 5, 6, 7"
-
     parser = argparse.ArgumentParser(description='DL Dermatology models')
 
     parser.add_argument('--config', help='Training Configurations', required=True)
-    parser.add_argument('--dataset', '--ds', default='stanforddogs', required=False)
+    parser.add_argument('--dataset', '--ds', default='cifar10', required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
     parser.add_argument('--subset_index', '--sub', type=int, default=None, required=False)
-
     args = parser.parse_args()
+
+    visible_divices = f"{args.device}, {args.device+1}"
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = visible_divices
     train(args)
