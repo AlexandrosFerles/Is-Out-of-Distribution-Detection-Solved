@@ -23,16 +23,16 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}")
-    device = torch.device(f'cuda:{args.device}')
+    wandb.init(name=f"rot_{training_configurations.checkpoint}_subset_{args.subset_index}")
+    device = torch.device(f'cuda')
 
     flag = False
     if training_configurations.train_pickle != 'None' and training_configurations.test_pickle != 'None':
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    model = build_model(args)
-    model = model.to(device)
+    model = build_model(args, rot=True)
+    model = nn.DataParallel(model).to(device)
     dataset = args.dataset.lower()
 
     if 'wide' in training_configurations.model.lower():
@@ -79,54 +79,38 @@ def train(args):
         model.train()
         correct, total = 0, 0
         train_loss = 0
-        for data in tqdm(trainloader):
-
-            model.train()
-
+        for index, data in enumerate(trainloader):
             inputs, labels = data
-            inputs = inputs.to(device)
             labels = labels.to(device)
-
+    
             optimizer.zero_grad()
-
-            if 'genodin' in training_configurations.checkpoint.lower():
-                outputs, h, g = model(inputs)
-            else:
-                outputs = model(inputs)
+            outputs = model(inputs)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-            loss = criterion(outputs, labels)
-            train_loss += loss.item()
+            ce_loss = criterion(outputs, labels)
+            rot_gt = torch.cat((torch.zeros(inputs.size(0)), torch.ones(inputs.size(0)),
+                                2*torch.ones(inputs.size(0)), 3*torch.ones(inputs.size(0))), 0).long().to(device)
+
+            rot_inputs = inputs.detach().cpu().numpy()
+
+            rot_inputs = np.concatenate((rot_inputs, np.rot90(rot_inputs, 1, axes=(2, 3)),
+                                         np.rot90(rot_inputs, 2, axes=(2, 3)), np.rot90(rot_inputs, 3, axes=(2, 3))), 0)
+
+            rot_inputs = torch.FloatTensor(rot_inputs)
+
+            rot_preds = model(rot_inputs, rot=True)
+            rot_loss = criterion(rot_preds, rot_gt)
+
+            loss = ce_loss + rot_loss
             loss.backward()
             optimizer.step()
+            train_loss += loss.item()
 
-            # if epoch < 2:
-            #     model.eval()
-            #     v_correct, v_total = 0, 0
-            #
-            #     with torch.no_grad():
-            #
-            #         for v_data in testloader:
-            #             v_images, v_labels = v_data
-            #             v_images = v_images.to(device)
-            #             v_labels = v_labels.to(device)
-            #
-            #             v_outputs = model(v_images)
-            #             _, v_predicted = torch.max(v_outputs.data, 1)
-            #             v_total += v_labels.size(0)
-            #             v_correct += (v_predicted == v_labels).sum().item()
-            #
-            #         acc = v_correct / v_total
-            #         if os.path.exists('/raid/ferles/'):
-            #             torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
-            #         else:
-            #             torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_acc_{acc}.pth')
-
-        train_accuracy = correct / total
-        wandb.log({'epoch': epoch}, commit=False)
-        wandb.log({'Train Set Loss': train_loss / trainloader.__len__(), 'epoch': epoch})
-        wandb.log({'Train Set Accuracy': train_accuracy, 'epoch': epoch})
+    train_accuracy = correct / total
+    wandb.log({'epoch': epoch}, commit=False)
+    wandb.log({'Train Set Loss': train_loss / trainloader.__len__(), 'epoch': epoch})
+    wandb.log({'Train Set Accuracy': train_accuracy, 'epoch': epoch})
 
         model.eval()
         correct, total = 0, 0
