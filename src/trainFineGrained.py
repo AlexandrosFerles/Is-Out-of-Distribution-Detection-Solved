@@ -102,12 +102,12 @@ def train(args):
                     for v_data in testloader:
                         v_images, v_labels = v_data
                         v_images = v_images.to(device)
-                        labels = v_labels.to(device)
+                        v_labels = v_labels.to(device)
 
                         v_outputs = model(v_images)
                         _, v_predicted = torch.max(v_outputs.data, 1)
                         v_total += v_labels.size(0)
-                        v_correct += (predicted == labels).sum().item()
+                        v_correct += (v_predicted == v_labels).sum().item()
 
                     acc = v_correct / v_total
                     if os.path.exists('/raid/ferles/'):
