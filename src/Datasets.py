@@ -527,7 +527,6 @@ class GenericImageFolderDataset(data.Dataset):
 
     def __init__(self, root, train=True, transform=None):
 
-        # ipdb.set_trace()
         self.train = train
         self.root = root
         self.transform = transform

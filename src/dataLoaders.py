@@ -905,8 +905,6 @@ def fine_grained_image_loaders_subset(dataset, subset_index, train_batch_size=32
             gts = trainset.get_targets()
             indexes = list(range(trainset.__len__()))
 
-            print(f"gts: {gts}")
-
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
             trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
 
