@@ -74,7 +74,6 @@ def train(args):
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
-    ipdb.set_trace()
     for epoch in tqdm(range(epochs)):
 
         model.train()
