@@ -24,7 +24,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=f"rot_{training_configurations.checkpoint}_subset_{args.subset_index}")
+    # wandb.init(name=f"rot_{training_configurations.checkpoint}_subset_{args.subset_index}")
     device = torch.device(f'cuda')
 
     flag = False
@@ -49,6 +49,7 @@ def train(args):
         if args.subset_index is None:
             trainloader, val_loader, testloader = fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, validation_test_split=1000, save_to_pickle=True)
         else:
+            ipdb.set_trace()
             trainloader, val_loader, testloader = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, save_to_pickle=True)
     else:
         if args.subset_index is None:
