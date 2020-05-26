@@ -539,14 +539,14 @@ class GenericImageFolderDataset(data.Dataset):
                         dic[f'/raid/ferles/Dogs/Stanford/Test/{key}'] = value
         else:
             dic = {}
-            with open('/raid/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
+            with open('/home/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
                 temp_dic = pickle.load(dic_pickle)
                 for key, value in temp_dic.items():
                     if self.train:
-                        dic[f'/raid/ferles/Dogs/Stanford/Train/{key}'] = value
+                        dic[f'/home/ferles/Dogs/Stanford/Train/{key}'] = value
                     else:
-                        dic[f'/raid/ferles/Dogs/Stanford/Test/{key}'] = value
-                        
+                        dic[f'/home/ferles/Dogs/Stanford/Test/{key}'] = value
+
         self.tgt_idx_to_class = dic
         print(self.tgt_idx_to_class)
         self.class_to_tgt_idx = {v: k for k, v in dic.items()}
