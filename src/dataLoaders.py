@@ -926,7 +926,6 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
                     pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
                     pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
-            ipdb.set_trace()
             if not single:
                 trainpickle, valpickle = pickle_files
                 with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
