@@ -4,9 +4,9 @@ import torch.optim as optim
 import numpy as np
 import os
 import argparse
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import StepLR, MultiStepLR
 from utils import build_model
-from dataLoaders import oversampling_loaders_exclude_class_custom_no_gts, oversampling_loaders_custom, _get_isic_loaders_ood
+from dataLoaders import oversampling_loaders_exclude_class_custom_no_gts, oversampling_loaders_custom, _get_isic_loaders_ood, imageNetLoader
 from utils import json_file_to_pyobj
 import wandb
 from logger import wandb_table
@@ -76,9 +76,6 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
 def train(args):
 
-    use_wandb = True
-    # use_wandb = False
-
     device = torch.device(f'cuda:{args.device}')
 
     json_options = json_file_to_pyobj(args.config)
@@ -91,41 +88,27 @@ def train(args):
     exclude_class = training_configurations.exclude_class
     exclude_class = None if exclude_class == "None" else exclude_class
 
-    if use_wandb:
-        wandb.init(name=checkpointFileName)
+    wandb.init(name=checkpointFileName)
 
     input_size = 224
     batch_size = 32
 
     if exclude_class is None:
-        train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, mode=args.mode)
+        train_loader, val_loader, test_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName)
     else:
-        train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, exclude_class=exclude_class, with_auto_augment=True, mode=args.mode)
-    _, _, _, ood_loader = _get_isic_loaders_ood(exclude_class=exclude_class, batch_size=batch_size)
+        train_loader, val_loader, test_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName, exclude_class=exclude_class)
+    ood_loader = imageNetLoader(dataset='isic', batch_size=batch_size)
     ood_loader_iter = iter(ood_loader)
-    model = build_model(args)
-    model = model.to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.000015)
-    scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 
-    epochs = 20
+    model = build_model(args).to(device)
+    epochs = 40
     criterion = nn.CrossEntropyLoss()
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, epochs)
+    optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+    scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
-    use_scheduler = True
-    use_scheduler = False
-
-    best_auc, best_balanced_accuracy = 0, 0
-    train_loss, val_loss, balanced_accuracies = [], [], []
-    best_train_loss = 1e30
-
-    lamda = 0.5
-    uniform = torch.ones(size=(batch_size, out_classes)) / float(out_classes) 
+    uniform = torch.ones(size=(batch_size, out_classes)) / float(out_classes)
     uniform = uniform.to(device)
-
-    early_stopping = True
-    # early_stopping = False
-    early_stopping_cnt = 0
+    lamda = 0.5
 
     for epoch in tqdm(range(epochs)):
 
@@ -133,12 +116,18 @@ def train(args):
         loss_acc = []
 
         for data in tqdm(train_loader):
-            path, inputs, labels = data
+
+            model.train()
+
+            inputs, labels = data
             inputs = inputs.to(device)
             labels = labels.to(device)
+
             optimizer.zero_grad()
 
             outputs = model(inputs)
+            _, predicted = torch.max(outputs.data, 1)
+
             try:
                 ood_inputs, _ = next(ood_loader_iter)
             except:
@@ -160,39 +149,59 @@ def train(args):
             loss_acc.append(loss.item())
             loss.backward()
             optimizer.step()
+
             if ood_outputs.size(0) < batch_size:
                 uniform = torch.ones(size=(batch_size, out_classes)) / float(out_classes)
                 uniform = uniform.to(device)
 
-        wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
         wandb.log({'epoch': epoch}, commit=False)
-        train_loss.append(sum(loss_acc) / float(train_loader.__len__()))
-        loss_acc.clear()
-        if use_scheduler:
-            scheduler.step()
+        wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
 
-        if train_loss[-1] < best_train_loss:
-            best_train_loss = train_loss[-1]
-            checkpointFile = os.path.join(f'/home/ferles/Dermatology/medusa/checkpoints/oe_{checkpointFileName}-best-train-loss-model.pth')
-            torch.save(model.state_dict(), checkpointFile)
+        model.eval()
+        correct, total = 0, 0
 
-        auc, balanced_accuracy = _test_set_eval(model, epoch, device, val_loader, out_classes, columns, gtFileName)
+        with torch.no_grad():
 
-        if auc > best_auc:
-            best_auc = auc
-            checkpointFile = os.path.join(f'/home/ferles/Dermatology/medusa/checkpoints/oe_{checkpointFileName}-best-auc-model.pth')
-            torch.save(model.state_dict(), checkpointFile)
+            for data in val_loader:
+                images, labels = data
+                images = images.to(device)
+                labels = labels.to(device)
+                _labels = torch.argmax(labels, dim=1)
 
-        if balanced_accuracy > best_balanced_accuracy:
-            best_balanced_accuracy = balanced_accuracy
-            checkpointFile = os.path.join(f'/home/ferles/Dermatology/medusa/checkpoints/_oe{checkpointFileName}-best-balanced-accuracy-model.pth')
-            torch.save(model.state_dict(), checkpointFile)
-            early_stopping_cnt = 0
-        else:
-            if early_stopping:
-                early_stopping_cnt +=1
-                if early_stopping_cnt == 3:
-                    break
+                outputs = model(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == _labels).sum().item()
+
+            val_detection_accuracy = round(100*correct/total, 2)
+            wandb.log({'Validation Detection Accuracy': val_detection_accuracy, 'epoch': epoch})
+
+            if val_detection_accuracy > best_val_acc:
+                best_val_acc = val_detection_accuracy
+
+                if os.path.exists('/raid/ferles/'):
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/outlier_exposure_{training_configurations.checkpointFile}.pth')
+                else:
+                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/isic_classifiers/outlier_exposure_{training_configurations.checkpointFile}.pth')
+
+                correct, total = 0, 0
+
+                for data in test_loader:
+                    _, images, labels = data
+                    images = images.to(device)
+                    labels = labels.to(device)
+                    _labels = torch.argmax(labels, dim=1)
+
+                    outputs = model(images)
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == _labels).sum().item()
+
+                test_detection_accuracy = correct / total
+
+            wandb.log({'Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
+
+            scheduler.step(epoch=epoch)
 
 if __name__ == '__main__':
 
