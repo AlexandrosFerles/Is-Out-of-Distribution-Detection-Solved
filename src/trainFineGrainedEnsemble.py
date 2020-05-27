@@ -24,7 +24,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    # wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}_ensemble")
+    wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}_ensemble")
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -91,7 +91,6 @@ def train(args):
             ce_loss = criterion(outputs, labels)
 
             try:
-                ipdb.set_trace()
                 ood_inputs, _ = next(ood_loader_iter)
             except:
                 ood_loader_iter = iter(train_ood_loader)
