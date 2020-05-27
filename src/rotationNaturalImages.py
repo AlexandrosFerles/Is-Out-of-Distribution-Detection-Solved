@@ -4,7 +4,7 @@ from torch import optim
 from torch.optim.lr_scheduler import MultiStepLR
 import numpy as np
 from dataLoaders import natural_image_loaders
-from utils import build_model, json_file_to_pyobj
+from utils import build_model, build_model_with_checkpoint, json_file_to_pyobj
 import argparse
 import random
 import os
@@ -32,8 +32,12 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
-    model = build_model(args, rot=True)
-    model = nn.DataParallel(model).to(device)
+    if args.checkpoint is None:
+        model = build_model(args, rot=True)
+        model = nn.DataParallel(model).to(device)
+    else:
+        model = build_model_with_checkpoint(modelName='rot' + training_configurations.model.lower(), model_checkpoint=args.checkpoint, device=device, out_classes=training_configurations.out_classes, rot=True)
+        model = nn.DataParallel(model).to(device)
 
     dataset = args.dataset.lower()
     if 'wide' in training_configurations.model.lower():
@@ -43,8 +47,8 @@ def train(args):
         scheduler = MultiStepLR(optimizer, milestones=[60, 120, 160], gamma=0.2)
     else:
         resize = True
-        epochs = 40
-        optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+        epochs = 10
+        optimizer = optim.SGD(model.parameters(), lr=1.25e-2*0.1*0.1*0.1, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
     if not flag:
@@ -132,7 +136,7 @@ def train(args):
 
         wandb.log({'Test Set Accuracy': test_set_accuracy, 'epoch': epoch})
 
-        scheduler.step(epoch=epoch)
+        # scheduler.step(epoch=epoch)
 
 
 if __name__ == '__main__':
@@ -142,6 +146,7 @@ if __name__ == '__main__':
     parser.add_argument('--config', help='Training Configurations', required=True)
     parser.add_argument('--dataset', '--ds', default='cifar10', required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
+    parser.add_argument('--checkpoint', '--ck', default=None, required=False)
     args = parser.parse_args()
 
     visible_divices = f"{args.device}, {args.device+1}"

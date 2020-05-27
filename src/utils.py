@@ -29,7 +29,7 @@ def build_model(args, rot=False):
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
 
-    modelName = training_configurations.model.lower() if not rot else 'rot'+ training_configurations.model.lower()
+    modelName = training_configurations.model.lower() if not rot else 'rot' + training_configurations.model.lower()
     depth = int(training_configurations.depth)
     pretrained = True if training_configurations.pretrained == 'True' else False
     out_classes = training_configurations.out_classes
@@ -122,55 +122,6 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
         torch.save(new_state_dict, os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth')
         net.load_state_dict(torch.load(os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth', map_location=device))
         os.system(f"rm {os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth'}")
-    elif 'seresnext50' in modelName:
-        from pretrainedmodels import se_resnext50_32x4d
-        net = se_resnext50_32x4d(num_classes=1000)
-        net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
-    elif 'seresnext101' in modelName:
-        from pretrainedmodels import se_resnext101_32x4d
-        net = se_resnext101_32x4d(num_classes=1000)
-        net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
-    elif 'densenet121' in modelName:
-        from pretrainedmodels import densenet121
-        net = densenet121(num_classes=1000)
-        net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
-    elif 'densenet169' in modelName:
-        from pretrainedmodels import densenet169
-        net = densenet169(num_classes=1000)
-        net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-        model_checkpoint = os.path.join(model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
-    elif 'densenet201' in modelName:
-        from pretrainedmodels import densenet201
-        net = densenet201(num_classes=1000)
-        net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
     elif 'roteb0' in modelName:
         from efficientnet_pytorch.rot_model import RotEfficientNet
         model = RotEfficientNet.from_pretrained('efficientnet-b0')
