@@ -126,7 +126,7 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
         from efficientnet_pytorch.rot_model import RotEfficientNet
         model = RotEfficientNet.from_pretrained('efficientnet-b0')
         model._fc = nn.Linear(model._fc.in_features, out_classes)
-        # model = model.to(device)
+        model = model.to(device)
         if 'checkpoints' not in model_checkpoint:
             model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
         state_dict = torch.load(model_checkpoint, map_location=device)

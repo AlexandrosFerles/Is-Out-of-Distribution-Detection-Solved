@@ -569,20 +569,32 @@ def _get_dataset(dataset, transforms, test=False):
     return trainset, testset
 
 
-def _get_subset(dataset, subset_index, transforms, test=False):
+def _get_subset(dataset, subset_index, transforms, single=False, test=False):
 
     if os.path.exists('/raid/ferles'):
         if dataset == 'stanforddogs':
-            root = f'/raid/ferles/Dogs/Stanford/Dataset{subset_index}'
+            if single:
+                root = f'/raid/ferles/Dogs/Stanford/Subset{subset_index}'
+            else:
+                root = f'/raid/ferles/Dogs/Stanford/Dataset{subset_index}'
         elif dataset == 'nabirds':
-            root = f'/raid/ferles/Birds/nabirds/Dataset{subset_index}'
+            if single:
+                root = f'/raid/ferles/Birds/nabirds/Subset{subset_index}'
+            else:
+                root = f'/raid/ferles/Birds/nabirds/Dataset{subset_index}'
         else:
             raise NotImplementedError(f'{dataset} not implemented!')
     else:
         if dataset == 'stanforddogs':
-            root = f'/home/ferles/Dogs/Stanford/Dataset{subset_index}'
+            if single:
+                root = f'/home/ferles/Dogs/Stanford/Subset{subset_index}'
+            else:
+                root = f'/home/ferles/Dogs/Stanford/Dataset{subset_index}'
         elif dataset == 'nabirds':
-            root = f'/home/ferles/Birds/nabirds/Dataset{subset_index}'
+            if single:
+                root = f'/home/ferles/Birds/nabirds/Subset{subset_index}'
+            else:
+                root = f'/home/ferles/Birds/nabirds/Dataset{subset_index}'
         else:
             raise NotImplementedError(f'{dataset} not implemented!')
 
@@ -891,10 +903,11 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
 
     return train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loaders, test_ind_loaders, test_ood_loaders
 
-def fine_grained_image_loaders_subset(dataset, subset_index, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None):
+
+def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None):
 
     transforms = _get_fine_grained_transforms()
-    trainset, testset = _get_subset(dataset, subset_index, transforms, test)
+    trainset, testset = _get_subset(dataset, subset_index, transforms, test, single=single)
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
     if validation_test_split == 0:
