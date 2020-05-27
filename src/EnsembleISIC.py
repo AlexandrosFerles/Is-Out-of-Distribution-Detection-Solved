@@ -148,7 +148,7 @@ def train(args):
                 if os.path.exists('/raid/ferles/'):
                     torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/{training_configurations.checkpointFile}.pth')
                 else:
-                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/{training_configurations.checkpointFile}.pth')
+                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/isic_classifiers/{training_configurations.checkpointFile}.pth')
 
                 correct, total = 0, 0
 
