@@ -154,7 +154,7 @@ def train(args):
                 correct, total = 0, 0
 
                 for data in test_loader:
-                    images, labels = data
+                    _, images, labels = data
                     images = images.to(device)
                     labels = labels.to(device)
                     _labels = torch.argmax(labels, dim=1)
