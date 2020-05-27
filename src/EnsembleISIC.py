@@ -93,7 +93,6 @@ def train(args):
             model.train()
 
             inputs, labels = data
-            ipdb.set_trace()
             inputs = inputs.to(device)
             labels = labels.to(device)
 
@@ -101,7 +100,8 @@ def train(args):
 
             outputs = model(inputs)
             _, predicted = torch.max(outputs.data, 1)
-            ce_loss = criterion(outputs, labels)
+            _labels = torch.argmax(labels, dim=1)
+            ce_loss = criterion(outputs, _labels)
 
             try:
                 ood_inputs, _ = next(ood_loader_iter)
@@ -133,11 +133,12 @@ def train(args):
                 images, labels = data
                 images = images.to(device)
                 labels = labels.to(device)
+                _labels = torch.argmax(labels, dim=1)
 
                 outputs = model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+                correct += (predicted == _labels).sum().item()
 
             val_detection_accuracy = round(100*correct/total, 2)
             wandb.log({'Validation Detection Accuracy': val_detection_accuracy, 'epoch': epoch})
@@ -156,11 +157,12 @@ def train(args):
                     images, labels = data
                     images = images.to(device)
                     labels = labels.to(device)
+                    _labels = torch.argmax(labels, dim=1)
 
                     outputs = model(images)
                     _, predicted = torch.max(outputs.data, 1)
                     total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
+                    correct += (predicted == _labels).sum().item()
 
                 test_detection_accuracy = correct / total
 
