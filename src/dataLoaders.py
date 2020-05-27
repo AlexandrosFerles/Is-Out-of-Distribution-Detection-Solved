@@ -907,7 +907,7 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
 def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None):
 
     transforms = _get_fine_grained_transforms()
-    trainset, testset = _get_subset(dataset, subset_index, transforms, test, single=single)
+    trainset, testset = _get_subset(dataset, subset_index, transforms, single, test)
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
     if validation_test_split == 0:
