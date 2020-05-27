@@ -41,6 +41,8 @@ def train(args):
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
     scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
+    ipdb.set_trace()
+
     if not flag:
         trainloader, val_loader, testloader = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, save_to_pickle=True)
     else:
