@@ -948,3 +948,25 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
             else:
                 trainloader = DataLoader(trainset, batch_size=train_batch_size, num_workers=3)
                 return trainloader
+
+
+def imageNetLoader(dataset, batch_size=32):
+
+    if dataset=='stanforddogs' or dataset == 'nabirds':
+        normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    else:
+        normalize = transforms.Normalize((0.6796, 0.5284, 0.5193), (0.1200, 0.1413, 0.1538))
+
+    test_transform = transforms.Compose([
+        transforms.ToTensor(),
+        normalize
+    ])
+
+    if os.path.exists('/raid/ferles'):
+        dataset = ImageFolder(root='/raid/ferles/ImageNet/', transform=test_transform)
+    else:
+        dataset = ImageFolder(root='/home/ferles/ImageNet/', transform=test_transform)
+
+    loader = DataLoader(dataset, batch_size=32)
+
+    return loader
