@@ -51,22 +51,16 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
 
 def train(args):
 
-    use_wandb = True
-
     device = torch.device(f'cuda:{args.device}')
-
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
     traincsv = training_configurations.traincsv
     testcsv = training_configurations.testcsv
     gtFileName = training_configurations.gtFile
     checkpointFileName = training_configurations.checkpointFile
-    out_classes = training_configurations.out_classes
     exclude_class = training_configurations.exclude_class
-    exclude_class = None if exclude_class == "None" else exclude_class
 
-    if use_wandb:
-        wandb.init(name=checkpointFileName)
+    wandb.init(name=checkpointFileName)
 
     batch_size = 32
 
