@@ -926,14 +926,20 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
                     pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
                     pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
-            trainpickle, valpickle = pickle_files
-            with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
-                trainset_indices = pickle.load(train_pickle)
-                valset_indices = pickle.load(val_pickle)
+            if not single:
+                trainpickle, valpickle = pickle_files
+                with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
+                    trainset_indices = pickle.load(train_pickle)
+                    valset_indices = pickle.load(val_pickle)
 
-        train_sampler = SubsetRandomSampler(trainset_indices)
-        test_sampler = SubsetRandomSampler(valset_indices)
-        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=4)
-        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=4)
+                train_sampler = SubsetRandomSampler(trainset_indices)
+                test_sampler = SubsetRandomSampler(valset_indices)
+                trainloader = DataLoader(trainset, batch_size=train_batch_size, sampler=train_sampler, num_workers=4)
+                val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=4)
 
-        return trainloader, val_loader, testloader
+                return trainloader, val_loader, testloader
+
+            else:
+
+                trainloader = DataLoader(trainset, batch_size=train_batch_size, num_workers=4)
+                return trainloader
