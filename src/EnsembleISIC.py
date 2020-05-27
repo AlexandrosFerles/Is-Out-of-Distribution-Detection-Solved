@@ -15,7 +15,7 @@ from tqdm import tqdm
 import pandas as pd
 import ipdb
 
-abs_path = '/home/ferles/Dermatology/medusa/'
+abs_path = '/home/ferles/medusa/src'
 
 
 def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile):
@@ -27,45 +27,26 @@ def _test_set_eval(net, epoch, device, test_loader, num_classes, columns, gtFile
         loss_acc = []
         criterion = nn.CrossEntropyLoss()
 
-        paths, results = [], []
-
+        correct, total = 0, 0
         for data in tqdm(test_loader):
             path, images, labels = data
             images = images.to(device)
             labels = labels.to(device)
 
-            for i in range(len(path)):
-                temp = path[i]
-                temp = temp.split('/')[-1].split('.jpg')[0]
-                paths.append(temp)
-
             outputs = net(images)
             softmax_outputs = torch.softmax(outputs, 1)
-            for output in softmax_outputs:
-                temp = output.detach().cpu().numpy().tolist()
-                results.append([float(elem) for elem in temp])
+            max_idx = torch.argmax(softmax_outputs, axis=1)
 
             _labels = torch.argmax(labels, dim=1)
-            ce_loss = criterion(outputs, _labels)
-
-            loss = ce_loss
+            correct += (max_idx == _labels).sum().item()
+            total += max_idx.size()[0]
+            loss = criterion(outputs, _labels)
             loss_acc.append(loss.item())
 
-        df = pd.DataFrame(columns=columns)
-        for idx, (path, result) in enumerate(zip(paths, results)):
-            df.loc[idx] = [path] + result
-
-        df.to_csv(os.path.join(abs_path, 'csvs', f'TemporaryResults-{gtFile}'), index=False)
-        os.system(f'isic-challenge-scoring classification {os.path.join(abs_path, "csvs", gtFile)} {os.path.join(abs_path, "csvs", f"TemporaryResults-{gtFile}")} > {os.path.join(abs_path, "txts", gtFile.split(".csv")[0]+"results.txt")}')
-        auc, balanced_accuracy = wandb_table(f'{os.path.join(abs_path, "txts", gtFile.split(".csv")[0]+"results.txt")}', epoch, num_classes)
-
+        detection_accuracy = round(100*correct/total, 2)
         val_loss = sum(loss_acc) / float(test_loader.__len__())
 
-        wandb.log({'Val Set Loss': val_loss, 'epoch': epoch})
-        wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
-        wandb.log({'AUC': auc, 'epoch': epoch})
-
-    return auc, balanced_accuracy
+    return val_loss, detection_accuracy
 
 
 def train(args):
@@ -87,13 +68,12 @@ def train(args):
     if use_wandb:
         wandb.init(name=checkpointFileName)
 
-    input_size = 224
     batch_size = 32
 
     if exclude_class is None:
-        train_loader, val_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, with_auto_augment=True, mode=args.mode)
+        train_loader, val_loader, test_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName)
     else:
-        train_loader, val_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, input_size=input_size, gtFile=gtFileName, exclude_class=exclude_class, with_auto_augment=True, mode=args.mode)
+        train_loader, val_loader, test_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName, exclude_class=exclude_class)
     _, _, _, ood_loader = _get_isic_loaders_ood(exclude_class=exclude_class, batch_size=batch_size)
     ood_loader_iter = iter(ood_loader)
     model = build_model(args)

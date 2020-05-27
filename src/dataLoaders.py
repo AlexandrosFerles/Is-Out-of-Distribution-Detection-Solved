@@ -310,6 +310,41 @@ class SubsetSequentialSampler(Sampler):
         return self.num_samples
 
 
+def _get_isic_loaders_ood(batch_size,
+                          train_csv='/raid/ferles/ISIC2019/folds/Train_Fold_new_no_preproc.csv',
+                          val_csv='/raid/ferles/ISIC2019/folds/Val_Fold_new_no_preproc.csv',
+                          test_csv='/raid/ferles/ISIC2019/folds/ValFold1NoPreproc.csv',
+                          full_csv='/raid/ferles/ISIC2019/Training_paths_and_classes_no_preproc.csv',
+                          exclude_class=None):
+
+    if not os.path.exists('/raid/ferles'):
+        train_csv = train_csv.replace('raid', 'home')
+        val_csv = val_csv.replace('raid', 'home')
+        test_csv = test_csv.replace('raid', 'home')
+        full_csv = full_csv.replace('raid', 'home')
+
+    input_size = 224
+    val_transform = transforms.Compose([
+        transforms.Resize((input_size, input_size)),
+        transforms.ToTensor(),
+    ])
+
+    trainset = PandasDataSetWithPaths(train_csv, transform=val_transform, exclude_class=exclude_class, ret_path=False)
+    valset = PandasDataSetWithPaths(val_csv, transform=val_transform, exclude_class=exclude_class, ret_path=False)
+    testset = PandasDataSetWithPaths(test_csv, transform=val_transform, exclude_class=exclude_class, ret_path=False)
+
+    trainloader = DataLoader(trainset, batch_size=batch_size, num_workers=3)
+    val_loader = DataLoader(valset, batch_size=batch_size, num_workers=3)
+    testloader = DataLoader(testset, batch_size=batch_size, num_workers=3)
+
+    if exclude_class is not None:
+        ood_set = PandasDataSetSingleClass(full_csv, single_class=exclude_class, transform=val_transform)
+        ood_loader = DataLoader(ood_set, batch_size=batch_size, num_workers=3)
+        return trainloader, val_loader, testloader, ood_loader
+    else:
+        return trainloader, val_loader, testloader
+
+
 def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFile, load_gts=True):
 
     training_transform, val_transform = _get_transforms()
@@ -389,35 +424,6 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     # _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
 
     return train_loader, val_loader, test_loader, testset.csv_columns
-
-
-def _get_isic_loaders_ood(batch_size,
-                          train_csv='/raid/ferles/ISIC2019/folds/Train_Fold_new.csv',
-                          val_csv='/raid/ferles/ISIC2019/folds/Val_Fold_new.csv',
-                          test_csv='/raid/ferles/ISIC2019/folds/ValFold1.csv',
-                          full_csv='/raid/ferles/ISIC2019/Training_paths_and_classes.csv',
-                          exclude_class=None):
-
-    input_size = 224
-    val_transform = transforms.Compose([
-        transforms.Resize((input_size, input_size)),
-        transforms.ToTensor(),
-    ])
-
-    trainset = PandasDataSetWithPaths(train_csv, transform=val_transform, exclude_class=exclude_class, ret_path=False)
-    valset = PandasDataSetWithPaths(val_csv, transform=val_transform, exclude_class=exclude_class, ret_path=False)
-    testset = PandasDataSetWithPaths(test_csv, transform=val_transform, exclude_class=exclude_class, ret_path=False)
-
-    trainloader = DataLoader(trainset, batch_size=batch_size, num_workers=3)
-    val_loader = DataLoader(valset, batch_size=batch_size, num_workers=3)
-    testloader = DataLoader(testset, batch_size=batch_size, num_workers=3)
-
-    if exclude_class is not None:
-        ood_set = PandasDataSetSingleClass(full_csv, single_class=exclude_class, transform=val_transform)
-        ood_loader = DataLoader(ood_set, batch_size=batch_size, num_workers=3)
-        return trainloader, val_loader, testloader, ood_loader
-    else:
-        return trainloader, val_loader, testloader
 
 
 def _get_7point_loaders(batch_size, csvfile='/raid/ferles/7-point/7pointAsISIC.csv'):
