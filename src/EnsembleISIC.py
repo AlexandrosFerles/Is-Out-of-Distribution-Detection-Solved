@@ -119,7 +119,6 @@ def train(args):
             loss_acc.append(loss.item())
             loss.backward()
             optimizer.step()
-            break
 
         wandb.log({'epoch': epoch}, commit=False)
         wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
