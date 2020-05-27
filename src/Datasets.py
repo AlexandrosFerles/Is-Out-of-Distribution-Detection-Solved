@@ -525,11 +525,12 @@ class TinyImageNetDataset(data.Dataset):
 
 class GenericImageFolderDataset(data.Dataset):
 
-    def __init__(self, root, train=True, transform=None):
+    def __init__(self, root, type='dogs', train=True, transform=None):
 
         self.train = train
         self.root = root
         self.transform = transform
+        self.type = type
         self.train_dir = os.path.join(self.root, "Train")
         self.val_dir = os.path.join(self.root, "Test")
 
@@ -541,8 +542,6 @@ class GenericImageFolderDataset(data.Dataset):
             self._make_dataset(self.val_dir)
 
     def _create_class_idx_dict(self, dir):
-        classes = glob(os.path.join(dir, '*'))
-        classes = sorted(classes)
         num_images = 0
         for root, dirs, files in os.walk(dir):
             for f in files:
@@ -551,25 +550,44 @@ class GenericImageFolderDataset(data.Dataset):
 
         self.len_dataset = num_images
 
-        if os.path.exists('/raid/ferles/'):
-            dic = {}
-            with open('/raid/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
-                temp_dic = pickle.load(dic_pickle)
-                for key, value in temp_dic.items():
-                    if self.train:
-                        dic[os.path.join(self.root, "Train/", key)] = value
-                    else:
-                        dic[os.path.join(self.root, "Test/", key)] = value
+        if self.type == 'dogs':
+            if os.path.exists('/raid/ferles/'):
+                dic = {}
+                with open('/raid/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
+                    temp_dic = pickle.load(dic_pickle)
+                    for key, value in temp_dic.items():
+                        if self.train:
+                            dic[os.path.join(self.root, "Train/", key)] = value
+                        else:
+                            dic[os.path.join(self.root, "Test/", key)] = value
+            else:
+                dic = {}
+                with open('/home/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
+                    temp_dic = pickle.load(dic_pickle)
+                    for key, value in temp_dic.items():
+                        if self.train:
+                            dic[os.path.join(self.root, "Train/", key)] = value
+                        else:
+                            dic[os.path.join(self.root, "Test/", key)] = value
         else:
-            dic = {}
-            with open('/home/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
-                temp_dic = pickle.load(dic_pickle)
-                for key, value in temp_dic.items():
-                    if self.train:
-                        dic[os.path.join(self.root, "Train/", key)] = value
-                    else:
-                        dic[os.path.join(self.root, "Test/", key)] = value
-
+            if os.path.exists('/raid/ferles/'):
+                dic = {}
+                with open('/raid/ferles/Birds/nabirds/birdsdict.pickle', 'rb') as dic_pickle:
+                    temp_dic = pickle.load(dic_pickle)
+                    for key, value in temp_dic.items():
+                        if self.train:
+                            dic[os.path.join(self.root, "Train/", key)] = value
+                        else:
+                            dic[os.path.join(self.root, "Test/", key)] = value
+            else:
+                dic = {}
+                with open('/home/ferles/Birds/nabirds/birdsdict.pickle', 'rb') as dic_pickle:
+                    temp_dic = pickle.load(dic_pickle)
+                    for key, value in temp_dic.items():
+                        if self.train:
+                            dic[os.path.join(self.root, "Train/", key)] = value
+                        else:
+                            dic[os.path.join(self.root, "Test/", key)] = value
         self.tgt_idx_to_class = {v: k for k, v in dic.items()}
         self.class_to_tgt_idx = dic
 
