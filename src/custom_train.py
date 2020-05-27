@@ -184,8 +184,8 @@ def train(args):
                     break
 
         wandb.log({'Val Set Loss': val_loss, 'epoch': epoch})
-        # wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
         wandb.log({'Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
+        # wandb.log({'Balanced Accuracy': balanced_accuracy, 'epoch': epoch})
         # wandb.log({'AUC': auc, 'epoch': epoch})
 
         scheduler.step()
