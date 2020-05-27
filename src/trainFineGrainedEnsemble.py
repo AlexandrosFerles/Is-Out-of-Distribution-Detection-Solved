@@ -23,7 +23,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}")
+    # wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}_ensemble")
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
