@@ -147,9 +147,9 @@ def train(args):
                 best_val_acc = val_detection_accuracy
 
                 if os.path.exists('/raid/ferles/'):
-                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/{training_configurations.checkpoint}.pth')
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/{training_configurations.checkpointFile}.pth')
                 else:
-                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/{training_configurations.checkpoint}.pth')
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/{training_configurations.checkpointFile}.pth')
 
                 correct, total = 0, 0
 
