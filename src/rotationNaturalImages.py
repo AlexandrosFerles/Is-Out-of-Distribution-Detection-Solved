@@ -36,6 +36,7 @@ def train(args):
         model = build_model(args, rot=True)
         model = nn.DataParallel(model).to(device)
     else:
+        ipdb.set_trace()
         model = build_model_with_checkpoint(modelName='rot' + training_configurations.model.lower(), model_checkpoint=args.checkpoint, device=device, out_classes=training_configurations.out_classes, rot=True)
         model = nn.DataParallel(model).to(device)
 
