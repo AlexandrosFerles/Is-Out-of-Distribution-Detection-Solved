@@ -93,6 +93,7 @@ def train(args):
             model.train()
 
             inputs, labels = data
+            ipdb.set_trace()
             inputs = inputs.to(device)
             labels = labels.to(device)
 
