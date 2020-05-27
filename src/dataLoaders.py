@@ -940,6 +940,5 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
                 return trainloader, val_loader, testloader
 
             else:
-                ipdb.set_trace()
                 trainloader = DataLoader(trainset, batch_size=train_batch_size, num_workers=4)
                 return trainloader
