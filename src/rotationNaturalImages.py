@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='DL Dermatology models')
 
-    parser.add_argument('--config', help='Training Configurations', required=True)
+    parser.add_argument('--config', '--c', help='Training Configurations', required=True)
     parser.add_argument('--dataset', '--ds', default='cifar10', required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
     parser.add_argument('--checkpoint', '--ck', default=None, required=False)
