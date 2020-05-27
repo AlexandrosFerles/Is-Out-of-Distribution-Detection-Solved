@@ -122,7 +122,7 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
         torch.save(new_state_dict, os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth')
         net.load_state_dict(torch.load(os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth', map_location=device))
         os.system(f"rm {os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth'}")
-    elif 'roteb0' in modelName:
+    elif 'rot' in modelName:
         from efficientnet_pytorch.rot_model import RotEfficientNet
         model = RotEfficientNet.from_pretrained('efficientnet-b0')
         model._fc = nn.Linear(model._fc.in_features, out_classes)
