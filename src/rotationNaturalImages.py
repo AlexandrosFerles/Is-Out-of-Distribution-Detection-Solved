@@ -24,7 +24,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    # wandb.init(name=f'rot_{training_configurations.checkpoint}')
+    wandb.init(name=f'rot_{training_configurations.checkpoint}')
     device = torch.device(f'cuda')
 
     flag = False
@@ -36,7 +36,6 @@ def train(args):
         model = build_model(args, rot=True)
         model = nn.DataParallel(model).to(device)
     else:
-        ipdb.set_trace()
         model = build_model_with_checkpoint(modelName='rot' + training_configurations.model.lower(), model_checkpoint=args.checkpoint, device=device, out_classes=training_configurations.out_classes, rot=True)
         model = nn.DataParallel(model).to(device)
 
