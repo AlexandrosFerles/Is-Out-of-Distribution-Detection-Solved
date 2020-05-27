@@ -595,10 +595,10 @@ def _get_subset(dataset, subset_index, transforms, test=False):
         testset = GenericImageFolderDataset(root=root, train=False, transform=transform_test)
     elif dataset == 'nabirds':
         if not test:
-            trainset = GenericImageFolderDataset(root=root, transform=transform_train)
+            trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_train)
         else:
-            trainset = GenericImageFolderDataset(root=root, transform=transform_test)
-        testset = GenericImageFolderDataset(root=root, train=False, transform=transform_test)
+            trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_test)
+        testset = GenericImageFolderDataset(root=root, type='birds', train=False, transform=transform_test)
 
     return trainset, testset
 
