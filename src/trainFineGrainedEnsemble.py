@@ -1,5 +1,6 @@
 import torch
 from torch import nn as nn
+import torch.nn.functional as F
 from torch.optim.lr_scheduler import MultiStepLR
 from torch import optim
 from dataLoaders import fine_grained_image_loaders, fine_grained_image_loaders_subset
