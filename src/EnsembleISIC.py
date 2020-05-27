@@ -182,7 +182,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='DL Dermatology models')
     parser.add_argument('--config', help='Training Configurations', required=True)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
-    parser.add_argument('--mode', '--md', type=str, default='new', required=False)
 
     args = parser.parse_args()
     train(args)
