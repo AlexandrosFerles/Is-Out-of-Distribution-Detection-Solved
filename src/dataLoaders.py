@@ -559,10 +559,10 @@ def _get_dataset(dataset, transforms, test=False):
         testset = GenericImageFolderDataset(root=dogs_root, train=False, transform=transform_test)
     elif dataset == 'nabirds':
         if not test:
-            trainset = GenericImageFolderDataset(root=birds_root, transform=transform_train)
+            trainset = GenericImageFolderDataset(root=birds_root, type='birds', transform=transform_train)
         else:
-            trainset = GenericImageFolderDataset(root=birds_root, transform=transform_test)
-        testset = GenericImageFolderDataset(root=birds_root, train=False, transform=transform_test)
+            trainset = GenericImageFolderDataset(root=birds_root, type='birds', transform=transform_test)
+        testset = GenericImageFolderDataset(root=birds_root, type='birds', train=False, transform=transform_test)
     else:
         raise NotImplementedError(f'{dataset} not implemented!')
 
