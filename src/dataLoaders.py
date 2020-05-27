@@ -279,9 +279,9 @@ def generate_random_multi_crop_loader(csvfiles, ncrops, train_batch_size, gtFile
         final_idx = _balance_order(idxs, labels, num_classes, batch_size=train_batch_size)
         sampler = SubsetSequentialSampler(indices=final_idx)
 
-        train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=4)
+        train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=3)
     else:
-        train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
+        train_loader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=3)
 
     val_transform = transforms.Compose([
         OrderedCrops(crop_size=input_size, ncrops=n_val_crops),
@@ -340,9 +340,9 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFi
     final_idx = _balance_order(idxs, labels, num_classes, batch_size=train_batch_size)
     sampler = SubsetSequentialSampler(indices=final_idx)
 
-    train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=4)
-    val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=4)
-    test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=4)
+    train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=3)
+    val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=3)
+    test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=3)
 
     # _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
 
@@ -379,12 +379,12 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     final_idx = _balance_order(idxs, labels, num_classes, batch_size=train_batch_size)
     sampler = SubsetSequentialSampler(indices=final_idx)
 
-    train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=4)
+    train_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=sampler, num_workers=3)
     if 'gen' in gtFile.lower() and exclude_class == 'DF':
-        val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=4, drop_last=True)
+        val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=3, drop_last=True)
     else:
-        val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=4)
-    test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=4)
+        val_loader = DataLoader(valset, batch_size=val_batch_size, num_workers=3)
+    test_loader = DataLoader(testset, batch_size=val_batch_size, num_workers=3)
 
     # _create_gt_csv_file(loader=test_loader, columns=testset.csv_columns, gtFile=gtFile)
 
@@ -408,13 +408,13 @@ def _get_isic_loaders_ood(batch_size,
     valset = PandasDataSetWithPaths(val_csv, transform=val_transform, exclude_class=exclude_class, ret_path=False)
     testset = PandasDataSetWithPaths(test_csv, transform=val_transform, exclude_class=exclude_class, ret_path=False)
 
-    trainloader = DataLoader(trainset, batch_size=batch_size, num_workers=4)
-    val_loader = DataLoader(valset, batch_size=batch_size, num_workers=4)
-    testloader = DataLoader(testset, batch_size=batch_size, num_workers=4)
+    trainloader = DataLoader(trainset, batch_size=batch_size, num_workers=3)
+    val_loader = DataLoader(valset, batch_size=batch_size, num_workers=3)
+    testloader = DataLoader(testset, batch_size=batch_size, num_workers=3)
 
     if exclude_class is not None:
         ood_set = PandasDataSetSingleClass(full_csv, single_class=exclude_class, transform=val_transform)
-        ood_loader = DataLoader(ood_set, batch_size=batch_size, num_workers=4)
+        ood_loader = DataLoader(ood_set, batch_size=batch_size, num_workers=3)
         return trainloader, val_loader, testloader, ood_loader
     else:
         return trainloader, val_loader, testloader
@@ -428,7 +428,7 @@ def _get_7point_loaders(batch_size, csvfile='/raid/ferles/7-point/7pointAsISIC.c
         transforms.ToTensor(),
     ])
     val_set = PandasDataSetWithPaths(csvfile, transform=val_transform, exclude_class=None, ret_path=True)
-    val_loader = DataLoader(val_set, batch_size=batch_size, num_workers=4)
+    val_loader = DataLoader(val_set, batch_size=batch_size, num_workers=3)
 
     return val_loader, val_set.csv_columns
 
@@ -456,7 +456,7 @@ def _get_isic_loader(batch_size, csvfile='/raid/ferles/ISIC2019/Training_paths_a
         transforms.ToTensor(),
     ])
     val_set = PandasDataSetWithPaths(csvfile, transform=val_transform, exclude_class=None, ret_path=False)
-    val_loader = DataLoader(val_set, batch_size=batch_size, num_workers=4)
+    val_loader = DataLoader(val_set, batch_size=batch_size, num_workers=3)
 
     return val_loader
 
@@ -476,8 +476,8 @@ def _get_7point_loaders_ood(batch_size, exclude_class=None, csvfile='/raid/ferle
         val_set = PandasDataSetWithPaths(csvfile, transform=val_transform, exclude_class=exclude_class, ret_path=False)
         ood_dataset = PandasDataSetSingleClass(csvfile, transform=val_transform, single_class='UNK')
 
-    val_loader = DataLoader(val_set, batch_size=batch_size, num_workers=4)
-    ood_loader = DataLoader(ood_dataset, batch_size=batch_size, num_workers=4)
+    val_loader = DataLoader(val_set, batch_size=batch_size, num_workers=3)
+    ood_loader = DataLoader(ood_dataset, batch_size=batch_size, num_workers=3)
 
     return val_loader, ood_loader
 
@@ -492,7 +492,7 @@ def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/raid/ferles/7
 
     ood_dataset = PandasDataSetSingleClass(csvfile, transform=val_transform, single_class=exclude_class)
 
-    ood_loader = DataLoader(ood_dataset, batch_size=batch_size, num_workers=4)
+    ood_loader = DataLoader(ood_dataset, batch_size=batch_size, num_workers=3)
 
     return ood_loader, ood_loader
 
@@ -732,10 +732,10 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
     transforms = _get_image_transforms(dataset, resize)
     trainset, testset = _get_dataset(dataset, transforms, test)
 
-    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=3)
 
     if validation_test_split == 0:
-        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
+        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=3)
         return trainloader, testloader
     else:
         if pickle_files is None:
@@ -763,10 +763,10 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         train_sampler = SubsetRandomSampler(trainset_indices)
         test_sampler = SubsetRandomSampler(valset_indices)
         if dataset=='svhn':
-            trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=4, drop_last=True)
+            trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=3, drop_last=True)
         else:
-            trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=4)
-        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=4)
+            trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=3)
+        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=3)
 
         return trainloader, val_loader, testloader
 
@@ -797,10 +797,10 @@ def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32,
 
     transforms = _get_fine_grained_transforms()
     trainset, testset = _get_dataset(dataset, transforms, test)
-    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=3)
 
     if validation_test_split == 0:
-        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
+        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=3)
         return trainloader, testloader
     else:
         if pickle_files is None:
@@ -822,8 +822,8 @@ def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32,
 
         train_sampler = SubsetRandomSampler(trainset_indices)
         test_sampler = SubsetRandomSampler(valset_indices)
-        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=4)
-        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=4)
+        trainloader = DataLoader(trainset, batch_size=test_batch_size, sampler=train_sampler, num_workers=3)
+        val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=3)
 
         return trainloader, val_loader, testloader
 
@@ -908,10 +908,10 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
 
     transforms = _get_fine_grained_transforms()
     trainset, testset = _get_subset(dataset, subset_index, transforms, single, test)
-    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
+    testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=3)
 
     if validation_test_split == 0:
-        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
+        trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=3)
         return trainloader, testloader
     else:
         if pickle_files is None:
@@ -934,11 +934,11 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
 
                 train_sampler = SubsetRandomSampler(trainset_indices)
                 test_sampler = SubsetRandomSampler(valset_indices)
-                trainloader = DataLoader(trainset, batch_size=train_batch_size, sampler=train_sampler, num_workers=4)
-                val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=4)
+                trainloader = DataLoader(trainset, batch_size=train_batch_size, sampler=train_sampler, num_workers=3)
+                val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=3)
 
                 return trainloader, val_loader, testloader
 
             else:
-                trainloader = DataLoader(trainset, batch_size=train_batch_size, num_workers=4)
+                trainloader = DataLoader(trainset, batch_size=train_batch_size, num_workers=3)
                 return trainloader
