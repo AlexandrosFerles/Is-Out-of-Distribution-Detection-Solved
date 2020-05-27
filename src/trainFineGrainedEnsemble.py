@@ -66,7 +66,7 @@ def train(args):
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
-    ood_iter = iter(train_ood_loader)
+    ood_loader_iter = iter(train_ood_loader)
 
     for epoch in tqdm(range(epochs)):
 
@@ -83,10 +83,7 @@ def train(args):
 
             optimizer.zero_grad()
 
-            if 'genodin' in training_configurations.checkpoint.lower():
-                outputs, h, g = model(inputs)
-            else:
-                outputs = model(inputs)
+            outputs = model(inputs)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
