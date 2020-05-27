@@ -106,7 +106,7 @@ def train(args):
             try:
                 ood_inputs, _ = next(ood_loader_iter)
             except:
-                ood_loader_iter = iter(ood_loader_iter)
+                ood_loader_iter = iter(ood_loader)
                 ood_inputs, _ = next(ood_loader_iter)
 
             ood_inputs = ood_inputs.to(device)
