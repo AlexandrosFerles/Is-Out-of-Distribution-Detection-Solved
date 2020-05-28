@@ -41,9 +41,9 @@ def _find_threshold(train_scores, val_scores):
 
     accuracies = np.array(accuracy_scores)
     max_accuracy = accuracies.max()
-    max_accuracy_threshold =  thresholds[accuracies.argmax()]
+    max_accuracy_threshold = thresholds[accuracies.argmax()]
 
-    return max_accuracy_threshold
+    return max_accuracy, max_accuracy_threshold
     # acc, threshold = 0, 0
     # index = val_scores.shape[0] - 1
     #
