@@ -176,43 +176,46 @@ def _predict_mahalanobis(regressor, ind, ood):
     return roc_auc, fpr
 
 
+def _get_baseline_scores(model, loader, device, monte_carlo_steps):
+
+    arr = np.zeros(loader.batch_size*loader.__len__())
+    arr_len = 0
+    for index, data in enumerate(loader):
+
+        images, _ = data
+        images = images.to(device)
+
+        outputs = model(images)
+        softmax_outputs = torch.softmax(outputs, 1)
+        top_class_probability = torch.max(softmax_outputs, axis=1)[0]
+
+        arr[index*loader.batch_size:index*loader.batch_size + top_class_probability.size()[0]] = top_class_probability.detach().cpu().numpy()
+        arr_len += top_class_probability.size()[0]
+
+    if monte_carlo_steps > 1:
+        for _ in range(monte_carlo_steps-1):
+            for index, data in enumerate(loader):
+
+                images, _ = data
+                images = images.to(device)
+
+                outputs = model(images)
+                softmax_outputs = torch.softmax(outputs, 1)
+                top_class_probability = torch.max(softmax_outputs, axis=1)[0]
+
+                arr[index*loader.batch_size:index*loader.batch_size + top_class_probability.size()[0]] += top_class_probability.detach().cpu().numpy()
+
+    arr = ind[:arr_len]
+    return arr
+
 def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_steps=1, exclude_class=None, score_ind=True):
 
     model.eval()
 
     if monte_carlo_steps > 1:
         model._dropout.train()
-    val_loader, ood_loader = loaders
 
-    if score_ind:
-        ind_len = 0
-        ind = np.zeros(val_loader.batch_size*val_loader.__len__())
-        for index, data in enumerate(val_loader):
-
-            images, _ = data
-            images = images.to(device)
-
-            outputs = model(images)
-            softmax_outputs = torch.softmax(outputs, 1)
-            top_class_probability = torch.max(softmax_outputs, axis=1)[0]
-
-            ind[index*val_loader.batch_size:index*val_loader.batch_size + top_class_probability.size()[0]] = top_class_probability.detach().cpu().numpy()
-            ind_len += top_class_probability.size()[0]
-
-        if monte_carlo_steps > 1:
-            for _ in range(monte_carlo_steps-1):
-                for index, data in enumerate(val_loader):
-
-                    images, _ = data
-                    images = images.to(device)
-
-                    outputs = model(images)
-                    softmax_outputs = torch.softmax(outputs, 1)
-                    top_class_probability = torch.max(softmax_outputs, axis=1)[0]
-
-                    ind[index*val_loader.batch_size:index*val_loader.batch_size + top_class_probability.size()[0]] += top_class_probability.detach().cpu().numpy()
-
-        ind = ind[:ind_len]
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
     ood_len = 0
     ood = np.zeros(ood_loader.batch_size*ood_loader.__len__())
@@ -1220,13 +1223,13 @@ if __name__ == '__main__':
         for line in open(args.model_checkpoints_file, 'r'):
             model_checkpoints.append(line.split('\n')[0])
 
-    loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=out_distribution_dataset)
+    loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
 
     if ood_method == 'baseline':
         if args.with_FGSM:
             print('FGSM cannot be combined with the baseline method, skipping this step')
         method_loaders = [val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader]
-        _baseline(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+        _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
 
     elif ood_method == 'odin':
         if args.temperature != 1 or args.epsilon != 0:
