@@ -26,28 +26,43 @@ torch.cuda.manual_seed(global_seed)
 
 def _find_threshold(train_scores, val_scores):
 
-    train_scores = np.sort(train_scores)
-    val_scores = np.sort(val_scores)
+    # train_scores = np.sort(train_scores)
+    # val_scores = np.sort(val_scores)
 
-    acc, threshold = 0, 0
-    index = val_scores.shape[0] - 1
+    probs = np.append(train_scores, val_scores, axis=0)
+    y_true = np.append(np.ones(train_scores.shape[0]), np.zeros(val_scores.shape[0]), axis=0)
+    from sklearn.metrics import accuracy_score
+    from sklearn.metrics import roc_curve
 
-    while(True):
+    fpr, tpr, thresholds = roc_curve(y_true, probs)
+    accuracy_scores = []
+    for thresh in thresholds:
+        accuracy_scores.append(accuracy_score(y_true, [1 if m > thresh else 0 for m in probs]))
 
-        temp_threshold = val_scores[index]
-        ind_ = np.zeros(train_scores.shape)
-        ood_ = np.zeros(val_scores.shape)
-        ind_[np.argwhere(train_scores > temp_threshold)] = 1
-        ood_[np.argwhere(val_scores < temp_threshold)] = 1
+    accuracies = np.array(accuracy_scores)
+    max_accuracy = accuracies.max()
+    max_accuracy_threshold =  thresholds[accuracies.argmax()]
 
-        temp_acc = (np.sum(ind_) + (np.sum(ood_) ) / (ind_.shape[0]  + ood_.shape[0]))
-        if temp_acc > acc:
-            acc, threshold = temp_acc, temp_threshold
-
-        if temp_threshold < train_scores[0]:
-            break
-
-    return acc, threshold
+    return max_accuracy_threshold
+    # acc, threshold = 0, 0
+    # index = val_scores.shape[0] - 1
+    #
+    # while(True):
+    #
+    #     temp_threshold = val_scores[index]
+    #     ind_ = np.zeros(train_scores.shape)
+    #     ood_ = np.zeros(val_scores.shape)
+    #     ind_[np.argwhere(train_scores > temp_threshold)] = 1
+    #     ood_[np.argwhere(val_scores < temp_threshold)] = 1
+    #
+    #     temp_acc = (np.sum(ind_) + (np.sum(ood_) ) / (ind_.shape[0]  + ood_.shape[0]))
+    #     if temp_acc > acc:
+    #         acc, threshold = temp_acc, temp_threshold
+    #
+    #     if temp_threshold < train_scores[0]:
+    #         break
+    #
+    # return acc, threshold
 
 
 def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
@@ -223,6 +238,7 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
         val_ind = val_ind / monte_carlo_steps
         val_ood = val_ood / monte_carlo_steps
 
+    ipdb.set_trace()
     acc, threshold = _find_threshold(val_ind, val_ood)
     test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps)
     test_ood = _get_baseline_scores(model, test_ood_loader, device, monte_carlo_steps)
@@ -1194,7 +1210,6 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
 
-    ipdb.set_trace()
     if ood_method == 'baseline':
         if args.with_FGSM:
             print('FGSM cannot be combined with the baseline method, skipping this step')
