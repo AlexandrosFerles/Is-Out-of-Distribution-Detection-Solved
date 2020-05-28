@@ -225,18 +225,18 @@ def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_step
 
     if exclude_class is None:
         if monte_carlo_steps == 1:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}.npz'
+            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}.npz'
         else:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_monte_carlo_{monte_carlo_steps}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
+            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
     else:
         if monte_carlo_steps == 1:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_{exclude_class}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_{exclude_class}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
+            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
         else:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
+            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
 
     if score_ind:
         np.savez(ind_savefile_name, ind)
