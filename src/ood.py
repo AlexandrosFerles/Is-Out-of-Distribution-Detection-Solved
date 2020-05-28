@@ -216,41 +216,12 @@ def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_step
         model._dropout.train()
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
-
-    ood_len = 0
-    ood = np.zeros(ood_loader.batch_size*ood_loader.__len__())
-    for index, data in enumerate(ood_loader):
-
-        images, _ = data
-        images = images.to(device)
-
-        outputs = model(images)
-        softmax_outputs = torch.softmax(outputs, 1)
-        top_class_probability = torch.max(softmax_outputs, axis=1)[0]
-
-        ood[index*ood_loader.batch_size:index*ood_loader.batch_size + top_class_probability.size()[0]] = top_class_probability.detach().cpu().numpy()
-        ood_len += top_class_probability.size()[0]
+    val_ind = _get_baseline_scores(model, val_ind_loader, device, monte_carlo_steps)
+    val_ood = _get_baseline_scores(model, val_ood_loader, device, monte_carlo_steps)
 
     if monte_carlo_steps > 1:
-        for _ in range(monte_carlo_steps-1):
-            for index, data in enumerate(ood_loader):
-                images, _ = data
-                images = images.to(device)
-
-                outputs = model(images)
-                softmax_outputs = torch.softmax(outputs, 1)
-                top_class_probability = torch.max(softmax_outputs, axis=1)[0]
-
-                ood[index*ood_loader.batch_size:index*ood_loader.batch_size + top_class_probability.size()[0]] += top_class_probability.detach().cpu().numpy()
-
-    ood = ood[:ood_len]
-
-    if monte_carlo_steps > 1:
-        if score_ind:
-            ind = ind / monte_carlo_steps
-            ood = ood / monte_carlo_steps
-        else:
-            ood = ood / monte_carlo_steps
+        ind = val_ind / monte_carlo_steps
+        ood = val_ood / monte_carlo_steps
 
     if exclude_class is None:
         if monte_carlo_steps == 1:
