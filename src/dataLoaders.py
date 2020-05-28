@@ -971,3 +971,26 @@ def imageNetLoader(dataset, batch_size=32):
     loader = DataLoader(dataset, batch_size=batch_size, num_workers=3)
 
     return loader
+
+
+def tinyImageNetLoader(dataset, batch_size=32):
+
+    if dataset=='stanforddogs' or dataset == 'nabirds':
+        normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    else:
+      normalize = transforms.Normalize((0.6796, 0.5284, 0.5193), (0.1200, 0.1413, 0.1538))
+
+    test_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        normalize
+    ])
+
+    if os.path.exists('/raid/ferles'):
+        dataset = MyImageFolder(root='/raid/ferles/tiny-imagenet-200/train', transform=test_transform)
+    else:
+        dataset = MyImageFolder(root='/home/ferles/tiny-imagenet-200/train', transform=test_transform)
+
+    loader = DataLoader(dataset, batch_size=batch_size, num_workers=3)
+
+    return loader
