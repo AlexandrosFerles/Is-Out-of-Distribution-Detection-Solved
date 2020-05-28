@@ -2,6 +2,7 @@ from dataLoaders import *
 import os
 import argparse
 import random
+from torch import nn
 import ipdb
 
 abs_path = '/home/ferles/medusa/src/'
@@ -18,6 +19,7 @@ def _create_fgsm_loader(val_loader, device):
     sample, gts = next(iter(val_loader))
     sizes = sample.size()
     len_ = 0
+    ipdb.set_trace()
     ood_data_x = torch.zeros(size=(val_loader.__len__()*val_loader.batch_size, sizes[1], sizes[2], sizes[3]))
     ood_data_y = torch.zeros(val_loader.__len__()*val_loader.batch_size)
     fgsm_step = 0.1
