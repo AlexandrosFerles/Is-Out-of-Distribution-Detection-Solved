@@ -7,7 +7,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import roc_curve, auc
 from utils import build_model_with_checkpoint
-from dataLoaders import get_temp_data_loaders
+from dataLoaders import 
 from tqdm import tqdm
 import lib_generation
 import argparse
@@ -1173,6 +1173,7 @@ if __name__ == '__main__':
     parser.add_argument('--ood_method', '--m', required=True)
     parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--in_distribution_dataset', '--in', required=True)
+    parser.add_argument('--val_dataset', '--val', required=True)
     parser.add_argument('--out_distribution_dataset', '--out', required=True)
     parser.add_argument('--model_checkpoint', '--mc', default=None, required=False)
     parser.add_argument('--model_type', '--mt', default='efficient', required=False)
@@ -1219,25 +1220,12 @@ if __name__ == '__main__':
         for line in open(args.model_checkpoints_file, 'r'):
             model_checkpoints.append(line.split('\n')[0])
 
-    # standard_datasets = ['cifar10']
-    # if args.in_distribution_dataset.lower() == 'cifar10' and args.out_distribution_dataset.lower() == 'tinyimagenet':
-    #     pickle_files = ['train_indices_cifar10.pickle', 'val_indices_cifar10.pickle']
-    #     if args.model_type == 'efficient':
-    #         trainloader, val_loader, testloader = cifar10loaders(train_batch_size=args.batch_size, test_batch_size=args.batch_size, pickle_files=pickle_files, test=True)
-    #         ood_loader = tinyImageNetloader(batch_size=args.batch_size)
-    #     else:
-    #         trainloader, val_loader, testloader = cifar10loaders(train_batch_size=args.batch_size, test_batch_size=args.batch_size, pickle_files=pickle_files, test=True, resize=False)
-    #         ood_loader = tinyImageNetloader(batch_size=args.batch_size, resize=False)
-
-    testloader, ood_loader = get_temp_data_loaders()
-    # if args.with_FGSM or ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-    #     loaders = [val_loader, testloader, ood_loader]
-    # else:
-    loaders = [testloader, ood_loader]
+    loaders =
 
     if ood_method == 'baseline':
         if args.with_FGSM:
             print('FGSM cannot be combined with the baseline method, skipping this step')
+        method_loaders = [val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader]
         _baseline(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
 
     elif ood_method == 'odin':
