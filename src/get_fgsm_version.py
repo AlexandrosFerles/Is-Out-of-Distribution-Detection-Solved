@@ -76,12 +76,12 @@ if __name__=='__main__':
     fgsm_dataloader_32 = _create_fgsm_loader(dataloader_32, args.device)
     fgsm_dataloader_32_isic = _create_fgsm_loader(dataloader_32_isic, args.device)
 
-    torch.save(dataloader_1, 'imageNetFGSM/dataloader_1.pth')
-    torch.save(dataloader_1_isic, 'imageNetFGSM/dataloader_1_isic.pth')
-    torch.save(dataloader_10, 'imageNetFGSM/dataloader_10.pth')
-    torch.save(dataloader_10_isic, 'imageNetFGSM/dataloader_10_isic.pth')
-    torch.save(dataloader_32, 'imageNetFGSM/dataloader_32.pth')
-    torch.save(dataloader_32_isic, 'imageNetFGSM/dataloader_32_isic.pth')
+    torch.save(dataloader_1, 'imageNetVal/dataloader_1.pth')
+    torch.save(dataloader_1_isic, 'imageNetVal/dataloader_1_isic.pth')
+    torch.save(dataloader_10, 'imageNetVal/dataloader_10.pth')
+    torch.save(dataloader_10_isic, 'imageNetVal/dataloader_10_isic.pth')
+    torch.save(dataloader_32, 'imageNetVal/dataloader_32.pth')
+    torch.save(dataloader_32_isic, 'imageNetVal/dataloader_32_isic.pth')
 
     torch.save(fgsm_dataloader_1, 'imageNetFGSM/fgsm_dataloader_1.pth')
     torch.save(fgsm_dataloader_1_isic, 'imageNetFGSM/fgsm_dataloader_1_isic.pth')
