@@ -927,7 +927,6 @@ def _gen_odin_temp(model, loaders, ind_dataset, device):
 
     model.eval()
     test_loader, ood_loader = loaders
-    _score_classification_accuracy(model, testloader, dataset=ind_dataset, genOdin=True)
 
     max_h_scores_ind = np.zeros(test_loader.batch_size*test_loader.__len__())
     len_ = 0
