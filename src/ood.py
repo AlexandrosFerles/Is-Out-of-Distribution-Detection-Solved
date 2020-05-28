@@ -208,7 +208,7 @@ def _get_baseline_scores(model, loader, device, monte_carlo_steps):
     arr = arr[:arr_len]
     return arr
 
-def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_steps=1, exclude_class=None, score_ind=True):
+def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, monte_carlo_steps=1, exclude_class=None, score_ind=True):
 
     model.eval()
 
@@ -253,12 +253,14 @@ def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_step
     print('###############################################')
     print()
     if monte_carlo_steps == 1:
-        print(f"Baseline results on {ind_dataset} (In) vs {ood_dataset} (Out):")
+        print(f"Baseline results on {ind_dataset} (In) vs {ood_dataset} (Out) with {val_dataset} as Validation:")
     else:
-        print(f"Baseline results with MC dropout ({monte_carlo_steps} steps) on {ind_dataset} (In) vs {ood_dataset} (Out):")
+        print(f"Baseline results with MC dropout ({monte_carlo_steps} steps) on {ind_dataset} (In) vs {ood_dataset} with {val_dataset} as Validation:")
     print()
     print(f'Area Under Receiver Operating Characteristic curve: {auc}')
     print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+    print(f'Detection Accuracy: {acc}')
+
 
 else:
     np.savez(ood_savefile_name, ood)
