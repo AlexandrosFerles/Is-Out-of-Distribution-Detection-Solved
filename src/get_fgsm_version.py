@@ -69,12 +69,12 @@ if __name__=='__main__':
     if not os.path.exists('imageNetVal/'):
         os.system('mkdir imageNetFGSM/')
 
-    fgsm_dataloader_1_isic = _create_fgsm_loader(dataloader_1_isic, args.device)
     fgsm_dataloader_1 = _create_fgsm_loader(dataloader_1, args.device)
-    fgsm_dataloader_10_isic = _create_fgsm_loader(dataloader_10_isic, args.device)
+    fgsm_dataloader_1_isic = _create_fgsm_loader(dataloader_1_isic, args.device)
     fgsm_dataloader_10 = _create_fgsm_loader(dataloader_10, args.device)
-    fgsm_dataloader_32_isic = _create_fgsm_loader(dataloader_32_isic, args.device)
+    fgsm_dataloader_10_isic = _create_fgsm_loader(dataloader_10_isic, args.device)
     fgsm_dataloader_32 = _create_fgsm_loader(dataloader_32, args.device)
+    fgsm_dataloader_32_isic = _create_fgsm_loader(dataloader_32_isic, args.device)
 
     torch.save('')
     torch.save('')
@@ -82,3 +82,10 @@ if __name__=='__main__':
     torch.save('')
     torch.save('')
     torch.save('')
+
+    torch.save(fgsm_dataloader_1, '')
+    torch.save(fgsm_dataloader_1_isic, '')
+    torch.save(fgsm_dataloader_10,'')
+    torch.save(fgsm_dataloader_10_isic,'')
+    torch.save(fgsm_dataloader_32,'')
+    torch.save(fgsm_dataloader_32_isic, '')
