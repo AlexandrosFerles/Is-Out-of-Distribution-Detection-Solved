@@ -958,6 +958,7 @@ def imageNetLoader(dataset, batch_size=32):
         normalize = transforms.Normalize((0.6796, 0.5284, 0.5193), (0.1200, 0.1413, 0.1538))
 
     test_transform = transforms.Compose([
+        transforms.Resize(224),
         transforms.ToTensor(),
         normalize
     ])
