@@ -75,3 +75,10 @@ if __name__=='__main__':
     fgsm_dataloader_10 = _create_fgsm_loader(dataloader_10, args.device)
     fgsm_dataloader_32_isic = _create_fgsm_loader(dataloader_32_isic, args.device)
     fgsm_dataloader_32 = _create_fgsm_loader(dataloader_32, args.device)
+
+    torch.save('')
+    torch.save('')
+    torch.save('')
+    torch.save('')
+    torch.save('')
+    torch.save('')
