@@ -117,13 +117,12 @@ def _score_npzs(ind, ood, threshold):
 
     fpr = round(100*fp/(fp+tn), 2)
 
-    ipdb.set_trace()
     ind_ = np.zeros(ind.shape)
     ood_ = np.zeros(ood.shape)
     ind_[np.argwhere(ind > threshold)] = 1
     ood_[np.argwhere(ood < threshold)] = 1
 
-    acc = (np.sum(ind_) + (np.sum(ood_) ) / (ind_.shape[0]  + ood_.shape[0]))
+    acc = (np.sum(ind_) + np.sum(ood_) ) / (ind_.shape[0]  + ood_.shape[0])
 
     return roc_auc, fpr, acc
 
