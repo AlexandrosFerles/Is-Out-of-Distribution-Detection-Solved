@@ -7,7 +7,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import roc_curve, auc
 from utils import build_model_with_checkpoint
-from dataLoaders import 
+from dataLoaders import get_ood_loaders
 from tqdm import tqdm
 import lib_generation
 import argparse
@@ -1220,7 +1220,7 @@ if __name__ == '__main__':
         for line in open(args.model_checkpoints_file, 'r'):
             model_checkpoints.append(line.split('\n')[0])
 
-    loaders =
+    loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=out_distribution_dataset)
 
     if ood_method == 'baseline':
         if args.with_FGSM:
