@@ -220,8 +220,12 @@ def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_step
     val_ood = _get_baseline_scores(model, val_ood_loader, device, monte_carlo_steps)
 
     if monte_carlo_steps > 1:
-        ind = val_ind / monte_carlo_steps
-        ood = val_ood / monte_carlo_steps
+        val_ind = val_ind / monte_carlo_steps
+        val_ood = val_ood / monte_carlo_steps
+
+    acc, threshold = _find_threshold(val_ind, val_ood)
+    test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps)
+    test_ood = _get_baseline_scores(model, test_ood_loader, device, monte_carlo_steps)
 
     if exclude_class is None:
         if monte_carlo_steps == 1:
@@ -238,32 +242,31 @@ def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_step
             ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
             ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
 
-    if score_ind:
-        np.savez(ind_savefile_name, ind)
-        np.savez(ood_savefile_name, ood)
-        auc, fpr, acc = _score_npzs(ind, ood)
+    np.savez(ind_savefile_name, test_ind)
+    np.savez(ood_savefile_name, test_ood)
+    auc, fpr, acc = _score_npzs(test_ind, test_ood, threshold)
 
-        print('###############################################')
-        print()
-        print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
-        print()
-        print('###############################################')
-        print()
-        if monte_carlo_steps == 1:
-            print(f"Baseline results on {ind_dataset} (In) vs {ood_dataset} (Out):")
-        else:
-            print(f"Baseline results with MC dropout ({monte_carlo_steps} steps) on {ind_dataset} (In) vs {ood_dataset} (Out):")
-        print()
-        print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-        print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-
+    print('###############################################')
+    print()
+    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
+    print()
+    print('###############################################')
+    print()
+    if monte_carlo_steps == 1:
+        print(f"Baseline results on {ind_dataset} (In) vs {ood_dataset} (Out):")
     else:
-        np.savez(ood_savefile_name, ood)
-        print('###############################################')
-        print()
-        print(f'Succesfully stored in-distribution out-distribution ood scores to: {ood_savefile_name}')
-        print()
-        print('###############################################')
+        print(f"Baseline results with MC dropout ({monte_carlo_steps} steps) on {ind_dataset} (In) vs {ood_dataset} (Out):")
+    print()
+    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+
+else:
+    np.savez(ood_savefile_name, ood)
+    print('###############################################')
+    print()
+    print(f'Succesfully stored in-distribution out-distribution ood scores to: {ood_savefile_name}')
+    print()
+    print('###############################################')
 
 
 def _create_fgsm_loader(val_loader):
