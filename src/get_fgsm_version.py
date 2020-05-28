@@ -1,6 +1,6 @@
 from dataLoaders import *
 import os
-import pickle
+import argparse
 import random
 import ipdb
 
@@ -13,7 +13,7 @@ torch.manual_seed(global_seed)
 torch.cuda.manual_seed(global_seed)
 
 
-def _create_fgsm_loader(val_loader):
+def _create_fgsm_loader(val_loader, device):
 
     sample, gts = next(iter(val_loader))
     sizes = sample.size()
@@ -53,14 +53,25 @@ def _create_fgsm_loader(val_loader):
 
 if __name__=='__main__':
 
+    parser = argparse.ArgumentParser(description='fgsm')
+    parser.add_argument('--device', '--dv', type=int, default=0, required=False)
+    args = parser.parse_args()
+
+    dataloader_1_isic = imageNetLoader(batch_size=1)
     dataloader_1 = imageNetLoader(batch_size=1)
+    dataloader_10_isic = imageNetLoader(batch_size=10)
     dataloader_10 = imageNetLoader(batch_size=10)
+    dataloader_32_isic = imageNetLoader(batch_size=32)
     dataloader_32 = imageNetLoader(batch_size=32)
+
     if not os.path.exists('imageNetFGSM/'):
         os.system('mkdir imageNetFGSM/')
     if not os.path.exists('imageNetVal/'):
         os.system('mkdir imageNetFGSM/')
 
-    fgsm_dataloader_1 = _create_fgsm_loader(dataloader_1)
-    fgsm_dataloader_10 = _create_fgsm_loader(dataloader_10)
-    fgsm_dataloader_32 = _create_fgsm_loader(dataloader_32)
+    fgsm_dataloader_1_isic = _create_fgsm_loader(dataloader_1_isic, args.device)
+    fgsm_dataloader_1 = _create_fgsm_loader(dataloader_1, args.device)
+    fgsm_dataloader_10_isic = _create_fgsm_loader(dataloader_10_isic, args.device)
+    fgsm_dataloader_10 = _create_fgsm_loader(dataloader_10, args.device)
+    fgsm_dataloader_32_isic = _create_fgsm_loader(dataloader_32_isic, args.device)
+    fgsm_dataloader_32 = _create_fgsm_loader(dataloader_32, args.device)
