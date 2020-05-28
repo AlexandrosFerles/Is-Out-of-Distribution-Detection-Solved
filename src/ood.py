@@ -1137,6 +1137,9 @@ def _gen_odin_inference(model, loaders, ind_dataset, ood_dataset, mode, exclude_
 
 if __name__ == '__main__':
 
+    import time
+    start = time.time()
+
     parser = argparse.ArgumentParser(description='Out-of-Distribution Detection')
 
     parser.add_argument('--ood_method', '--m', required=True)
@@ -1226,3 +1229,8 @@ if __name__ == '__main__':
     #     _gen_odin_temp(model, loaders, ind_dataset=args.in_distribution_dataset, device=device)
     # else:
     #     raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
+
+    end = time.time()
+    hours, rem = divmod(end-start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
