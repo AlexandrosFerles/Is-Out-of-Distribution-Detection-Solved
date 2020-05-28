@@ -262,15 +262,6 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
     print(f'Detection Accuracy: {acc}')
 
 
-else:
-    np.savez(ood_savefile_name, ood)
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution out-distribution ood scores to: {ood_savefile_name}')
-    print()
-    print('###############################################')
-
-
 def _create_fgsm_loader(val_loader):
 
     sample, gts = next(iter(val_loader))
