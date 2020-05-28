@@ -7,7 +7,7 @@
     "resolutionIncrease": "False",
     "out_classes": 10,
     "checkpoint": "STL",
-    "train_pickle": "None",
-    "test_pickle": "None"
+    "train_pickle": "train_indices_stl.pickle",
+    "test_pickle": "val_indices_stl.pickle"
   }
 }
