@@ -74,7 +74,7 @@ def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
     print(f'Accuracy on {dataset}: {accuracy}%')
 
 
-def _score_npzs(ind, ood):
+def _score_npzs(ind, ood, threshold):
 
     y_known, y_novel = np.ones(ind.shape[0]), np.zeros(ood.shape[0])
     X, y = np.append(ind, ood), np.append(y_known, y_novel)
@@ -85,12 +85,12 @@ def _score_npzs(ind, ood):
 
     perc = 0.95
     sorted_ = np.sort(ind)
-    threshold = sorted_[int((1-perc)*ind.shape[0])]
+    fpr_threshold = sorted_[int((1-perc)*ind.shape[0])]
 
     ind_ = np.zeros(ind.shape)
     ood_ = np.zeros(ood.shape)
-    ind_[np.argwhere(ind > threshold)] = 1
-    ood_[np.argwhere(ood > threshold)] = 1
+    ind_[np.argwhere(ind > fpr_threshold)] = 1
+    ood_[np.argwhere(ood > fpr_threshold)] = 1
 
     X = np.append(ind_, ood_)
     bool_X = np.atleast_1d(X.astype(np.bool))
@@ -100,7 +100,15 @@ def _score_npzs(ind, ood):
     fp = np.count_nonzero(bool_X & ~bool_y)
 
     fpr = round(100*fp/(fp+tn), 2)
-    return roc_auc, fpr
+
+    ind_ = np.zeros(ind.shape)
+    ood_ = np.zeros(ood.shape)
+    ind_[np.argwhere(ind > threshold)] = 1
+    ood_[np.argwhere(ood < threshold)] = 1
+
+    acc = np.sum(ind_) / ind_.shape[0] + (np.sum(ood_) / ood_.shape[0])
+
+    return roc_auc, fpr, acc
 
 
 def _score_mahalanobis(ind, ood):
@@ -1174,7 +1182,6 @@ if __name__ == '__main__':
     parser.add_argument('--epsilon', '--e', type=float, default=0, required=False)
     parser.add_argument('--with_FGSM', '--fgsm', type=bool, default=False, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
-    parser.add_argument('--ensemble_mode', '--ensmd', default='accuracy', required=False)
     parser.add_argument('--exclude_class', '--ex', default=None, required=False)
     parser.add_argument('--gen_odin_mode', '--gom', type=int, default=0, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
@@ -1186,7 +1193,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     device = torch.device(f'cuda:{args.device}')
-    score_ind = True if args.score_ind==1 else False
+    score_ind = True if args.score_ind == 1 else False
 
     ood_method = args.ood_method.lower()
 
