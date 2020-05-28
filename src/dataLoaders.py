@@ -1037,12 +1037,18 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 valset_indices = pickle.load(open('cifar10dogsindices.pickle', 'rb'))
             sampler = SubsetRandomSampler(valset_indices)
             val_ood_loader = DataLoader(valset, batch_size=32, sampler=sampler, num_workers=3)
-
         elif val_ood_dataset == 'birdsnap':
             if os.path.exists('/raid/ferles'):
                 birds_path = '/raid/ferles/Birds/birdsnap/'
             else:
                 birds_path = '/home/ferles/Birds/birdsnap/'
+            dataset_birdsnap = ImageFolder(birds_path, transform=transform_test)
+            val_ood_loader = DataLoader(dataset_birdsnap, batch_size=batch_size, num_workers=3)
+        elif val_ood_dataset == 'imagenet':
+            if os.path.exists('/raid/ferles'):
+                val_imagenet_path = '/raid/ferles/ImageNetVal/'
+            else:
+                val_imagenet_path = '/home/ferles/ImageNetVal/'
             dataset_birdsnap = ImageFolder(birds_path, transform=transform_test)
             val_ood_loader = DataLoader(dataset_birdsnap, batch_size=batch_size, num_workers=3)
 
