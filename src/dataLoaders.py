@@ -950,6 +950,137 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
                 return trainloader
 
 
+def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=32, exclude_class=None, subset_index=None):
+
+    if ind_dataset == 'isic':
+        _, transform_test = _get_transforms()
+    else:
+        _, transform_test = _get_image_transforms(ind_dataset, resize=True)
+
+    if ind_dataset == 'isic':
+        if os.path.exists('/raid/ferles'):
+            path = '/raid/ferles/ISIC2019/folds/'
+        else:
+            path = '/home/ferles/ISIC2019/folds/'
+        ind_trainset = PandasDataSetWithPaths(f'{path}Train_Fold_new_no_preproc', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+        ind_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+        ind_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+
+        train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3)
+        val_ind_loader = DataLoader(ind_valset, batch_size=batch_size, num_workers=3)
+        test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
+    elif ind_dataset == 'stanforddogs' or ind_dataset=='nabirds':
+        if subset_index is None:
+            ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
+            with open(f'train_indices_{ind_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'wb') as val_pickle:
+                trainset_indices = pickle.load(train_pickle)
+                valset_indices = pickle.load(val_pickle)
+
+                train_sampler = SubsetRandomSampler(trainset_indices)
+                val_sampler = SubsetRandomSampler(valset_indices)
+                train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=train_sampler)
+                val_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+                test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
+        else:
+            pass
+    elif ind_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
+        ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
+        with open(f'train_indices_{ind_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'wb') as val_pickle:
+            trainset_indices = pickle.load(train_pickle)
+            valset_indices = pickle.load(val_pickle)
+
+            train_sampler = SubsetRandomSampler(trainset_indices)
+            val_sampler = SubsetRandomSampler(valset_indices)
+            train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=train_sampler)
+            val_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+            test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
+
+    if val_ood_dataset != 'fgsm':
+        if val_ood_dataset == 'isic':
+            if os.path.exists('/raid/ferles'):
+                path = '/raid/ferles/ISIC2019/folds/'
+            else:
+                path = '/home/ferles/ISIC2019/folds/'
+            val_ood_trainset = PandasDataSetWithPaths(f'{path}Train_Fold_new_no_preproc', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+            val_ood_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+            val_ood_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+            val_ood_loader = DataLoader(val_ood_valset, batch_size=batch_size, num_workers=3)
+        elif val_ood_dataset=='stanforddogs' or val_ood_dataset=='nabirds':
+            if subset_index is None:
+                val_ood_trainset, val_ood_testset = _get_dataset(val_ood_dataset, [transform_test, transform_test], test=True)
+                with open(f'train_indices_{val_ood_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_pickle:
+                    trainset_val_oodices = pickle.load(train_pickle)
+                    valset_val_oodices = pickle.load(val_pickle)
+                    val_sampler = SubsetRandomSampler(valset_val_oodices)
+                    val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+            else:
+                pass
+        elif val_ood_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
+            val_ood_trainset, val_ood_testset = _get_dataset(val_ood_dataset, [transform_test, transform_test], test=True)
+            with open(f'train_indices_{val_ood_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_pickle:
+                trainset_val_oodices = pickle.load(train_pickle)
+                valset_val_oodices = pickle.load(val_pickle)
+                val_sampler = SubsetRandomSampler(valset_val_oodices)
+                val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+        elif val_ood_dataset == '7point':
+            if os.path.exists('/raid/ferles'):
+                path_7_points = '/raid/ferles/7-point/7_point_images'
+            else:
+                path_7_points = '/home/ferles/7-point/7_point_images'
+            dataset7point = ImageFolder(path_7_points, transform=transform_test)
+            val_ood_loader = DataLoader(dataset7point, batch_size=batch_size, num_workers=3)
+
+
+    if test_ood_dataset == 'isic':
+        if os.path.exists('/raid/ferles'):
+            path = '/raid/ferles/ISIC2019/folds/'
+        else:
+            path = '/home/ferles/ISIC2019/folds/'
+        test_ood_trainset = PandasDataSetWithPaths(f'{path}Train_Fold_new_no_preproc', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+        test_ood_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+        test_ood_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+
+        train_test_ood_loader = DataLoader(test_ood_trainset, batch_size=batch_size, num_workers=3)
+        val_test_ood_loader = DataLoader(test_ood_valset, batch_size=batch_size, num_workers=3)
+        test_test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
+    elif test_ood_dataset=='stanforddogs' or test_ood_dataset=='nabirds':
+        if subset_index is None:
+            test_ood_trainset, test_ood_testset = _get_dataset(test_ood_dataset, [transform_test, transform_test], test=True)
+            with open(f'train_indices_{test_ood_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{test_ood_dataset}.pickle', 'wb') as val_pickle:
+                trainset_test_oodices = pickle.load(train_pickle)
+                valset_test_oodices = pickle.load(val_pickle)
+
+                train_sampler = SubsetRandomSampler(trainset_test_oodices)
+                val_sampler = SubsetRandomSampler(valset_test_oodices)
+                train_test_ood_loader = DataLoader(test_ood_trainset, batch_size=batch_size, num_workers=3, sampler=train_sampler)
+                val_test_ood_loader = DataLoader(test_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+                test_test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
+        else:
+            pass
+    elif test_ood_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
+        test_ood_trainset, test_ood_testset = _get_dataset(test_ood_dataset, [transform_test, transform_test], test=True)
+        with open(f'train_indices_{test_ood_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{test_ood_dataset}.pickle', 'wb') as val_pickle:
+            trainset_test_oodices = pickle.load(train_pickle)
+            valset_test_oodices = pickle.load(val_pickle)
+
+            train_sampler = SubsetRandomSampler(trainset_test_oodices)
+            val_sampler = SubsetRandomSampler(valset_test_oodices)
+            train_test_ood_loader = DataLoader(test_ood_trainset, batch_size=batch_size, num_workers=3, sampler=train_sampler)
+            val_test_ood_loader = DataLoader(test_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+            test_test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
+    elif test_ood_dataset == 'oxfordpets':
+        if os.path.exists('/raid/ferles'):
+            oxford_pets_path = '/raid/ferles/Dogs/Oxford/images'
+        else:
+            oxford_pets_path = '/home/ferles/Dogs/Oxford/images'
+        dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test)
+        val_ood_loader = DataLoader(dataset_oxford_pets, batch_size=batch_size, num_workers=3)
+
+
+
+
+
+
 def imageNetLoader(dataset, batch_size=32):
 
     if dataset=='stanforddogs' or dataset == 'nabirds':
