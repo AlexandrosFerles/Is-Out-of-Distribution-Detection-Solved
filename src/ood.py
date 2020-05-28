@@ -117,6 +117,7 @@ def _score_npzs(ind, ood, threshold):
 
     fpr = round(100*fp/(fp+tn), 2)
 
+    ipdb.set_trace()
     ind_ = np.zeros(ind.shape)
     ood_ = np.zeros(ood.shape)
     ind_[np.argwhere(ind > threshold)] = 1
