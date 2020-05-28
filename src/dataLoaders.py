@@ -962,7 +962,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             path = '/raid/ferles/ISIC2019/folds/'
         else:
             path = '/home/ferles/ISIC2019/folds/'
-        ind_trainset = PandasDataSetWithPaths(f'{path}Train_Fold_new_no_preproc', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+        ind_trainset = PandasDataSetWithPaths(f'{path}Train_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
         ind_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
         ind_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
 
@@ -1049,8 +1049,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_imagenet_path = '/raid/ferles/ImageNetVal/'
             else:
                 val_imagenet_path = '/home/ferles/ImageNetVal/'
-            dataset_birdsnap = ImageFolder(birds_path, transform=transform_test)
-            val_ood_loader = DataLoader(dataset_birdsnap, batch_size=batch_size, num_workers=3)
+            dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
+            val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
 
     if test_ood_dataset == 'isic':
         if os.path.exists('/raid/ferles'):
