@@ -1,5 +1,6 @@
 import torch
 from torch.utils import data
+import torchvision
 import numpy as np
 from PIL import Image
 import pandas as pd
@@ -626,3 +627,52 @@ class GenericImageFolderDataset(data.Dataset):
             sample = self.transform[0](sample)
 
         return sample, tgt
+
+
+class MyDatasetFolder(torchvision.datasets.folder.VisionDataset):
+
+    def __init__(self, root, loader, extensions=None, transform=None,
+                 target_transform=None, is_valid_file=None):
+        super(MyDatasetFolder, self).__init__(root, transform=transform, target_transform=target_transform)
+        classes, class_to_idx = self._find_classes(self.root)
+        samples = torchvision.datasets.folder.make_dataset(self.root, class_to_idx, extensions, is_valid_file)
+        if len(samples) == 0:
+            raise (RuntimeError("Found 0 files in subfolders of: " + self.root + "\n Supported extensions are: " + ",".join(extensions)))
+
+        self.loader = loader
+        self.extensions = extensions
+
+        self.classes = classes
+        self.class_to_idx = class_to_idx
+        self.samples = samples
+        self.targets = [s[1] for s in samples]
+
+    def _find_classes(self, dir):
+        classes = [d.name for d in os.scandir(dir) if d.is_dir()]
+        classes.sort()
+        class_to_idx = {classes[i]: i for i in range(len(classes))}
+        return classes, class_to_idx
+
+    def __getitem__(self, index):
+        path, target = self.samples[index]
+        sample = self.loader(path)
+        sample = sample.convert('RGB')
+        if self.transform is not None:
+            sample = self.transform(sample)
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        return sample, target
+
+    def __len__(self):
+        return len(self.samples)
+
+
+class MyImageFolder(MyDatasetFolder):
+    def __init__(self, root, transform=None, target_transform=None,
+                 loader=torchvision.datasets.folder.default_loader, is_valid_file=None):
+        super(MyImageFolder, self).__init__(root, loader, torchvision.datasets.folder.IMG_EXTENSIONS if is_valid_file is None else None,
+                                          transform=transform,
+                                          target_transform=target_transform,
+                                          is_valid_file=is_valid_file)
+        self.imgs = self.samples
