@@ -57,12 +57,12 @@ if __name__=='__main__':
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
     args = parser.parse_args()
 
-    dataloader_1_isic = imageNetLoader(batch_size=1)
-    dataloader_1 = imageNetLoader(batch_size=1)
-    dataloader_10_isic = imageNetLoader(batch_size=10)
-    dataloader_10 = imageNetLoader(batch_size=10)
-    dataloader_32_isic = imageNetLoader(batch_size=32)
-    dataloader_32 = imageNetLoader(batch_size=32)
+    dataloader_1_isic = imageNetLoader(dataset='isic', batch_size=1)
+    dataloader_1 = imageNetLoader(dataset='nabirds', batch_size=1)
+    dataloader_10_isic = imageNetLoader(dataset='isic', batch_size=10)
+    dataloader_10 = imageNetLoader(dataset='nabirds', batch_size=10)
+    dataloader_32_isic = imageNetLoader(dataset='isic', batch_size=32)
+    dataloader_32 = imageNetLoader(dataset='nabirds', batch_size=32)
 
     if not os.path.exists('imageNetFGSM/'):
         os.system('mkdir imageNetFGSM/')
