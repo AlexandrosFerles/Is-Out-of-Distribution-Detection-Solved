@@ -87,7 +87,7 @@ def train(args):
     exclude_class = training_configurations.exclude_class
     exclude_class = None if exclude_class == "None" else exclude_class
 
-    # wandb.init(name=checkpointFileName)
+    wandb.init(name=checkpointFileName)
 
     batch_size = 32
 
@@ -95,7 +95,6 @@ def train(args):
         train_loader, val_loader, test_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName)
     else:
         train_loader, val_loader, test_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName, exclude_class=exclude_class)
-    ipdb.set_trace()
     ood_loader = imageNetLoader(dataset='isic', batch_size=batch_size)
     ood_loader_iter = iter(ood_loader)
 
