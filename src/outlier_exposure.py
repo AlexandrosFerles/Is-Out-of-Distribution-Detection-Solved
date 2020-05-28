@@ -87,7 +87,10 @@ def train(args):
     exclude_class = training_configurations.exclude_class
     exclude_class = None if exclude_class == "None" else exclude_class
 
-    wandb.init(name=checkpointFileName)
+    if exclude_class is None:
+        wandb.init(name='oe_isic')
+    else:
+        wandb.init(name=f'oe_{exclude_class}')
 
     batch_size = 32
 
@@ -179,10 +182,15 @@ def train(args):
                 best_val_acc = val_detection_accuracy
 
                 if os.path.exists('/raid/ferles/'):
-                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/outlier_exposure_{training_configurations.checkpointFile}.pth')
+                    if exclude_class is None:
+                        torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/outlier_exposure_isic.pth')
+                    else:
+                        torch.save(model.state_dict(), f'/raid/ferles/checkpoints/isic_classifiers/outlier_exposure_{exclude_class}.pth')
                 else:
-                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/isic_classifiers/outlier_exposure_{training_configurations.checkpointFile}.pth')
-
+                    if exclude_class is None:
+                        torch.save(model.state_dict(), f'/home/ferles/checkpoints/isic_classifiers/outlier_exposure_isic.pth')
+                    else:
+                        torch.save(model.state_dict(), f'/home/ferles/checkpoints/isic_classifiers/outlier_exposure_{exclude_class}.pth')
                 correct, total = 0, 0
 
                 for data in test_loader:
