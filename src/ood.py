@@ -205,7 +205,7 @@ def _get_baseline_scores(model, loader, device, monte_carlo_steps):
 
                 arr[index*loader.batch_size:index*loader.batch_size + top_class_probability.size()[0]] += top_class_probability.detach().cpu().numpy()
 
-    arr = ind[:arr_len]
+    arr = arr[:arr_len]
     return arr
 
 def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_steps=1, exclude_class=None, score_ind=True):
@@ -1228,7 +1228,7 @@ if __name__ == '__main__':
     if ood_method == 'baseline':
         if args.with_FGSM:
             print('FGSM cannot be combined with the baseline method, skipping this step')
-        method_loaders = [val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader]
+        method_loaders = loaders[1:]
         _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
 
     elif ood_method == 'odin':
