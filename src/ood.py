@@ -40,7 +40,7 @@ def _find_threshold(train_scores, val_scores):
         ind_[np.argwhere(train_scores > temp_threshold)] = 1
         ood_[np.argwhere(val_scores < temp_threshold)] = 1
 
-        temp_acc = np.sum(ind_) / ind_.shape[0] + (np.sum(ood_) / ood_.shape[0])
+        temp_acc = (np.sum(ind_) + (np.sum(ood_) ) / (ind_.shape[0]  + ood_.shape[0]))
         if temp_acc > acc:
             acc, threshold = temp_acc, temp_threshold
 
