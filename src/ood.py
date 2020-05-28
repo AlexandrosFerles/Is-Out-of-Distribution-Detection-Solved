@@ -267,7 +267,7 @@ def _baseline(model, loaders, device, ind_dataset, ood_dataset, monte_carlo_step
     if score_ind:
         np.savez(ind_savefile_name, ind)
         np.savez(ood_savefile_name, ood)
-        auc, fpr = _score_npzs(ind, ood)
+        auc, fpr, acc = _score_npzs(ind, ood)
 
         print('###############################################')
         print()
