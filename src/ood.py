@@ -1205,33 +1205,33 @@ if __name__ == '__main__':
         if args.with_FGSM:
             print('FGSM cannot be combined with the baseline method, skipping this step')
         method_loaders = loaders[1:]
-        _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+        _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
 
-    elif ood_method == 'odin':
-        if args.temperature != 1 or args.epsilon != 0:
-            _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, T=args.temperature, epsilon=args.epsilon, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
-        else:
-            _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
-
-    elif ood_method == 'mahalanobis':
-        if not args.with_FGSM:
-            print('Mahalanobis method can only be used with FGSM, applying it either way')
-        loaders = [trainloader] + [val_loader, testloader, ood_loader]
-        _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
-
-    elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
-        if args.with_FGSM:
-            print('FGSM cannot be combined with the self-supervision method, skipping this step')
-        _rotation(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
-
-    elif ood_method == 'ensemble':
-        if args.with_FGSM:
-            print('FGSM cannot be combined with the ensemble method, skipping this step')
-        scaling = True if args.scaling == 1 else False
-        _ensemble_inference(model_checkpoints, loaders, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, mode=args.ensemble_mode, device=device, scaling=scaling)
-
-    elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-        # _gen_odin_inference(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, mode=args.gen_odin_mode, exclude_class=args.exclude_class)
-        _gen_odin_temp(model, loaders, ind_dataset=args.in_distribution_dataset, device=device)
-    else:
-        raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
+    # elif ood_method == 'odin':
+    #     if args.temperature != 1 or args.epsilon != 0:
+    #         _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, T=args.temperature, epsilon=args.epsilon, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+    #     else:
+    #         _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+    #
+    # elif ood_method == 'mahalanobis':
+    #     if not args.with_FGSM:
+    #         print('Mahalanobis method can only be used with FGSM, applying it either way')
+    #     loaders = [trainloader] + [val_loader, testloader, ood_loader]
+    #     _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+    #
+    # elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
+    #     if args.with_FGSM:
+    #         print('FGSM cannot be combined with the self-supervision method, skipping this step')
+    #     _rotation(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
+    #
+    # elif ood_method == 'ensemble':
+    #     if args.with_FGSM:
+    #         print('FGSM cannot be combined with the ensemble method, skipping this step')
+    #     scaling = True if args.scaling == 1 else False
+    #     _ensemble_inference(model_checkpoints, loaders, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, mode=args.ensemble_mode, device=device, scaling=scaling)
+    #
+    # elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
+    #     # _gen_odin_inference(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, mode=args.gen_odin_mode, exclude_class=args.exclude_class)
+    #     _gen_odin_temp(model, loaders, ind_dataset=args.in_distribution_dataset, device=device)
+    # else:
+    #     raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
