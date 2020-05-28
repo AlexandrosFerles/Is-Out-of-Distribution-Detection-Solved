@@ -968,6 +968,6 @@ def imageNetLoader(dataset, batch_size=32):
     else:
         dataset = ImageFolder(root='/home/ferles/ImageNet/', transform=test_transform)
 
-    loader = DataLoader(dataset, batch_size=32)
+    loader = DataLoader(dataset, batch_size=32, num_workers=3)
 
     return loader
