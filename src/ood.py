@@ -24,6 +24,32 @@ torch.manual_seed(global_seed)
 torch.cuda.manual_seed(global_seed)
 
 
+def _find_threshold(train_scores, val_scores):
+
+    train_scores = np.sort(train_scores)
+    val_scores = np.sort(val_scores)
+
+    acc, threshold = 0, 0
+    index = val_scores.shape[0] - 1
+
+    while(True):
+
+        temp_threshold = val_scores[index]
+        ind_ = np.zeros(train_scores.shape)
+        ood_ = np.zeros(val_scores.shape)
+        ind_[np.argwhere(train_scores > temp_threshold)] = 1
+        ood_[np.argwhere(val_scores < temp_threshold)] = 1
+
+        temp_acc = np.sum(ind_) / ind_.shape[0] + (np.sum(ood_) / ood_.shape[0])
+        if temp_acc > acc:
+            acc, threshold = temp_acc, temp_threshold
+
+        if temp_threshold < train_scores[0]:
+            break
+
+    return acc, threshold
+
+
 def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
 
     model.eval()
