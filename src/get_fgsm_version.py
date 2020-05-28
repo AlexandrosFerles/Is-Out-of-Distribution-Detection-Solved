@@ -1,21 +1,16 @@
-import torch
-import numpy as np
-import torchvision
-from torch.utils.data import DataLoader, TensorDataset, ConcatDataset
-from torchvision import transforms, datasets
-from torchvision.transforms import functional as Ftransforms
-from torchvision.datasets import ImageFolder
-from torch.utils.data.sampler import SubsetRandomSampler, Sampler
-import torch.nn.functional as F
-from sklearn.model_selection import StratifiedShuffleSplit
-from imblearn.over_sampling import RandomOverSampler
-from tqdm import tqdm
-from auto_augment import AutoAugment, Cutout
-from dataLoaders import  *
+from dataLoaders import *
 import os
 import pickle
 import random
 import ipdb
+
+abs_path = '/home/ferles/medusa/src/'
+global_seed = 1
+torch.backends.cudnn.deterministic = True
+random.seed(global_seed)
+np.random.seed(global_seed)
+torch.manual_seed(global_seed)
+torch.cuda.manual_seed(global_seed)
 
 
 def _create_fgsm_loader(val_loader):
