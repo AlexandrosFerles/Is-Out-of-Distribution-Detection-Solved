@@ -155,7 +155,6 @@ def train(args):
             if ood_outputs.size(0) < batch_size:
                 uniform = torch.ones(size=(batch_size, out_classes)) / float(out_classes)
                 uniform = uniform.to(device)
-            break
 
         wandb.log({'epoch': epoch}, commit=False)
         wandb.log({'Train Set Loss': sum(loss_acc) / float(train_loader.__len__()), 'epoch': epoch})
