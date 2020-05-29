@@ -143,7 +143,7 @@ def _score_mahalanobis(ind, ood):
     _, threshold = _find_threshold(known_preds, novel_preds)
 
     fpr, tpr, _ = roc_curve(y, np.append(known_preds, novel_preds, axis=0))
-    roc_auc = auc(fpr, tpr)
+    roc_auc = round(100*auc(fpr, tpr), 2)
 
     return lr, roc_auc, threshold
 
