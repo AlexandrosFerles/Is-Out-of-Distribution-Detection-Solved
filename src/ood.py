@@ -141,6 +141,7 @@ def _predict_mahalanobis(regressor, ind, ood, threshold):
 
     return auc, fpr, acc
 
+
 def _get_baseline_scores(model, loader, device, monte_carlo_steps):
 
     arr = np.zeros(loader.batch_size*loader.__len__())
