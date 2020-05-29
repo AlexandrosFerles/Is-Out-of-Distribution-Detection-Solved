@@ -599,48 +599,6 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num
     print(f'OOD Detection Accuracy: {acc}')
 
 
-def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, ood_dataset, T=1000, epsilon=0.002, mode='accuracy', scaling =True):
-
-    test_loader, ood_loader = loaders
-    index = 0
-    for model_checkpoint in tqdm(model_checkpoints):
-        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
-        model.eval()
-        if scaling:
-            if index == 0:
-                ind = _get_odin_scores(model, test_loader, T, epsilon, device=device, score_entropy=True)
-                ood = _get_odin_scores(model, ood_loader, T, epsilon, device=device, score_entropy=True)
-            else:
-                ind += _get_odin_scores(model, test_loader, T, epsilon, device=device, score_entropy=True)
-                ood += _get_odin_scores(model, ood_loader, T, epsilon, device=device, score_entropy=True)
-        else:
-            if index == 0:
-                ind = _get_odin_scores(model, test_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                ood = _get_odin_scores(model, ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-            else:
-                ind += _get_odin_scores(model, test_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                ood += _get_odin_scores(model, ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-        index += 1
-
-    ind_savefile_name = f'npzs/ensemble_{ind_dataset}_mode_{mode}.npz'
-    ood_savefile_name = f'npzs/ensemble_{ood_dataset}_mode_{mode}.npz'
-
-    ind = ind / (index-1)
-    ood = ood / (index-1)
-    np.savez(ind_savefile_name, ind)
-    np.savez(ood_savefile_name, ood)
-    auc, fpr = _score_npzs(ind, ood)
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
-    print()
-    print('###############################################')
-    print()
-    print(f"Leave-Out Ensemble results ({mode}) on {ind_dataset} (In) vs {ood_dataset}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-
-
 def _process_gen_odin(model, images, epsilon, criterion=nn.CrossEntropyLoss()):
 
     model.eval()
@@ -728,6 +686,49 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
     print(f'Detection Accuracy: {acc}')
 
+
+def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, ood_dataset, T=1000, epsilon=0.002, mode='accuracy', scaling =True):
+
+    test_loader, ood_loader = loaders
+    index = 0
+    for model_checkpoint in tqdm(model_checkpoints):
+        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
+        model.eval()
+        if scaling:
+            if index == 0:
+                ind = _get_odin_scores(model, test_loader, T, epsilon, device=device, score_entropy=True)
+                ood = _get_odin_scores(model, ood_loader, T, epsilon, device=device, score_entropy=True)
+            else:
+                ind += _get_odin_scores(model, test_loader, T, epsilon, device=device, score_entropy=True)
+                ood += _get_odin_scores(model, ood_loader, T, epsilon, device=device, score_entropy=True)
+        else:
+            if index == 0:
+                ind = _get_odin_scores(model, test_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                ood = _get_odin_scores(model, ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+            else:
+                ind += _get_odin_scores(model, test_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                ood += _get_odin_scores(model, ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+        index += 1
+
+    ind_savefile_name = f'npzs/ensemble_{ind_dataset}_mode_{mode}.npz'
+    ood_savefile_name = f'npzs/ensemble_{ood_dataset}_mode_{mode}.npz'
+
+    ind = ind / (index-1)
+    ood = ood / (index-1)
+    np.savez(ind_savefile_name, ind)
+    np.savez(ood_savefile_name, ood)
+    auc, fpr = _score_npzs(ind, ood)
+    print('###############################################')
+    print()
+    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
+    print()
+    print('###############################################')
+    print()
+    print(f"Leave-Out Ensemble results ({mode}) on {ind_dataset} (In) vs {ood_dataset}:")
+    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+
+
 if __name__ == '__main__':
 
     import time
@@ -741,16 +742,11 @@ if __name__ == '__main__':
     parser.add_argument('--val_dataset', '--val', required=True)
     parser.add_argument('--out_distribution_dataset', '--out', required=True)
     parser.add_argument('--model_checkpoint', '--mc', default=None, required=False)
-    parser.add_argument('--model_type', '--mt', default='efficient', required=False)
     parser.add_argument('--model_checkpoints_file', '--mcf', default=None, required=False)
     parser.add_argument('--monte_carlo_steps', '--mcdo', type=int, default=1, required=False)
-    parser.add_argument('--with_FGSM', '--fgsm', type=bool, default=False, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
     parser.add_argument('--exclude_class', '--ex', default=None, required=False)
-    parser.add_argument('--gen_odin_mode', '--gom', type=int, default=0, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
-    parser.add_argument('--score_ind', '--sind', type=int, default=1, required=False)
-    parser.add_argument('--scaling', '--sc', type=int, default=1, required=False)
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3, 4, 5, 6, 7"
@@ -764,20 +760,12 @@ if __name__ == '__main__':
     if args.model_checkpoint is None and args.model_checkpoints_file is None:
         raise NotImplementedError('You need to specify either a single or multiple checkpoints')
     elif args.model_checkpoint is not None:
-        if args.model_type == 'efficient':
-            if ood_method == 'self-supervision' or ood_method == 'selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
-                model = build_model_with_checkpoint('roteb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
-            elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-                model = build_model_with_checkpoint('geneb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
-            else:
-                model = build_model_with_checkpoint('eb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
-        elif args.model_type == 'wide':
-            model = build_model_with_checkpoint('wide', args.model_checkpoint, device=device, out_classes=args.num_classes)
-        elif args.model_type == 'dense':
-            if ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-                model = build_model_with_checkpoint('genDense', args.model_checkpoint, device=device, out_classes=args.num_classes, gen_odin_mode=args.gen_odin_mode)
-            else:
-                raise NotImplementedError('DenseNet can only ne used with Generalized-Odin at the monent')
+        if ood_method == 'self-supervision' or ood_method == 'selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
+            model = build_model_with_checkpoint('roteb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
+        elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
+            model = build_model_with_checkpoint('geneb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
+        else:
+            model = build_model_with_checkpoint('eb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
     else:
         model_checkpoints = []
         for line in open(args.model_checkpoints_file, 'r'):
