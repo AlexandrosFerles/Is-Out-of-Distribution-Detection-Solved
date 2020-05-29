@@ -230,6 +230,8 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
 
 def _create_fgsm_loader(val_loader, gen_odin=False):
 
+    if gen_odin:
+        val_loader.drop_last = True
     sample, gts = next(iter(val_loader))
     sizes = sample.size()
     len_ = 0
