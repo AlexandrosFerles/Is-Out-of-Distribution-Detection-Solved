@@ -8,7 +8,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import roc_curve, auc
 from utils import build_model_with_checkpoint
-from dataLoaders import get_ood_loaders
+from dataLoaders import get_triplets_loaders
 from tqdm import tqdm
 import lib_generation
 import argparse
@@ -672,44 +672,28 @@ if __name__ == '__main__':
     all_datasets.remove(ind_dataset)
     all_datasets.remove(val_dataset)
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = all_datasets
-    
-    loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
-    if args.val_dataset == 'fgsm':
-        if args.fgsm_checkpoint is not None:
-            if args.fgsm_classes is None:
-                fgsm_classes = args.num_classes
-            else:
-                fgsm_classes = args.fgsm_classes
-            fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=fgsm_classes)
-        else:
-            from copy import deepcopy
-            fgsm_model = deepcopy(model)
-        if not os.path.exists(f'{args.val_dataset}_fgsm_loader_{ood_method}.pth'):
-            fgsm_loader = _create_fgsm_loader(fgsm_model, loaders[1], device)
-            torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader_{ood_method}.pth')
-        else:
-            fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader_{ood_method}.pth')
-        loaders[-2] = fgsm_loader
+
+    loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
     if ood_method == 'baseline':
         method_loaders = loaders[1:]
         _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device)
-    elif ood_method == 'odin':
-        method_loaders = loaders[1:]
-        _odin(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
-    elif ood_method == 'mahalanobis':
-        _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
-    elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
-        method_loaders = loaders[1:]
-        _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
-    elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-        method_loaders = loaders[1:]
-        _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
-    elif ood_method == 'ensemble':
-        method_loaders = loaders[1:]
-        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
-    else:
-        raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
+    # elif ood_method == 'odin':
+    #     method_loaders = loaders[1:]
+    #     _odin(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
+    # elif ood_method == 'mahalanobis':
+    #     _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
+    # elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
+    #     method_loaders = loaders[1:]
+    #     _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
+    # elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
+    #     method_loaders = loaders[1:]
+    #     _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
+    # elif ood_method == 'ensemble':
+    #     method_loaders = loaders[1:]
+    #     _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
+    # else:
+    #     raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)
