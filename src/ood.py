@@ -686,9 +686,14 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     print(f'Detection Accuracy: {acc}')
 
 
+# def _get_ensemble_scores(model, loader, device):
+
+
 def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
+    if ind_dataset == 'isic':
+        val_ind = np.zeros()
     index = 0
     for model_checkpoint in tqdm(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
@@ -731,6 +736,7 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
         ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
         ood_savefile_name = f'npzs/ensemble_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
 
+    ipdb.set_trace()
     auc, fpr, acc = _score_npzs(ind, ood, threshold)
 
     np.savez(ind_savefile_name, ind)
@@ -817,14 +823,7 @@ if __name__ == '__main__':
         _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     elif ood_method == 'ensemble':
         method_loaders = loaders[1:]
-        print('SCALING')
-        print()
-        print()
-        scaling = True
-        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, scaling=scaling)
-        print('NO SCALING')
-        scaling = False
-        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, scaling=scaling)
+        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
     else:
         raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
