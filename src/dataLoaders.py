@@ -953,7 +953,7 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
 def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=32, exclude_class=None, subset_index=None):
 
     if val_ood_dataset == 'fgsm':
-        val_batch_size = 10
+        val_batch_size = 1
     else:
         val_batch_size = batch_size
 
