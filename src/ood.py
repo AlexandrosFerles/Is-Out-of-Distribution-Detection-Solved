@@ -955,8 +955,6 @@ if __name__ == '__main__':
     parser.add_argument('--model_type', '--mt', default='efficient', required=False)
     parser.add_argument('--model_checkpoints_file', '--mcf', default=None, required=False)
     parser.add_argument('--monte_carlo_steps', '--mcdo', type=int, default=1, required=False)
-    parser.add_argument('--temperature', '--T', type=int, default=1, required=False)
-    parser.add_argument('--epsilon', '--e', type=float, default=0, required=False)
     parser.add_argument('--with_FGSM', '--fgsm', type=bool, default=False, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
     parser.add_argument('--exclude_class', '--ex', default=None, required=False)
@@ -1012,7 +1010,7 @@ if __name__ == '__main__':
         _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
 
     elif ood_method == 'odin':
-        _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, T=args.temperature, epsilon=args.epsilon, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+        _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
 
     # elif ood_method == 'mahalanobis':
     #     if not args.with_FGSM:
