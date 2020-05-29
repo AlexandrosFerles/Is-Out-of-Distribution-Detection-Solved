@@ -81,7 +81,7 @@ def _get_metrics(X, y):
 def _score_npzs(ind, ood, threshold):
 
     y_known, y_novel = np.ones(ind.shape[0]), np.zeros(ood.shape[0])
-    X, y = np.append(ind, ood), np.append(y_known, y_novel)
+    X, y = np.append(ind, ood, axis=0), np.append(y_known, y_novel, axis=0)
 
     fpr, tpr, _ = roc_curve(y, X)
     roc_auc = auc(fpr, tpr)
@@ -95,21 +95,21 @@ def _score_npzs(ind, ood, threshold):
     ood_ = np.zeros(ood.shape)
     ind_[np.argwhere(ind >= fpr_threshold)] = 1
     ood_[np.argwhere(ood >= fpr_threshold)] = 1
-    X = np.append(ind_, ood_, axis=0)
+    X_fpr = np.append(ind_, ood_, axis=0)
 
-    fpr, _ = _get_metrics(X, y)
-    fpr = round(100*fpr, 2)
+    fpr_, _ = _get_metrics(X_fpr, y)
+    fpr_ = round(100*fpr_, 2)
 
-    ind_ = np.zeros(ind.shape)
-    ood_ = np.zeros(ood.shape)
-    ind_[np.argwhere(ind >= threshold)] = 1
-    ood_[np.argwhere(ood >= threshold)] = 1
-    X = np.append(ind_, ood_, axis=0)
+    ind_acc = np.zeros(ind.shape)
+    ood_acc = np.zeros(ood.shape)
+    ind_acc[np.argwhere(ind >= threshold)] = 1
+    ood_acc[np.argwhere(ood >= threshold)] = 1
+    X_acc = np.append(ind_acc, ood_acc, axis=0)
 
-    _, acc = _get_metrics(X, y)
+    _, acc = _get_metrics(X_acc, y)
     acc = round(100*acc, 2)
 
-    return roc_auc, fpr, acc
+    return roc_auc, fpr_, acc
 
 
 def _score_mahalanobis(ind, ood):
