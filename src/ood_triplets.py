@@ -16,7 +16,7 @@ import os
 import random
 import pickle
 import ipdb
-from ood import _find_threshold, _get_metrics, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores
+from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -66,6 +66,7 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, mo
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
     model.eval()
+    _score_classification_accuracy(model, testloader=test_ind_loader, device=device, dataset=ind_dataset)
 
     if monte_carlo_steps > 1:
         model._dropout.train()
