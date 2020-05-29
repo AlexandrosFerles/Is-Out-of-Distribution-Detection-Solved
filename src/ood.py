@@ -411,7 +411,7 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
 
     np.savez(ind_savefile_name, ind)
     np.savez(ood_savefile_name, ood)
-    
+
     auc, fpr, acc = _score_npzs(ind, ood, threshold)
 
     print('###############################################')
@@ -998,7 +998,7 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
 
-    if args.with_FGSM:
+    if args.val_dataset == 'fgsm':
         if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
             fgsm_loader = _create_fgsm_loader(loaders[1])
             torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader.pth')
