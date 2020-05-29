@@ -71,7 +71,6 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, mo
     if monte_carlo_steps > 1:
         model._dropout.train()
 
-    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     val_ind = _get_baseline_scores(model, val_ind_loader, device, monte_carlo_steps)
     val_ood = _get_baseline_scores(model, val_ood_loader, device, monte_carlo_steps)
 
