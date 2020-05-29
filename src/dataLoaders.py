@@ -971,6 +971,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             path = '/raid/ferles/ISIC2019/folds/'
         else:
             path = '/home/ferles/ISIC2019/folds/'
+
         ind_trainset = PandasDataSetWithPaths(f'{path}Train_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
         ind_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
         ind_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
@@ -1017,8 +1018,14 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 path = '/raid/ferles/ISIC2019/folds/'
             else:
                 path = '/home/ferles/ISIC2019/folds/'
-            val_ood_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
-            val_ood_loader = DataLoader(val_ood_valset, batch_size=batch_size, num_workers=3)
+            if exclude_class is None:
+                val_ood_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+            else:
+                val_ood_valset = PandasDataSetSingleClass(f'{path}Train_Fold_new_no_preproc.csv', transform=transform_test, single_class=exclude_class)
+            indexes = list(range(val_ood_valset.__len__()))
+            random.shuffle(indexes)
+            sampler = SubsetRandomSampler(indexes[:min(len(indexes), dataset_size)])
+            val_ood_loader = DataLoader(val_ood_valset, batch_size=batch_size, sampler=sampler, num_workers=3)
         elif val_ood_dataset=='stanforddogs' or val_ood_dataset=='nabirds':
             if subset_index is None:
                 val_ood_trainset, val_ood_testset = _get_dataset(val_ood_dataset, [transform_test, transform_test], test=True)
