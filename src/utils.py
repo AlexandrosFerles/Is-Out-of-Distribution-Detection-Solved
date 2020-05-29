@@ -143,6 +143,8 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
         if 'checkpoints' not in model_checkpoint:
             model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
         model = GenOdinEfficientNet.from_pretrained('efficientnet-b0', mode=gen_odin_mode)
+        from efficientnet_pytorch.gen_odin_model import CosineSimilarity
+        model._fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=out_classes)
         model.load_state_dict(torch.load(model_checkpoint, map_location=device))
         model = model.to(device)
         return model
