@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 from sklearn.linear_model import LogisticRegressionCV
-from sklearn.metrics._plot import confusion_matrix
+from sklearn.metrics import confusion_matrix
 from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
@@ -69,13 +69,9 @@ def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
     print(f'Accuracy on {dataset}: {accuracy}%')
 
 
-def _get_metrics(ind, ood):
+def _get_metrics(X, y):
 
-    fp = confusion_matrix.sum(axis=0) - np.diag(confusion_matrix)
-    tp = np.diag(confusion_matrix)
-    fn = confusion_matrix.sum(axis=1) - np.diag(confusion_matrix)
-    tn = confusion_matrix.sum() - (fp + fn + tp)
-
+    tn, fp, fn, tp = confusion_matrix(y, X).ravel()
     fpr = fp/(fp+tn)
     acc = (tp+tn)/(tp+fp+fn+tn)
 
@@ -144,6 +140,7 @@ def _predict_mahalanobis(regressor, ind, ood, threshold):
     novel_preds = regressor.predict_proba(ood)[:, 1]
     auc, fpr, acc = _score_npzs(known_preds, novel_preds, threshold)
 
+    return auc, fpr, acc
 
 def _get_baseline_scores(model, loader, device, monte_carlo_steps):
 
