@@ -950,7 +950,7 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
                 return trainloader
 
 
-def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=32, exclude_class=None, subset_index=None):
+def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=32, dataset_size=1000, exclude_class=None, subset_index=None):
 
     if val_ood_dataset == 'fgsm':
         val_batch_size = 1
@@ -971,8 +971,15 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         ind_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
         ind_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
 
+        if ind_valset.__len__() < dataset_size:
+            dataset_size = ind_valset.__len__()
+        indexes = list(range(ind_valset.__len__()))
+        random.shuffle(indexes)
+        indexes = indexes[:dataset_size]
+        val_ind_sampler = SubsetRandomSampler(indexes)
+
         train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3)
-        val_ind_loader = DataLoader(ind_valset, batch_size=val_batch_size, num_workers=3)
+        val_ind_loader = DataLoader(ind_valset, batch_size=val_batch_size, sampler=val_ind_sampler, num_workers=3)
         test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
     elif ind_dataset == 'stanforddogs' or ind_dataset=='nabirds':
         if subset_index is None:
@@ -1029,14 +1036,18 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             else:
                 path_7_points = '/home/ferles/7-point/7_point_images'
             dataset7point = ImageFolder(path_7_points, transform=transform_test)
-            val_ood_loader = DataLoader(dataset7point, batch_size=batch_size, num_workers=3)
+            indexes = list(range(dataset7point.__len__()))
+            random.shuffle(indexes)
+            indexes = indexes[:dataset_size]
+            val_sampler = SubsetRandomSampler(indexes)
+            val_ood_loader = DataLoader(dataset7point, batch_size=batch_size, sampler=val_sampler, num_workers=3)
         elif val_ood_dataset == 'cifar10dogs':
             valset = _get_dataset(dataset='cifar10', transforms=[transform_test, transform_test], test=True)
             if not os.path.exists('cifar10dogsindices.pickle'):
                 targets = np.array(valset.targets)
                 pos = np.where(targets == 5).tolist()
                 random.shuffle(pos)
-                valset_indices = pos[:1000]
+                valset_indices = pos[:dataset_size]
                 pickle.dump(valset_indices, open('cifar10dogsindices.pickle', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
             else:
                 valset_indices = pickle.load(open('cifar10dogsindices.pickle', 'rb'))
@@ -1141,6 +1152,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         return train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader
     else:
         return [train_ind_loader, val_ind_loader, test_ind_loader, val_ind_loader, test_ood_loader]
+
 
 def imageNetLoader(dataset, batch_size=32):
 
