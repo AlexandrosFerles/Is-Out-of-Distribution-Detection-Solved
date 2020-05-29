@@ -779,6 +779,7 @@ if __name__ == '__main__':
     parser.add_argument('--exclude_class', '--ex', default=None, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
     parser.add_argument('--fgsm_checkpoint', '--fgsm', required=False)
+    parser.add_argument('--fgsm_classes', '--fgsmc', required=False)
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3, 4, 5, 6, 7"
@@ -804,7 +805,7 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
     if args.val_dataset == 'fgsm':
-        fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=args.num_classes)
+        fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=args.fgsm_classes)
         if not os.path.exists(f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth'):
             fgsm_loader = _create_fgsm_loader(loaders[1])
             torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth')
