@@ -384,7 +384,7 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
     print()
     print('###############################################')
     print()
-    print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={best_T} and epsilon={best_epsilon}:")
+    print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with Val Set {val_dataset} and chosen T={best_T}, epsilon={best_epsilon}:")
     print(f'Area Under Receiver Operating Characteristic curve: {auc}')
     print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
     print(f'Detection Accuracy: {acc}')
@@ -494,7 +494,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
             print()
             print('###############################################')
             print()
-            print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset}:')
+            print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset} (Out)  with Val Set {val_dataset}:')
             print(f'Area Under Receiver Operating Characteristic curve: {auc}')
             print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
             print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
@@ -548,62 +548,69 @@ def _predict_rotations(model, loader, num_classes, device):
     return numpy_array_kl_div, numpy_array_rot_score, numpy_array_full
 
 
-def _rotation(model, loaders, device, ind_dataset, ood_dataset, num_classes, exclude_class=None):
+def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes, exclude_class=None):
 
-    val_loader, ood_loader = loaders
-    ind_kl_div, ind_rot_score, ind_full = _predict_rotations(model, val_loader, num_classes, device=device)
-    ood_kl_div, ood_rot_score, ood_full = _predict_rotations(model, ood_loader, num_classes, device=device)
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
+
+    val_ind_kl_div, val_ind_rot_score, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
+    val_ood_kl_div, val_ood_rot_score, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
+
+    _, threshold = _find_threshold(val_ind_full, val_ood_full)
+
+    ind_kl_div, ind_rot_score, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
+    ood_kl_div, ood_rot_score, ood_full = _predict_rotations(model, test_ood_loader, num_classes, device=device)
 
     if exclude_class is None:
-        ind_savefile_name_kl_div = f'npzs/self_supervision_{ind_dataset}_kl_div.npz'
-        ind_savefile_name_rot_score = f'npzs/self_supervision_{ind_dataset}_rot_score.npz'
-        ind_savefile_name_full = f'npzs/self_supervision_{ind_dataset}_full.npz'
-        ood_savefile_name_kl_div = f'npzs/self_supervision_{ood_dataset}_kl_div.npz'
-        ood_savefile_name_rot_score = f'npzs/self_supervision_{ood_dataset}_rot_score.npz'
-        ood_savefile_name_full = f'npzs/self_supervision_{ood_dataset}_full.npz'
+        # ind_savefile_name_kl_div = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div.npz'
+        # ind_savefile_name_rot_score = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_rot_score.npz'
+        ind_savefile_name_full = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_full.npz'
+        # ood_savefile_name_kl_div = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div.npz'
+        # ood_savefile_name_rot_score = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_rot_score.npz'
+        ood_savefile_name_full = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_full.npz'
     else:
-        ind_savefile_name_kl_div = f'npzs/self_supervision_{ind_dataset}_kl_div_{exclude_class}.npz'
-        ind_savefile_name_rot_score = f'npzs/self_supervision_{ind_dataset}_rot_score_{exclude_class}.npz'
-        ind_savefile_name_full = f'npzs/self_supervision_{ind_dataset}_full_{exclude_class}.npz'
-        ood_savefile_name_kl_div = f'npzs/self_supervision_{ood_dataset}_kl_div_{exclude_class}.npz'
-        ood_savefile_name_rot_score = f'npzs/self_supervision_{ood_dataset}_rot_score_{exclude_class}.npz'
-        ood_savefile_name_full = f'npzs/self_supervision_{ood_dataset}_full_{exclude_class}.npz'
-    np.savez(ind_savefile_name_kl_div, ind_kl_div)
-    np.savez(ind_savefile_name_rot_score, ind_rot_score)
+        # ind_savefile_name_kl_div = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div_{exclude_class}.npz'
+        # ind_savefile_name_rot_score = f'npzs/self_supervision_{ind_dataset}__ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}rot_score_{exclude_class}.npz'
+        ind_savefile_name_full = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}full_{exclude_class}.npz'
+        # ood_savefile_name_kl_div = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div_{exclude_class}.npz'
+        # ood_savefile_name_rot_score = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_rot_score_{exclude_class}.npz'
+        ood_savefile_name_full = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_full_{exclude_class}.npz'
+
+    auc, fpr, acc = _score_npzs(ind_full, ood_full, threshold)
+
+    # np.savez(ind_savefile_name_kl_div, ind_kl_div)
+    # np.savez(ind_savefile_name_rot_score, ind_rot_score)
     np.savez(ind_savefile_name_full, ind_full)
-    np.savez(ood_savefile_name_kl_div, ood_kl_div)
-    np.savez(ood_savefile_name_rot_score, ood_rot_score)
+    # np.savez(ood_savefile_name_kl_div, ood_kl_div)
+    # np.savez(ood_savefile_name_rot_score, ood_rot_score)
     np.savez(ood_savefile_name_full, ood_full)
-    auc_kl_div, fpr_kl_div = _score_npzs(ind_kl_div, ood_kl_div)
-    auc_rot_score, fpr_rot_score = _score_npzs(ind_rot_score, ood_rot_score)
-    auc_full, fpr_full = _score_npzs(ind_full, ood_full)
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_kl_div} and out-distribution ood scores to {ood_savefile_name_kl_div}')
-    print()
-    print('###############################################')
-    print()
-    print(f"Self-Supervision results (KL-Divergence) on {ind_dataset} (In) vs {ood_dataset}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc_kl_div}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr_kl_div}')
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_rot_score} and out-distribution ood scores to {ood_savefile_name_rot_score}')
-    print()
-    print('###############################################')
-    print()
-    print(f"Self-Supervision results (Rotation Score) on {ind_dataset} (In) vs {ood_dataset}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc_rot_score}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr_rot_score}')
+    # print('###############################################')
+    # print()
+    # print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_kl_div} and out-distribution ood scores to {ood_savefile_name_kl_div}')
+    # print()
+    # print('###############################################')
+    # print()
+    # print(f"Self-Supervision results (KL-Divergence) on {ind_dataset} (In) vs {ood_dataset}:")
+    # print(f'Area Under Receiver Operating Characteristic curve: {auc_kl_div}')
+    # print(f'False Positive Rate @ 95% True Positive Rate: {fpr_kl_div}')
+    # print('###############################################')
+    # print()
+    # print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_rot_score} and out-distribution ood scores to {ood_savefile_name_rot_score}')
+    # print()
+    # print('###############################################')
+    # print()
+    # print(f"Self-Supervision results (Rotation Score) on {ind_dataset} (In) vs {ood_dataset}:")
+    # print(f'Area Under Receiver Operating Characteristic curve: {auc_rot_score}')
+    # print(f'False Positive Rate @ 95% True Positive Rate: {fpr_rot_score}')
     print('###############################################')
     print()
     print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_full} and out-distribution ood scores to {ood_savefile_name_full}')
     print()
     print('###############################################')
     print()
-    print(f"Self-Supervision results on {ind_dataset} (In) vs {ood_dataset}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc_full}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr_full}')
+    print(f"Self-Supervision results on {ind_dataset} (In) vs {ood_dataset} with Val Set {val_dataset}:")
+    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+    print(f'OOD Detection Accuracy: {acc}')
 
 
 def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, ood_dataset, T=1000, epsilon=0.002, mode='accuracy', scaling =True):
@@ -959,11 +966,9 @@ if __name__ == '__main__':
         _odin(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     elif ood_method == 'mahalanobis':
         _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
-    #
-    # elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
-    #     if args.with_FGSM:
-    #         print('FGSM cannot be combined with the self-supervision method, skipping this step')
-    #     _rotation(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
+    elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
+        method_loaders = loaders[1:]
+        _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
     #
     # elif ood_method == 'ensemble':
     #     if args.with_FGSM:
