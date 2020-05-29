@@ -120,7 +120,7 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
             new_key = key.split('module.')[1]
             new_state_dict[new_key] = value
         torch.save(new_state_dict, os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth')
-        net.load_state_dict(torch.load(os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth', map_location=device), strict=False)
+        net.load_state_dict(torch.load(os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth', map_location=device))
         os.system(f"rm {os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth'}")
     elif 'rot' in modelName:
         from efficientnet_pytorch.rot_model import RotEfficientNet
@@ -135,7 +135,7 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
             new_key = key.split('module.')[1]
             new_state_dict[new_key] = value
         torch.save(new_state_dict, model_checkpoint.split('.pth')[0]+'correct.pth')
-        model.load_state_dict(torch.load(model_checkpoint.split('.pth')[0]+'correct.pth', map_location=device))
+        model.load_state_dict(torch.load(model_checkpoint.split('.pth')[0]+'correct.pth', map_location=device), strict=False)
         os.system(f"rm {model_checkpoint.split('.pth')[0]+'correct.pth'}")
         return model
     elif 'geneb0' in modelName:
