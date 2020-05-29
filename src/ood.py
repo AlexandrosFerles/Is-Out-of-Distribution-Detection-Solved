@@ -449,47 +449,47 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     print()
 
     for (best_magnitude, regressor, threshold) in zip(best_magnitudes, regressors, thresholds):
-            for i in range(num_output):
-                M_test = lib_generation.get_Mahalanobis_score(model, test_ind_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
-                M_test = np.asarray(M_test, dtype=np.float32)
-                if i == 0:
-                    Mahalanobis_test = M_test.reshape((M_test.shape[0], -1))
-                else:
-                    Mahalanobis_test = np.concatenate((Mahalanobis_test, M_test.reshape((M_test.shape[0], -1))), axis=1)
-
-            for i in range(num_output):
-                M_ood = lib_generation.get_Mahalanobis_score(model, test_ood_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
-                M_ood = np.asarray(M_ood, dtype=np.float32)
-                if i == 0:
-                    Mahalanobis_ood = M_ood.reshape((M_ood.shape[0], -1))
-                else:
-                    Mahalanobis_ood = np.concatenate((Mahalanobis_ood, M_ood.reshape((M_ood.shape[0], -1))), axis=1)
-
-            Mahalanobis_test = np.asarray(Mahalanobis_test, dtype=np.float32)
-            Mahalanobis_ood = np.asarray(Mahalanobis_ood, dtype=np.float32)
-
-            if exclude_class is None:
-                ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}.npz'
-                ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}.npz'
+        for i in range(num_output):
+            M_test = lib_generation.get_Mahalanobis_score(model, test_ind_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+            M_test = np.asarray(M_test, dtype=np.float32)
+            if i == 0:
+                Mahalanobis_test = M_test.reshape((M_test.shape[0], -1))
             else:
-                ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
-                ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+                Mahalanobis_test = np.concatenate((Mahalanobis_test, M_test.reshape((M_test.shape[0], -1))), axis=1)
 
-            np.savez(ind_savefile_name, Mahalanobis_test)
-            np.savez(ood_savefile_name, Mahalanobis_ood)
-            auc, fpr, acc = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood, threshold)
-            print('###############################################')
-            print()
-            print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
-            print()
-            print('###############################################')
-            print()
-            print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset} (Out)  with Val Set {val_dataset}:')
-            print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-            print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-            print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-            print('###############################################')
-            print()
+        for i in range(num_output):
+            M_ood = lib_generation.get_Mahalanobis_score(model, test_ood_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+            M_ood = np.asarray(M_ood, dtype=np.float32)
+            if i == 0:
+                Mahalanobis_ood = M_ood.reshape((M_ood.shape[0], -1))
+            else:
+                Mahalanobis_ood = np.concatenate((Mahalanobis_ood, M_ood.reshape((M_ood.shape[0], -1))), axis=1)
+
+        Mahalanobis_test = np.asarray(Mahalanobis_test, dtype=np.float32)
+        Mahalanobis_ood = np.asarray(Mahalanobis_ood, dtype=np.float32)
+
+        if exclude_class is None:
+            ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}.npz'
+            ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}.npz'
+        else:
+            ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+            ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+
+        np.savez(ind_savefile_name, Mahalanobis_test)
+        np.savez(ood_savefile_name, Mahalanobis_ood)
+        auc, fpr, acc = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood, threshold)
+        print('###############################################')
+        print()
+        print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
+        print()
+        print('###############################################')
+        print()
+        print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset} (Out)  with Val Set {val_dataset}:')
+        print(f'Area Under Receiver Operating Characteristic curve: {auc}')
+        print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+        print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+        print('###############################################')
+        print()
 
 
 def _predict_rotations(model, loader, num_classes, device):
