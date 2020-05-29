@@ -16,6 +16,7 @@ import os
 import random
 import pickle
 import ipdb
+from ood import _find_threshold, _get_metrics, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -25,134 +26,44 @@ torch.manual_seed(global_seed)
 torch.cuda.manual_seed(global_seed)
 
 
-def _find_threshold(train_scores, val_scores):
+def _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs):
 
-    probs = np.append(train_scores, val_scores, axis=0)
-    y_true = np.append(np.ones(train_scores.shape[0]), np.zeros(val_scores.shape[0]), axis=0)
-    from sklearn.metrics import accuracy_score
-    from sklearn.metrics import roc_curve
-
-    fpr, tpr, thresholds = roc_curve(y_true, probs)
-    accuracy_scores = []
-    for thresh in thresholds:
-        accuracy_scores.append(accuracy_score(y_true, [1 if m > thresh else 0 for m in probs]))
-
-    accuracies = np.array(accuracy_scores)
-    max_accuracy = round(100*accuracies.max(), 2)
-    max_accuracy_threshold = thresholds[accuracies.argmax()]
-
-    print(f'Chosen threshold: {max_accuracy_threshold} yielding {max_accuracy}% accuracy')
-    return max_accuracy, max_accuracy_threshold
-
-
-def _get_metrics(X, y):
-
-    tn, fp, fn, tp = confusion_matrix(y, X).ravel()
-    fpr = fp/(fp+tn)
-    acc = (tp+tn)/(tp+fp+fn+tn)
-
-    return fpr, acc
-
-
-def _score_npzs(ind, ood, threshold):
-
-    y_known, y_novel = np.ones(ind.shape[0]), np.zeros(ood.shape[0])
-    X, y = np.append(ind, ood, axis=0), np.append(y_known, y_novel, axis=0)
-
-    fpr, tpr, _ = roc_curve(y, X)
-    roc_auc = auc(fpr, tpr)
-    roc_auc = round(100*roc_auc, 2)
-
-    perc = 0.95
-    sorted_ = np.sort(ind)
-    fpr_threshold = sorted_[int((1-perc)*ind.shape[0])]
-
-    ind_ = np.zeros(ind.shape)
-    ood_ = np.zeros(ood.shape)
-    ind_[np.argwhere(ind >= fpr_threshold)] = 1
-    ood_[np.argwhere(ood >= fpr_threshold)] = 1
-    X_fpr = np.append(ind_, ood_, axis=0)
-
-    fpr_, _ = _get_metrics(X_fpr, y)
-    fpr_ = round(100*fpr_, 2)
-
-    ind_acc = np.zeros(ind.shape)
-    ood_acc = np.zeros(ood.shape)
-    ind_acc[np.argwhere(ind >= threshold)] = 1
-    ood_acc[np.argwhere(ood >= threshold)] = 1
-    X_acc = np.append(ind_acc, ood_acc, axis=0)
-
-    _, acc = _get_metrics(X_acc, y)
-    acc = round(100*acc, 2)
-
-    return roc_auc, fpr_, acc
+    print('###############################################')
+    print()
+    print(f"{method} results on {ood_dataset_1} (Out):")
+    print()
+    print(f'Area Under Receiver Operating Characteristic curve: {aucs[0]}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fprs[0]}')
+    print(f'Detection Accuracy: {accs[0]}')
+    print('###############################################')
+    print()
+    print(f"{method} results on {ood_dataset_2} (Out):")
+    print()
+    print(f'Area Under Receiver Operating Characteristic curve: {aucs[1]}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fprs[1]}')
+    print(f'Detection Accuracy: {accs[1]}')
+    print('###############################################')
+    print()
+    print(f"{method} results on {ood_dataset_3} (Out):")
+    print()
+    print(f'Area Under Receiver Operating Characteristic curve: {aucs[2]}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fprs[2]}')
+    print(f'Detection Accuracy: {accs[2]}')
+    print('###############################################')
+    print()
+    print('###############################################')
+    print('###############################################')
+    print(f"MEAN PERFORMANCE OF {method.upper()}:")
+    print(f'Area Under Receiver Operating Characteristic curve: {round(np.mean(aucs), 2)}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {round(np.mean(fprs), 2)}')
+    print(f'Detection Accuracy: {round(np.mean(accs), 2)}')
+    print('###############################################')
+    print('###############################################')
 
 
-def _score_mahalanobis(ind, ood):
+def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset_1, ood_dataset_2, ood_dataset_3, monte_carlo_steps=1, exclude_class=None):
 
-    y_known = np.ones(ind.shape[0])
-    y_novel = np.zeros(ood.shape[0])
-
-    X = np.append(ind, ood, axis=0)
-    y = np.append(y_known, y_novel)
-
-    lr = LogisticRegressionCV(n_jobs=-1, cv=5, max_iter=1000).fit(X, y)
-
-    known_preds = lr.predict_proba(ind)[:, 1]
-    novel_preds = lr.predict_proba(ood)[:, 1]
-
-    _, threshold = _find_threshold(known_preds, novel_preds)
-
-    fpr, tpr, _ = roc_curve(y, np.append(known_preds, novel_preds, axis=0))
-    roc_auc = round(100*auc(fpr, tpr), 2)
-
-    return lr, roc_auc, threshold
-
-
-def _predict_mahalanobis(regressor, ind, ood, threshold):
-
-    known_preds = regressor.predict_proba(ind)[:, 1]
-    novel_preds = regressor.predict_proba(ood)[:, 1]
-    auc, fpr, acc = _score_npzs(known_preds, novel_preds, threshold)
-
-    return auc, fpr, acc
-
-
-def _get_baseline_scores(model, loader, device, monte_carlo_steps):
-
-    arr = np.zeros(loader.batch_size*loader.__len__())
-    arr_len = 0
-    for index, data in enumerate(loader):
-
-        images, _ = data
-        images = images.to(device)
-
-        outputs = model(images)
-        softmax_outputs = torch.softmax(outputs, 1)
-        top_class_probability = torch.max(softmax_outputs, axis=1)[0]
-
-        arr[index*loader.batch_size:index*loader.batch_size + top_class_probability.size()[0]] = top_class_probability.detach().cpu().numpy()
-        arr_len += top_class_probability.size()[0]
-
-    if monte_carlo_steps > 1:
-        for _ in range(monte_carlo_steps-1):
-            for index, data in enumerate(loader):
-
-                images, _ = data
-                images = images.to(device)
-
-                outputs = model(images)
-                softmax_outputs = torch.softmax(outputs, 1)
-                top_class_probability = torch.max(softmax_outputs, axis=1)[0]
-
-                arr[index*loader.batch_size:index*loader.batch_size + top_class_probability.size()[0]] += top_class_probability.detach().cpu().numpy()
-
-    arr = arr[:arr_len]
-    return arr
-
-
-def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, monte_carlo_steps=1, exclude_class=None, score_ind=True):
-
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
     model.eval()
 
     if monte_carlo_steps > 1:
@@ -167,79 +78,61 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
         val_ood = val_ood / monte_carlo_steps
 
     acc, threshold = _find_threshold(val_ind, val_ood)
+
     test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps)
-    test_ood = _get_baseline_scores(model, test_ood_loader, device, monte_carlo_steps)
+    test_ood_1 = _get_baseline_scores(model, test_ood_loader_1, device, monte_carlo_steps)
+    test_ood_2 = _get_baseline_scores(model, test_ood_loader_2, device, monte_carlo_steps)
+    test_ood_3 = _get_baseline_scores(model, test_ood_loader_3, device, monte_carlo_steps)
 
     if exclude_class is None:
         if monte_carlo_steps == 1:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
+            ood_savefile_name_1 = f'npzs/baseline_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}.npz'
+            ood_savefile_name_2 = f'npzs/baseline_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}.npz'
+            ood_savefile_name_3 = f'npzs/baseline_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}.npz'
         else:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_monte_carlo_{monte_carlo_steps}.npz'
+            ood_savefile_name_1 = f'npzs/baseline_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}_monte_carlo_{monte_carlo_steps}.npz'
+            ood_savefile_name_2 = f'npzs/baseline_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}_monte_carlo_{monte_carlo_steps}.npz'
+            ood_savefile_name_3 = f'npzs/baseline_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}_monte_carlo_{monte_carlo_steps}.npz'
     else:
         if monte_carlo_steps == 1:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{exclude_class}.npz'
+            ood_savefile_name_1 = f'npzs/baseline_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}_{exclude_class}.npz'
+            ood_savefile_name_2 = f'npzs/baseline_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}_{exclude_class}.npz'
+            ood_savefile_name_3 = f'npzs/baseline_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}_{exclude_class}.npz'
         else:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
+            ood_savefile_name_1 = f'npzs/baseline_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
+            ood_savefile_name_2 = f'npzs/baseline_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
+            ood_savefile_name_3 = f'npzs/baseline_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
 
     np.savez(ind_savefile_name, test_ind)
-    np.savez(ood_savefile_name, test_ood)
-    auc, fpr, acc = _score_npzs(test_ind, test_ood, threshold)
+    np.savez(ood_savefile_name_1, test_ood_1)
+    np.savez(ood_savefile_name_2, test_ood_2)
+    np.savez(ood_savefile_name_3, test_ood_3)
+
+    auc_1, fpr_1, acc_1 = _score_npzs(test_ind, test_ood_1, threshold)
+    auc_2, fpr_2, acc_2 = _score_npzs(test_ind, test_ood_2, threshold)
+    auc_3, fpr_3, acc_3 = _score_npzs(test_ind, test_ood_3, threshold)
+
+    aucs = [auc_1, auc_2, auc_3]
+    fprs = [fpr_1, fpr_2, fpr_3]
+    accs = [acc_1, acc_2, acc_3]
 
     print('###############################################')
     print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
+    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name_1}, {ood_savefile_name_2} and {ood_savefile_name_3}')
     print()
     print('###############################################')
     print()
+    print(f"InD dataset: {ind_dataset}")
+    print(f"Validation dataset: {val_dataset}")
     if monte_carlo_steps == 1:
-        print(f"Baseline results on {ind_dataset} (In) vs {ood_dataset} (Out) with {val_dataset} as Validation:")
+        method = f"Baseline"
     else:
-        print(f"Baseline results with MC dropout ({monte_carlo_steps} steps) on {ind_dataset} (In) vs {ood_dataset} with {val_dataset} as Validation:")
-    print()
-    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-    print(f'Detection Accuracy: {acc}')
-
-
-def _create_fgsm_loader(model, val_loader, device):
-
-    sample, gts = next(iter(val_loader))
-    sizes = sample.size()
-    len_ = 0
-    ood_data_x = torch.zeros(size=(val_loader.__len__()*val_loader.batch_size, sizes[1], sizes[2], sizes[3]))
-    ood_data_y = torch.zeros(val_loader.__len__()*val_loader.batch_size)
-    fgsm_step = 0.1
-    criterion = nn.CrossEntropyLoss()
-    for index, data in enumerate(val_loader):
-
-        images, labels = data
-        images = images.to(device)
-        labels = labels.to(device)
-        input_var = torch.autograd.Variable(images, requires_grad=True)
-        input_var = input_var.to(device)
-        output = model(input_var)
-        if len(labels.size()) > 1:
-            labels = torch.argmax(labels, dim=1)
-        loss = criterion(output, labels)
-        loss.backward()
-
-        sign_data_grad = input_var.grad.data.sign()
-        perturbed_image = input_var + fgsm_step*sign_data_grad
-        perturbed_image = torch.clamp(perturbed_image, 0, 1)
-
-        ood_data_x[index*val_loader.batch_size:index*val_loader.batch_size+images.size(0)] = perturbed_image
-        ood_data_y[index*val_loader.batch_size:index*val_loader.batch_size+images.size(0)] = labels
-        len_ += images.size(0)
-
-    ood_data_x, ood_data_y = ood_data_x[:len_], ood_data_y[:len_]
-    fgsm_dataset = TensorDataset(ood_data_x, ood_data_y)
-    fgsm_loader = DataLoader(fgsm_dataset, batch_size=val_loader.batch_size)
-
-    return fgsm_loader
+        method = f"Baseline results with MC dropout ({monte_carlo_steps} steps)"
+    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
 def _process(model, images, T, epsilon, device, criterion=nn.CrossEntropyLoss()):
@@ -522,7 +415,6 @@ def _predict_rotations(model, loader, num_classes, device):
 def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes, exclude_class=None):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
-    _score_classification_accuracy(model, test_ind_loader, device, ind_dataset)
 
     val_ind_kl_div, val_ind_rot_score, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
     val_ood_kl_div, val_ood_rot_score, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
@@ -673,9 +565,6 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     print(f'Detection Accuracy: {acc}')
 
 
-# def _get_ensemble_scores(model, loader, device):
-
-
 def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
@@ -749,15 +638,11 @@ if __name__ == '__main__':
     parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--in_distribution_dataset', '--in', required=True)
     parser.add_argument('--val_dataset', '--val', required=True)
-    parser.add_argument('--out_distribution_dataset', '--out', required=True)
     parser.add_argument('--model_checkpoint', '--mc', default=None, required=False)
     parser.add_argument('--model_checkpoints_file', '--mcf', default=None, required=False)
     parser.add_argument('--monte_carlo_steps', '--mcdo', type=int, default=1, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
-    parser.add_argument('--exclude_class', '--ex', default=None, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
-    parser.add_argument('--fgsm_checkpoint', '--fgsm', default=None, required=False)
-    parser.add_argument('--fgsm_classes', '--fgsmc', type=int, default=10, required=False)
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3, 4, 5, 6, 7"
@@ -781,6 +666,13 @@ if __name__ == '__main__':
         for line in open(args.model_checkpoints_file, 'r'):
             model_checkpoints.append(line.split('\n')[0])
 
+    ind_dataset = args.in_distribution_dataset.lower()
+    val_dataset = args.val_dataset.lower()
+    all_datasets = ['cifar10', 'cifar100', 'svhn', 'stt', 'tinyimagenet']
+    all_datasets.remove(ind_dataset)
+    all_datasets.remove(val_dataset)
+    ood_dataset_1, ood_dataset_2, ood_dataset_3 = all_datasets
+    
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
     if args.val_dataset == 'fgsm':
         if args.fgsm_checkpoint is not None:

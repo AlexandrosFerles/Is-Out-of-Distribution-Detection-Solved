@@ -1164,6 +1164,37 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
     else:
         return [train_ind_loader, val_ind_loader, test_ind_loader, val_ind_loader, test_ood_loader]
 
+def get_triplets_loaders(ind_dataset, val_ood_dataset, ood_datasets, batch_size=32, dataset_size=1000):
+
+    _, transform_test = _get_image_transforms(ind_dataset, resize=True)
+    ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
+    with open(f'train_indices_{ind_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'wb') as val_pickle:
+        trainset_indices = pickle.load(train_pickle)
+        valset_indices = pickle.load(val_pickle)
+
+        train_sampler = SubsetRandomSampler(trainset_indices)
+        val_sampler = SubsetRandomSampler(valset_indices)
+        train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=train_sampler)
+        val_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+        test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
+
+    with open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_val_pickle:
+        val_ood_trainset, _ = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
+        val_valset_indices = pickle.load(val_val_pickle)
+
+        val_sampler = SubsetRandomSampler(val_valset_indices)
+        val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+
+    _, test_ood_testset_1 = _get_dataset(ood_datasets[0], transforms=transform_test, test=True)
+    _, test_ood_testset_2 = _get_dataset(ood_datasets[1], transforms=transform_test, test=True)
+    _, test_ood_testset_3 = _get_dataset(ood_datasets[2], transforms=transform_test, test=True)
+
+    test_ood_loader_1 = DataLoader(test_ood_testset_1, batch_size=batch_size, num_workers=3)
+    test_ood_loader_2 = DataLoader(test_ood_testset_2, batch_size=batch_size, num_workers=3)
+    test_ood_loader_3 = DataLoader(test_ood_testset_3, batch_size=batch_size, num_workers=3)
+
+    return train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3
+
 
 def imageNetLoader(dataset, batch_size=32):
 
