@@ -45,7 +45,7 @@ def _find_threshold(train_scores, val_scores):
     return max_accuracy, max_accuracy_threshold
 
 
-def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
+def _score_classification_accuracy(model, testloader, device, dataset, genOdin=False):
 
     model.eval()
     correct, total = 0, 0
@@ -62,9 +62,16 @@ def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
             else:
                 outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-
+            if 'isic' in dataset:
+                _labels = torch.argmax(labels, dim=1)
+                softmax_outputs = torch.softmax(outputs, 1)
+                max_idx = torch.argmax(softmax_outputs, axis=1)
+                total += max_idx.size()[0]
+                correct += (max_idx == _labels).sum().item()
+            else:
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+                
     accuracy = round(100*correct/total, 2)
     print(f'Accuracy on {dataset}: {accuracy}%')
 
@@ -545,6 +552,7 @@ def _predict_rotations(model, loader, num_classes, device):
 def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes, exclude_class=None):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
+    _score_classification_accuracy(model, test_ind_loader, device, ind_dataset)
 
     val_ind_kl_div, val_ind_rot_score, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
     val_ood_kl_div, val_ood_rot_score, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
