@@ -806,7 +806,7 @@ if __name__ == '__main__':
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
     if args.val_dataset == 'fgsm':
         if args.fgsm_checkpoint is not None:
-            if args.fgsm_classes None:
+            if args.fgsm_classes is None:
                 fgsm_classes = args.num_classes
             else:
                 fgsm_classes = args.fgsm_classes
