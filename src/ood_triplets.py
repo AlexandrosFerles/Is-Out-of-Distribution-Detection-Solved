@@ -78,7 +78,6 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, mo
         val_ind = val_ind / monte_carlo_steps
         val_ood = val_ood / monte_carlo_steps
 
-    ipdb.set_trace()
     acc, threshold = _find_threshold(val_ind, val_ood)
 
     test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps)
@@ -269,7 +268,6 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         feature_list[count] = out.size(1)
         count += 1
 
-    ipdb.set_trace()
     sample_mean, precision = lib_generation.sample_estimator(model, num_classes, feature_list, train_ind_loader, device=device)
 
     best_auc = 0
