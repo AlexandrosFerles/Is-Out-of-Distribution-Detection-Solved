@@ -390,7 +390,7 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
     print(f'Detection Accuracy: {acc}')
 
 
-def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_classes=10, exclude_class=None, model_type='eb0'):
+def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes=10, exclude_class=None, model_type='eb0'):
 
     model.eval()
     train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
