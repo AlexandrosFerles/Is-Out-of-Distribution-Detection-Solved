@@ -1000,17 +1000,17 @@ if __name__ == '__main__':
         if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
             fgsm_loader = _create_fgsm_loader(loaders[1])
             ipdb.set_trace()
-            torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader.pth')
+            torch.save(fgsm_loader, f'{args.in_distribution_dataset}_fgsm_loader.pth')
         else:
-            fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader.pth')
-        loaders[-2]
+            fgsm_loader = torch.load(f'{args.in_distribution_dataset}_fgsm_loader.pth')
+        loaders[-2] = fgsm_loader
 
     if ood_method == 'baseline':
         method_loaders = loaders[1:]
         _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
-
     elif ood_method == 'odin':
-        _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+        method_loaders = loaders[1:]
+        _odin(model, loaders, device, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
 
     # elif ood_method == 'mahalanobis':
     #     if not args.with_FGSM:
