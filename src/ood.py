@@ -266,7 +266,8 @@ def _create_fgsm_loader(val_loader, gen_odin=False):
     fgsm_dataset = TensorDataset(ood_data_x, ood_data_y)
     if gen_odin:
         fgsm_loader = DataLoader(fgsm_dataset, batch_size=val_loader.batch_size, drop_last=True)
-
+    else:
+        fgsm_loader = DataLoader(fgsm_dataset, batch_size=val_loader.batch_size)
     return fgsm_loader
 
 
