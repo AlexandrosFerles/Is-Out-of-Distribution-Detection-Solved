@@ -713,33 +713,20 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
         max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
         max_h_ood_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
 
-    np.savez(max_h_ind_savefile_name, max_h_scores_ind)
-    np.savez(max_h_ood_savefile_name, max_h_scores_ood)
-    auc_o, fpr_o = _score_npzs(max_o_scores_ind, max_o_scores_ood)
-    auc_h, fpr_h = _score_npzs(max_h_scores_ind, max_h_scores_ood)
-    auc_sigmoid, fpr_sigmoid = _score_npzs(sigmoid_scores_ind, sigmoid_scores_ood)
+    np.savez(max_h_ind_savefile_name, test_ind_scores)
+    np.savez(max_h_ood_savefile_name, test_ood_scores)
+    auc, fpr, acc = _score_npzs(test_ind_scores, test_ood_scores)
+
     print('###############################################')
     print()
-    print(f'Succesfully stored in-distribution ood scores for maximum output to {max_o_ind_savefile_name} and out-distribution ood scores to {max_o_ood_savefile_name}')
-    print(f'Succesfully stored in-distribution ood scores for maximum softmax to {max_h_ind_savefile_name} and out-distribution ood scores to {max_h_ood_savefile_name}')
-    print(f'Succesfully stored in-distribution sigmoid scores to {sigmoid_ind_savefile_name} and out-distribution ood scores to {sigmoid_ood_savefile_name}')
+    print(f'Succesfully stored in-distribution ood scores for maximum h to {max_h_ind_savefile_name} and out-distribution ood scores to {max_h_ood_savefile_name}')
     print()
     print('###############################################')
     print()
-    print(f"Generalized-Odin results (maximum output) on {ind_dataset} (In) vs {ood_dataset} (Out):")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc_o}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr_o}')
-    print('###############################################')
-    print()
-    print(f"Generalized-Odin results (maximum softmax probability) on {ind_dataset} (In) vs {ood_dataset} (Out):")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc_h}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr_h}')
-    print()
-    print('###############################################')
-    print()
-    print(f"Generalized-Odin results (sigmoid) on {ind_dataset} (In) vs {ood_dataset} (Out):")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc_sigmoid}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr_sigmoid}')
+    print(f"Generalized-Odin results (sigmoid) on {ind_dataset} (In) vs {ood_dataset} (Out) with Val Dataset {val_dataset}:")
+    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+    print(f'Detection Accuracy: {acc}')
 
 if __name__ == '__main__':
 
