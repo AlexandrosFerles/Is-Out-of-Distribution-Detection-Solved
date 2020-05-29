@@ -734,7 +734,6 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
         ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
         ood_savefile_name = f'npzs/ensemble_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
 
-    ipdb.set_trace()
     auc, fpr, acc = _score_npzs(ind, ood, threshold)
 
     np.savez(ind_savefile_name, ind)
