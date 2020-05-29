@@ -692,8 +692,6 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
 def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
-    if ind_dataset == 'isic':
-        val_ind = np.zeros()
     index = 0
     for model_checkpoint in tqdm(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
