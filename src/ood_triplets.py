@@ -54,9 +54,9 @@ def _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, ac
     print('###############################################')
     print('###############################################')
     print(f"MEAN PERFORMANCE OF {method.upper()}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {round(np.mean(aucs), 2)}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {round(np.mean(fprs), 2)}')
-    print(f'Detection Accuracy: {round(np.mean(accs), 2)}')
+    print(f'Area Under Receiver Operating Characteristic curve: {round(np.mean(aucs), 2)} with variance {round(np.std(aucs), 2)}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {round(np.mean(fprs), 2)} with variance {round(np.std(fprs), 2)}')
+    print(f'Detection Accuracy: {round(np.mean(accs), 2)} with variance {round(np.std(accs), 2)}')
     print('###############################################')
     print('###############################################')
 
