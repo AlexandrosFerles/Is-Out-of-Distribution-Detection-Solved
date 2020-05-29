@@ -1132,8 +1132,10 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
         test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
 
-    return train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader
-
+    if val_ood_dataset != 'fgsm':
+        return train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader
+    else:
+        return train_ind_loader, val_ind_loader, test_ind_loader, val_ind_loader, test_ood_loader
 
 def imageNetLoader(dataset, batch_size=32):
 
