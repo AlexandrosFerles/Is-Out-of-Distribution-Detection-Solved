@@ -779,7 +779,7 @@ if __name__ == '__main__':
     parser.add_argument('--exclude_class', '--ex', default=None, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
     parser.add_argument('--fgsm_checkpoint', '--fgsm', required=False)
-    parser.add_argument('--fgsm_classes', '--fgsmc', required=False)
+    parser.add_argument('--fgsm_classes', '--fgsmc', type=int, default=10, required=False)
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3, 4, 5, 6, 7"
