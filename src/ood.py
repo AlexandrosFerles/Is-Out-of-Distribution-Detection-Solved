@@ -794,7 +794,7 @@ if __name__ == '__main__':
         _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
     elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
         method_loaders = loaders[1:]
-        _gen_odin_inference(model, loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
+        _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     # elif ood_method == 'ensemble':
     #     if args.with_FGSM:
     #         print('FGSM cannot be combined with the ensemble method, skipping this step')
