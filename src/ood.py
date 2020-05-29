@@ -995,8 +995,6 @@ if __name__ == '__main__':
             model_checkpoints.append(line.split('\n')[0])
 
     loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
-
-
     if args.val_dataset == 'fgsm':
         fgsm_loader = _create_fgsm_loader(loaders[1])
         loaders[-2] = fgsm_loader
