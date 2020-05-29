@@ -122,7 +122,7 @@ def _score_npzs(ind, ood, threshold):
     ind_[np.argwhere(ind > threshold)] = 1
     ood_[np.argwhere(ood < threshold)] = 1
 
-    acc = round(100*(np.sum(ind_) + np.sum(ood_) ) / (ind_.shape[0]  + ood_.shape[0]), 2)
+    acc = round(100*(np.sum(ind_) + np.sum(ood_)) / (ind_.shape[0] + ood_.shape[0]), 2)
 
     return roc_auc, fpr, acc
 
@@ -140,56 +140,19 @@ def _score_mahalanobis(ind, ood):
     known_preds = lr.predict_proba(ind)[:, 1]
     novel_preds = lr.predict_proba(ood)[:, 1]
 
+    _, threshold = _find_threshold(known_preds, novel_preds)
+
     fpr, tpr, _ = roc_curve(y, np.append(known_preds, novel_preds, axis=0))
     roc_auc = auc(fpr, tpr)
 
-    perc = 0.95
-    sorted_ = np.sort(known_preds)
-    threshold = sorted_[int((1-perc)*known_preds.shape[0])]
-
-    ind_ = np.zeros(known_preds.shape)
-    ood_ = np.zeros(novel_preds.shape)
-    ind_[np.argwhere(known_preds > threshold)] = 1
-    ood_[np.argwhere(novel_preds > threshold)] = 1
-
-    X = np.append(ind_, ood_)
-    bool_X = np.atleast_1d(X.astype(np.bool))
-    bool_y = np.atleast_1d(y.astype(np.bool))
-
-    tn = np.count_nonzero(~bool_X & ~bool_y)
-    fp = np.count_nonzero(bool_X & ~bool_y)
-
-    fpr = round(fp/(fp+tn), 5)
-    return lr, roc_auc, fpr
+    return lr, roc_auc, threshold
 
 
-def _predict_mahalanobis(regressor, ind, ood):
+def _predict_mahalanobis(regressor, ind, ood, threshold):
 
     known_preds = regressor.predict_proba(ind)[:, 1]
     novel_preds = regressor.predict_proba(ood)[:, 1]
-    y = np.append(np.ones(ind.shape[0]), np.zeros(ood.shape[0]), axis=0)
-
-    fpr, tpr, _ = roc_curve(y, np.append(known_preds, novel_preds, axis=0))
-    roc_auc = auc(fpr, tpr)
-
-    perc = 0.95
-    sorted_ = np.sort(known_preds)
-    threshold = sorted_[int((1-perc)*known_preds.shape[0])]
-
-    ind_ = np.zeros(known_preds.shape)
-    ood_ = np.zeros(novel_preds.shape)
-    ind_[np.argwhere(known_preds > threshold)] = 1
-    ood_[np.argwhere(novel_preds > threshold)] = 1
-
-    X = np.append(ind_, ood_)
-    bool_X = np.atleast_1d(X.astype(np.bool))
-    bool_y = np.atleast_1d(y.astype(np.bool))
-
-    tn = np.count_nonzero(~bool_X & ~bool_y)
-    fp = np.count_nonzero(bool_X & ~bool_y)
-
-    fpr = round(fp/(fp+tn), 5)
-    return roc_auc, fpr
+    auc, fpr, acc = _score_npzs(known_preds, novel_preds, threshold)
 
 
 def _get_baseline_scores(model, loader, device, monte_carlo_steps):
@@ -223,6 +186,7 @@ def _get_baseline_scores(model, loader, device, monte_carlo_steps):
 
     arr = arr[:arr_len]
     return arr
+
 
 def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, monte_carlo_steps=1, exclude_class=None, score_ind=True):
 
@@ -426,12 +390,10 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
     print(f'Detection Accuracy: {acc}')
 
 
-def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_classes=10, exclude_class=None, model_type='eb0', score_ind=True):
+def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_classes=10, exclude_class=None, model_type='eb0'):
 
     model.eval()
-
-    train_loader, val_loader, test_loader, out_test_loader = loaders
-    fgsm_loader = _create_fgsm_loader(val_loader)
+    train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
     temp_x = torch.rand(2, 3, 224, 224).to(device)
     temp_x = Variable(temp_x)
@@ -450,52 +412,55 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_
         feature_list[count] = out.size(1)
         count += 1
 
-    sample_mean, precision = lib_generation.sample_estimator(model, num_classes, feature_list, train_loader, device=device)
+    sample_mean, precision = lib_generation.sample_estimator(model, num_classes, feature_list, train_ind_loader, device=device)
 
-    best_fpr = 100
+    best_auc = 0
     m_list = [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]
-    if score_ind:
-        best_magnitudes, best_fprs, regressors = [], [], []
-        for magnitude in m_list:
-            for i in range(num_output):
-                M_val = lib_generation.get_Mahalanobis_score(model, val_loader, num_classes, sample_mean, precision, i, magnitude, device=device)
-                M_val = np.asarray(M_val, dtype=np.float32)
-                if i == 0:
-                    Mahalanobis_val = M_val.reshape((M_val.shape[0], -1))
-                else:
-                    Mahalanobis_val = np.concatenate((Mahalanobis_val, M_val.reshape((M_val.shape[0], -1))), axis=1)
 
-            for i in range(num_output):
-                M_fgsm = lib_generation.get_Mahalanobis_score(model, fgsm_loader, num_classes, sample_mean, precision, i, magnitude, device=device)
-                M_fgsm = np.asarray(M_fgsm, dtype=np.float32)
-                if i == 0:
-                    Mahalanobis_fgsm = M_fgsm.reshape((M_fgsm.shape[0], -1))
-                else:
-                    Mahalanobis_fgsm = np.concatenate((Mahalanobis_fgsm, M_fgsm.reshape((M_fgsm.shape[0], -1))), axis=1)
+    best_magnitudes, best_fprs, regressors, thresholds = [], [], [], []
+    for magnitude in m_list:
+        for i in range(num_output):
+            M_val = lib_generation.get_Mahalanobis_score(model, val_ind_loader, num_classes, sample_mean, precision, i, magnitude, device=device)
+            M_val = np.asarray(M_val, dtype=np.float32)
+            if i == 0:
+                Mahalanobis_val_ind = M_val.reshape((M_val.shape[0], -1))
+            else:
+                Mahalanobis_val_ind = np.concatenate((Mahalanobis_val_ind, M_val.reshape((M_val.shape[0], -1))), axis=1)
 
-            Mahalanobis_val = np.asarray(Mahalanobis_val, dtype=np.float32)
-            Mahalanobis_fgsm = np.asarray(Mahalanobis_fgsm, dtype=np.float32)
+        for i in range(num_output):
+            M_val_ood = lib_generation.get_Mahalanobis_score(model, val_ood_loader, num_classes, sample_mean, precision, i, magnitude, device=device)
+            M_val_ood = np.asarray(M_val_ood, dtype=np.float32)
+            if i == 0:
+                Mahalanobis_val_ood = M_val_ood.reshape((M_val_ood.shape[0], -1))
+            else:
+                Mahalanobis_val_ood = np.concatenate((Mahalanobis_val_ood, M_val_ood.reshape((M_val_ood.shape[0], -1))), axis=1)
 
-            regressor, _, fpr = _score_mahalanobis(Mahalanobis_val, Mahalanobis_fgsm)
-            with open(f'lr_pickles/logistic_regressor_{exclude_class}_{magnitude}.pickle', 'wb') as lrp:
-                pickle.dump(regressor, lrp, protocol=pickle.HIGHEST_PROTOCOL)
+        Mahalanobis_val_ind = np.asarray(Mahalanobis_val_ind, dtype=np.float32)
+        Mahalanobis_val_ood = np.asarray(Mahalanobis_val_ood, dtype=np.float32)
 
-            if fpr < best_fpr:
-                best_fpr = fpr
-                best_magnitudes = [magnitude]
-                regressors = [regressor]
-            elif fpr == best_fpr:
-                best_magnitudes.append(magnitude)
-                regressors.append(regressor)
+        regressor, auc, threshold = _score_mahalanobis(Mahalanobis_val_ind, Mahalanobis_val_ood)
+        with open(f'lr_pickles/logistic_regressor_{exclude_class}_{magnitude}.pickle', 'wb') as lrp:
+            pickle.dump(regressor, lrp, protocol=pickle.HIGHEST_PROTOCOL)
+
+        if auc > best_auc:
+            best_auc = auc
+            best_magnitudes = [magnitude]
+            regressors = [regressor]
+            thresholds = [threshold]
+        elif auc == best_auc:
+            best_magnitudes.append(magnitude)
+            regressors.append(regressor)
+            thresholds.append(threshold)
 
         print('###############################################')
         print()
         print(f'Selected magnitudes: {best_magnitudes}')
+        print(f'Selected thresholds: {thresholds}')
         print()
 
-        for (best_magnitude, regressor) in zip(best_magnitudes, regressors):
+        for (best_magnitude, regressor, threshold) in zip(best_magnitudes, regressors, thresholds):
             for i in range(num_output):
-                M_test = lib_generation.get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+                M_test = lib_generation.get_Mahalanobis_score(model, test_ind_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
                 M_test = np.asarray(M_test, dtype=np.float32)
                 if i == 0:
                     Mahalanobis_test = M_test.reshape((M_test.shape[0], -1))
@@ -503,7 +468,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_
                     Mahalanobis_test = np.concatenate((Mahalanobis_test, M_test.reshape((M_test.shape[0], -1))), axis=1)
 
             for i in range(num_output):
-                M_ood = lib_generation.get_Mahalanobis_score(model, out_test_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+                M_ood = lib_generation.get_Mahalanobis_score(model, test_ood_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
                 M_ood = np.asarray(M_ood, dtype=np.float32)
                 if i == 0:
                     Mahalanobis_ood = M_ood.reshape((M_ood.shape[0], -1))
@@ -514,14 +479,15 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_
             Mahalanobis_ood = np.asarray(Mahalanobis_ood, dtype=np.float32)
 
             if exclude_class is None:
-                ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_{best_magnitude}.npz'
-                ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_{best_magnitude}.npz'
+                ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}.npz'
+                ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}.npz'
             else:
-                ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_{best_magnitude}_{exclude_class}.npz'
-                ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+                ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+                ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+
             np.savez(ind_savefile_name, Mahalanobis_test)
             np.savez(ood_savefile_name, Mahalanobis_ood)
-            auc, fpr = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood)
+            auc, fpr, acc = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood, threshold)
             print('###############################################')
             print()
             print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
@@ -531,30 +497,9 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_
             print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset}:')
             print(f'Area Under Receiver Operating Characteristic curve: {auc}')
             print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+            print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
             print('###############################################')
             print()
-    else:
-        for magnitude in m_list:
-            for i in range(num_output):
-                M_ood = lib_generation.get_Mahalanobis_score(model, out_test_loader, num_classes, sample_mean, precision, i, magnitude, device=device)
-                M_ood = np.asarray(M_ood, dtype=np.float32)
-                if i == 0:
-                    Mahalanobis_ood = M_ood.reshape((M_ood.shape[0], -1))
-                else:
-                    Mahalanobis_ood = np.concatenate((Mahalanobis_ood, M_ood.reshape((M_ood.shape[0], -1))), axis=1)
-
-            Mahalanobis_ood = np.asarray(Mahalanobis_ood, dtype=np.float32)
-
-            if exclude_class is None:
-                ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_{magnitude}.npz'
-            else:
-                ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_{magnitude}_{exclude_class}.npz'
-            np.savez(ood_savefile_name, Mahalanobis_ood)
-            print('###############################################')
-            print()
-            print(f'Succesfully stored in-distribution and out-distribution ood scores to {ood_savefile_name}')
-            print()
-            print('###############################################')
 
 
 def _predict_rotations(model, loader, num_classes, device):
@@ -1012,12 +957,8 @@ if __name__ == '__main__':
     elif ood_method == 'odin':
         method_loaders = loaders[1:]
         _odin(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
-
-    # elif ood_method == 'mahalanobis':
-    #     if not args.with_FGSM:
-    #         print('Mahalanobis method can only be used with FGSM, applying it either way')
-    #     loaders = [trainloader] + [val_loader, testloader, ood_loader]
-    #     _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+    elif ood_method == 'mahalanobis':
+        _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
     #
     # elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
     #     if args.with_FGSM:
