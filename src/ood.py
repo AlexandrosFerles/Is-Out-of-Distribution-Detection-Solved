@@ -816,14 +816,15 @@ if __name__ == '__main__':
         method_loaders = loaders[1:]
         _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     elif ood_method == 'ensemble':
+        method_loaders = loaders[1:]
         print('SCALING')
         print()
         print()
         scaling = True
-        _ensemble_inference(model_checkpoints, loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, scaling=scaling)
+        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, scaling=scaling)
         print('NO SCALING')
         scaling = False
-        _ensemble_inference(model_checkpoints, loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, scaling=scaling)
+        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, scaling=scaling)
     else:
         raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
