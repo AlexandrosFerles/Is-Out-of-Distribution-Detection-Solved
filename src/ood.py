@@ -394,20 +394,26 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
     print(f'Selected temperature: {best_T}, selected epsilon: {best_epsilon}')
     print()
 
-    val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device)
-    val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device)
+    val_ind = _get_odin_scores(model, val_ind_loader, best_T, best_epsilon, device=device)
+    val_ood = _get_odin_scores(model, val_ood_loader, best_T, best_epsilon, device=device)
+
+    _, threshold = _find_threshold(val_ind, val_ood)
 
     ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device)
     ood = _get_odin_scores(model, test_ood_loader, best_T, best_epsilon, device=device)
+
     if exclude_class is None:
         ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
         ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
     else:
         ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
         ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
+
     np.savez(ind_savefile_name, ind)
     np.savez(ood_savefile_name, ood)
-    auc, fpr, acc = _score_npzs(ind, ood)
+    
+    auc, fpr, acc = _score_npzs(ind, ood, threshold)
+
     print('###############################################')
     print()
     print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
@@ -417,6 +423,7 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
     print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={best_T} and epsilon={best_epsilon}:")
     print(f'Area Under Receiver Operating Characteristic curve: {auc}')
     print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+    print(f'Detection Accuracy: {acc}')
 
 
 def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_classes=10, exclude_class=None, model_type='eb0', score_ind=True):
