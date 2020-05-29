@@ -338,16 +338,15 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
                 best_auc = auc
                 best_epsilon = epsilon
                 best_T = T
+                best_val_ind = val_ind
+                best_val_ood = val_ood
 
     print('###############################################')
     print()
     print(f'Selected temperature: {best_T}, selected epsilon: {best_epsilon}')
     print()
 
-    val_ind = _get_odin_scores(model, val_ind_loader, best_T, best_epsilon, device=device)
-    val_ood = _get_odin_scores(model, val_ood_loader, best_T, best_epsilon, device=device)
-
-    _, threshold = _find_threshold(val_ind, val_ood)
+    _, threshold = _find_threshold(best_val_ind, best_val_ood)
 
     ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device)
     ood = _get_odin_scores(model, test_ood_loader, best_T, best_epsilon, device=device)
