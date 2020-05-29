@@ -125,8 +125,7 @@ def train(args):
         train_loader, val_loader, test_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName)
     else:
         train_loader, val_loader, test_loader, columns = oversampling_loaders_exclude_class_custom_no_gts(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName, exclude_class=exclude_class)
-    args.model = 'rotefficientnet'
-    model = build_model(args)
+    model = build_model(args, rot=True)
     model = nn.DataParallel(model).to(device)
 
     epochs = 40
@@ -223,7 +222,24 @@ def train(args):
                         wandb.log({'Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
                         break
 
-                        
+            if exclude_class is None and epoch == 20:
+                break
+            elif exclude_class == 'AK' and epoch == 19:
+                break
+            elif exclude_class == 'BCC' and epoch == 12:
+                break
+            elif exclude_class == 'BKL' and epoch == 15:
+                break
+            elif exclude_class == 'DF' and epoch == 10:
+                break
+            elif exclude_class == 'MEL' and epoch == 12:
+                break
+            elif exclude_class == 'NV' and epoch == 27:
+                break
+            elif exclude_class == 'SCC' and epoch == 10:
+                break
+            elif exclude_class == 'VASC' and epoch == 10:
+                break
 
             wandb.log({'Test Set Loss': test_loss, 'epoch': epoch})
             wandb.log({'Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
