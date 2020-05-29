@@ -343,7 +343,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     print()
     print(f"InD dataset: {ind_dataset}")
     print(f"Validation dataset: {val_dataset}")
-    method = f"Mahalanobis"
+    method = f"Mahalanobis "
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
@@ -664,7 +664,7 @@ if __name__ == '__main__':
         _odin(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
     elif ood_method == 'mahalanobis':
         _generate_Mahalanobis(model, loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, num_classes=args.num_classes)
-    elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
+    # elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
     #     method_loaders = loaders[1:]
     #     _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
     # elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
