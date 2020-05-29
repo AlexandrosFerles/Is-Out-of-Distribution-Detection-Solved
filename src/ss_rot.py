@@ -121,7 +121,6 @@ def train(args):
     if use_wandb:
         wandb.init(name=checkpointFileName, entity='ferles')
 
-    input_size = 224
     if exclude_class is None:
         train_loader, val_loader, test_loader, columns = oversampling_loaders_custom(csvfiles=[traincsv, testcsv], train_batch_size=32, val_batch_size=16, gtFile=gtFileName)
     else:
@@ -207,6 +206,15 @@ def train(args):
             if val_detection_accuracy > best_val_detection_accuracy:
                 best_val_detection_accuracy = val_detection_accuracy
                 test_loss, test_detection_accuracy = _test_set_eval(model, epoch, device, test_loader, out_classes, columns, gtFileName)
+
+                if exclude_class is None:
+                    checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers/rot_isic-best-model.pth')
+                else:
+                    checkpointFile = os.path.join(f'/raid/ferles/checkpoints/isic_classifiers/rot_isic-_{exclude_class}-best-model.pth')
+                if os.path.exists('/raid/ferles/'):
+                    torch.save(model.state_dict(), checkpointFile)
+                else:
+                    torch.save(model.state_dict(), checkpointFile.replace('raid', 'home'))
             else:
                 if early_stopping:
                     early_stopping_cnt +=1
@@ -214,6 +222,8 @@ def train(args):
                         wandb.log({'Test Set Loss': test_loss, 'epoch': epoch})
                         wandb.log({'Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
                         break
+
+                        
 
             wandb.log({'Test Set Loss': test_loss, 'epoch': epoch})
             wandb.log({'Detection Accuracy': test_detection_accuracy, 'epoch': epoch})
