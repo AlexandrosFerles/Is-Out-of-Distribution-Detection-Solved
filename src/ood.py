@@ -443,6 +443,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     print(f'Selected thresholds: {thresholds}')
     print()
 
+    aucs, fprs, accs = [], [], []
     for (best_magnitude, regressor, threshold) in zip(best_magnitudes, regressors, thresholds):
         for i in range(num_output):
             M_test = lib_generation.get_Mahalanobis_score(model, test_ind_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
@@ -473,18 +474,25 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         np.savez(ind_savefile_name, Mahalanobis_test)
         np.savez(ood_savefile_name, Mahalanobis_ood)
         auc, fpr, acc = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood, threshold)
+        aucs.append(auc)
+        fprs.append(fpr)
+        accs.append(acc)
         print('###############################################')
         print()
         print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
         print()
         print('###############################################')
         print()
-        print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset} (Out)  with Val Set {val_dataset}:')
-        print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-        print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-        print(f'Detection Accuracy : {acc}')
-        print('###############################################')
-        print()
+
+    auc = round(100*np.mean(aucs), 2)
+    fpr = round(100*np.mean(fprs), 2)
+    acc = round(100*np.mean(accs), 2)
+    print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset} (Out)  with Val Set {val_dataset}:')
+    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+    print(f'Detection Accuracy : {acc}')
+    print('###############################################')
+    print()
 
 
 def _predict_rotations(model, loader, num_classes, device):
