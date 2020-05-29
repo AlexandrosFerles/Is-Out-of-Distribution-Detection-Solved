@@ -672,7 +672,7 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
 
     np.savez(max_h_ind_savefile_name, test_ind_scores)
     np.savez(max_h_ood_savefile_name, test_ood_scores)
-    auc, fpr, acc = _score_npzs(test_ind_scores, test_ood_scores)
+    auc, fpr, acc = _score_npzs(test_ind_scores, test_ood_scores, threshold)
 
     print('###############################################')
     print()
