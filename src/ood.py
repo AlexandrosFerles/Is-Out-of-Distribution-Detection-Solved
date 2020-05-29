@@ -999,7 +999,6 @@ if __name__ == '__main__':
     if args.val_dataset == 'fgsm':
         if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
             fgsm_loader = _create_fgsm_loader(loaders[1])
-            ipdb.set_trace()
             torch.save(fgsm_loader, f'{args.in_distribution_dataset}_fgsm_loader.pth')
         else:
             fgsm_loader = torch.load(f'{args.in_distribution_dataset}_fgsm_loader.pth')
