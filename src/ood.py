@@ -209,18 +209,18 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
 
     if exclude_class is None:
         if monte_carlo_steps == 1:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
+            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
         else:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
+            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}.npz'
     else:
         if monte_carlo_steps == 1:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
+            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
         else:
-            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
-            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
+            ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
+            ood_savefile_name = f'npzs/baseline_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_monte_carlo_{monte_carlo_steps}_{exclude_class}.npz'
 
     np.savez(ind_savefile_name, test_ind)
     np.savez(ood_savefile_name, test_ood)
