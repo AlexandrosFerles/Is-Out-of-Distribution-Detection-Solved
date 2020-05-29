@@ -101,6 +101,7 @@ def _score_npzs(ind, ood, threshold):
     ind_[np.argwhere(ind > threshold)] = 1
     ood_[np.argwhere(ood < threshold)] = 1
 
+    X = np.append(ind_, ood_)
     bool_X = np.atleast_1d(X.astype(np.bool))
     bool_y = np.atleast_1d(y.astype(np.bool))
 
