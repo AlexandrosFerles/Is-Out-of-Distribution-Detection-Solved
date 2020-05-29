@@ -144,7 +144,7 @@ def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
     return arr[:len_]
 
 
-def _odin(model, loaders, device, ind_dataset, val_dataset, ood_datasets,):
+def _odin(model, loaders, device, ind_dataset, val_dataset, ood_datasets):
 
     model.eval()
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
@@ -208,10 +208,11 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_datasets,):
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
-def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes=10, exclude_class=None, model_type='eb0'):
+def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_datasets, num_classes, model_type='eb0'):
 
     model.eval()
-    train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
+    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
+    train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     temp_x = torch.rand(2, 3, 224, 224).to(device)
     temp_x = Variable(temp_x)
@@ -257,7 +258,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         Mahalanobis_val_ood = np.asarray(Mahalanobis_val_ood, dtype=np.float32)
 
         regressor, auc, threshold = _score_mahalanobis(Mahalanobis_val_ind, Mahalanobis_val_ood)
-        with open(f'lr_pickles/logistic_regressor_{exclude_class}_{magnitude}.pickle', 'wb') as lrp:
+        with open(f'lr_pickles/logistic_regressor_{ind_dataset}_{val_dataset}_{magnitude}.pickle', 'wb') as lrp:
             pickle.dump(regressor, lrp, protocol=pickle.HIGHEST_PROTOCOL)
 
         if auc > best_auc:
@@ -297,12 +298,8 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         Mahalanobis_test = np.asarray(Mahalanobis_test, dtype=np.float32)
         Mahalanobis_ood = np.asarray(Mahalanobis_ood, dtype=np.float32)
 
-        if exclude_class is None:
-            ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}.npz'
-            ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}.npz'
-        else:
-            ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
-            ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+        ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+        ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
 
         np.savez(ind_savefile_name, Mahalanobis_test)
         np.savez(ood_savefile_name, Mahalanobis_ood)
@@ -310,22 +307,6 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         aucs.append(auc)
         fprs.append(fpr)
         accs.append(acc)
-        print('###############################################')
-        print()
-        print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
-        print()
-        print('###############################################')
-        print()
-
-    auc = round(np.mean(aucs), 2)
-    fpr = round(np.mean(fprs), 2)
-    acc = round(np.mean(accs), 2)
-    print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset} (Out)  with Val Set {val_dataset}:')
-    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-    print(f'Detection Accuracy : {acc}')
-    print('###############################################')
-    print()
 
 
 def _predict_rotations(model, loader, num_classes, device):
@@ -643,9 +624,9 @@ if __name__ == '__main__':
     elif ood_method == 'odin':
         method_loaders = loaders[1:]
         _odin(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
-    # elif ood_method == 'mahalanobis':
-    #     _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
-    # elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
+    elif ood_method == 'mahalanobis':
+        _generate_Mahalanobis(model, loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, num_classes=args.num_classes)
+    elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
     #     method_loaders = loaders[1:]
     #     _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
     # elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
