@@ -229,7 +229,7 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
     print(f'Detection Accuracy: {acc}')
 
 
-def _create_fgsm_loader(val_loader, gen_odin=False):
+def _create_fgsm_loader(model, val_loader, device):
 
     sample, gts = next(iter(val_loader))
     sizes = sample.size()
@@ -245,10 +245,7 @@ def _create_fgsm_loader(val_loader, gen_odin=False):
         labels = labels.to(device)
         input_var = torch.autograd.Variable(images, requires_grad=True)
         input_var = input_var.to(device)
-        if gen_odin:
-            output, _, _ = model(input_var)
-        else:
-            output = model(input_var)
+        output = model(input_var)
         if len(labels.size()) > 1:
             labels = torch.argmax(labels, dim=1)
         loss = criterion(output, labels)
@@ -264,10 +261,8 @@ def _create_fgsm_loader(val_loader, gen_odin=False):
 
     ood_data_x, ood_data_y = ood_data_x[:len_], ood_data_y[:len_]
     fgsm_dataset = TensorDataset(ood_data_x, ood_data_y)
-    if gen_odin:
-        fgsm_loader = DataLoader(fgsm_dataset, batch_size=val_loader.batch_size, drop_last=True)
-    else:
-        fgsm_loader = DataLoader(fgsm_dataset, batch_size=val_loader.batch_size)
+    fgsm_loader = DataLoader(fgsm_dataset, batch_size=val_loader.batch_size)
+
     return fgsm_loader
 
 
@@ -783,6 +778,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
     parser.add_argument('--exclude_class', '--ex', default=None, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
+    parser.add_argument('--fgsm_checkpoint', '--fgsm', required=False)
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3, 4, 5, 6, 7"
@@ -808,8 +804,9 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
     if args.val_dataset == 'fgsm':
+        fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=args.num_classes)
         if not os.path.exists(f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth'):
-            fgsm_loader = _create_fgsm_loader(loaders[1], gen_odin= ood_method == 'generalizedodin')
+            fgsm_loader = _create_fgsm_loader(loaders[1])
             torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth')
         else:
             fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth')
