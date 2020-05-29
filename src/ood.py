@@ -370,272 +370,53 @@ def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
     return arr[:len_]
 
 
-def _odin(model, loaders, device, ind_dataset, ood_dataset, T=None, epsilon=None, with_fgsm=False, exclude_class=None, score_ind=True):
+def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude_class=None):
 
     model.eval()
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
-    if with_fgsm:
-        val_loader, test_loader, ood_loader = loaders
-        fgsm_loader = _create_fgsm_loader(val_loader)
+    best_auc = 0
+
+    for T in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
+        for epsilon in tqdm(np.arange(0, 0.004, 0.004/21, float).tolist()):
+
+            val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device)
+            val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device)
+            auc, _, _ = _score_npzs(val_ind, val_ood, threshold=0)
+
+            if auc > best_auc:
+                best_auc = auc
+                best_epsilon = epsilon
+                best_T = T
+
+    print('###############################################')
+    print()
+    print(f'Selected temperature: {best_T}, selected epsilon: {best_epsilon}')
+    print()
+
+    val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device)
+    val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device)
+
+    ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device)
+    ood = _get_odin_scores(model, test_ood_loader, best_T, best_epsilon, device=device)
+    if exclude_class is None:
+        ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
+        ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
     else:
-        test_loader, ood_loader = loaders
-
-    if T is not None:
-        if epsilon is not None:
-            if score_ind:
-                ind = _get_odin_scores(model, test_loader, T, epsilon, device=device)
-                ood = _get_odin_scores(model, ood_loader, T, epsilon, device=device)
-
-                if exclude_class is None:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{T}_epsilon{epsilon}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{epsilon}.npz'
-                else:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{T}_epsilon{epsilon}_{exclude_class}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{epsilon}_{exclude_class}.npz'
-                np.savez(ind_savefile_name, ind)
-                np.savez(ood_savefile_name, ood)
-                auc, fpr = _score_npzs(ind, ood)
-                print('###############################################')
-                print()
-                print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
-                print()
-                print('###############################################')
-                print()
-                print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={T} and epsilon={epsilon}:")
-                print()
-                print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-                print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-            else:
-                ood = _get_odin_scores(model, ood_loader, T, epsilon, device=device)
-                if exclude_class is None:
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{epsilon}.npz'
-                else:
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{epsilon}_{exclude_class}.npz'
-                np.savez(ood_savefile_name, ood)
-                print('###############################################')
-                print()
-                print(f'Succesfully stored in-distribution ood scores to out-distribution ood scores to: {ood_savefile_name}')
-                print()
-                print('###############################################')
-                print()
-        else:
-            if with_fgsm:
-                best_fpr = 100
-                best_epsilon = 0
-                for epsilon in tqdm(np.arange(0, 0.004, 0.004/21, float).tolist()):
-                    ind = _get_odin_scores(model, val_loader, T, epsilon, device=device)
-                    ood = _get_odin_scores(model, fgsm_loader, T, epsilon, device=device)
-
-                    _, fpr = _score_npzs(ind, ood)
-                    if fpr <= best_fpr:
-                        best_fpr = fpr
-                        best_epsilon = epsilon
-
-                print('###############################################')
-                print()
-                print(f'Selected temperature: {T}, selected epsilon: {best_epsilon}')
-                print()
-                ind = _get_odin_scores(model, test_loader, device, T, best_epsilon, device=device)
-                ood = _get_odin_scores(model, ood_loader, device, T, best_epsilon, device=device)
-                if exclude_class is None:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{T}_epsilon{best_epsilon}_fgsm.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{best_epsilon}_fgsm.npz'
-                else:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{T}_epsilon{best_epsilon}_fgsm_{exclude_class}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{best_epsilon}_fgsm_{exclude_class}.npz'
-                np.savez(ind_savefile_name, ind)
-                np.savez(ood_savefile_name, ood)
-                auc, fpr = _score_npzs(ind, ood)
-                print('###############################################')
-                print()
-                print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
-                print()
-                print('###############################################')
-                print()
-                print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={T} and epsilon={best_epsilon}:")
-                print()
-                print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-                print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-
-            else:
-                best_epsilon, best_fpr = 0, 100
-                for epsilon in tqdm(np.arange(0, 0.004, 0.004/21, float).tolist()):
-                    ind = _get_odin_scores(model, test_loader, T, epsilon, device=device)
-                    ood = _get_odin_scores(model, ood_loader, T, epsilon, device=device)
-                    _, fpr = _score_npzs(ind, ood)
-                    if fpr <= best_fpr:
-                        best_fpr = fpr
-                        best_epsilon = epsilon
-
-                print('###############################################')
-                print()
-                print(f'Selected temperature: {T}, selected epsilon: {best_epsilon}')
-                print()
-
-                ind = _get_odin_scores(model, test_loader, T, best_epsilon, device=device)
-                ood = _get_odin_scores(model, ood_loader, T, best_epsilon, device=device)
-                if exclude_class is None:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{T}_epsilon{best_epsilon}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{best_epsilon}.npz'
-                else:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{T}_epsilon{best_epsilon}_{exclude_class}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{best_epsilon}_{exclude_class}.npz'
-                np.savez(ind_savefile_name, ind)
-                np.savez(ood_savefile_name, ood)
-                auc, fpr = _score_npzs(ind, ood)
-                print('###############################################')
-                print()
-                print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
-                print()
-                print('###############################################')
-                print()
-                print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={T} and epsilon={best_epsilon}:")
-                print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-                print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-    else:
-        if epsilon is not None:
-            if with_fgsm:
-                best_fpr = 100
-                best_T = 1
-
-                for T in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
-                    ind = _get_odin_scores(model, val_loader, T, epsilon, device=device)
-                    ood = _get_odin_scores(model, fgsm_loader, T, epsilon, device=device)
-
-                    _, fpr = _score_npzs(ind, ood)
-                    if fpr < best_fpr:
-                        best_fpr = fpr
-                        best_T = T
-
-                print('###############################################')
-                print()
-                print(f'Selected temperature: {best_T}, selected epsilon: {epsilon}')
-                print()
-
-                ind = _get_odin_scores(model, test_loader, device, best_T, epsilon)
-                ood = _get_odin_scores(model, ood_loader, device, best_T, epsilon)
-                if exclude_class is None:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{best_T}_epsilon{epsilon}_fgsm.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{best_T}_epsilon{epsilon}_fgsm.npz'
-                else:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{best_T}_epsilon{epsilon}_fgsm_{exclude_class}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{best_T}_epsilon{epsilon}_fgsm_{exclude_class}.npz'
-                np.savez(ind_savefile_name, ind)
-                np.savez(ood_savefile_name, ood)
-                auc, fpr = _score_npzs(ind, ood)
-                print('###############################################')
-                print()
-                print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
-                print()
-                print('###############################################')
-                print()
-                print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={best_T} and epsilon={epsilon}:")
-                print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-                print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-            else:
-                best_T, best_fpr = 0, 100
-                for T in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
-                    ind = _get_odin_scores(model, test_loader, T, epsilon, device=device)
-                    ood = _get_odin_scores(model, ood_loader, T, epsilon, device=device)
-                    _, fpr = _score_npzs(ind, ood)
-                    if fpr <= best_fpr:
-                        best_fpr = fpr
-                        best_T = T
-
-                print('###############################################')
-                print()
-                print(f'Selected temperature: {best_T}, selected epsilon: {epsilon}')
-                print()
-
-                ind = _get_odin_scores(model, test_loader, best_T, epsilon, device=device)
-                ood = _get_odin_scores(model, ood_loader, best_T, epsilon, device=device)
-                if exclude_class is None:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{best_T}_epsilon{epsilon}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{best_T}_epsilon{epsilon}.npz'
-                else:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{best_T}_epsilon{epsilon}_{exclude_class}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{best_T}_epsilon{epsilon}_{exclude_class}.npz'
-                np.savez(ind_savefile_name, ind)
-                np.savez(ood_savefile_name, ood)
-                auc, fpr = _score_npzs(ind, ood)
-                print('###############################################')
-                print()
-                print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
-                print()
-                print('###############################################')
-                print()
-                print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={best_T} and epsilon={epsilon}:")
-                print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-                print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-        else:
-            if with_fgsm:
-                best_fpr = 100
-                best_epsilon, best_T = 0, 1
-                for T in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
-                    for epsilon in tqdm(np.arange(0, 0.004, 0.004/21, float).tolist()):
-
-                        ind = _get_odin_scores(model, val_loader, T, epsilon, device=device)
-                        ood = _get_odin_scores(model, fgsm_loader, T, epsilon, device=device)
-
-                        _, fpr = _score_npzs(ind, ood)
-                        if fpr < best_fpr:
-                            best_fpr = fpr
-                            best_epsilon = epsilon
-                            best_T = T
-
-                print('###############################################')
-                print()
-                print(f'Selected temperature: {best_T}, selected epsilon: {best_epsilon}')
-                print()
-
-                ind = _get_odin_scores(model, test_loader, best_T, best_epsilon, device=device)
-                ood = _get_odin_scores(model, ood_loader, best_T, best_epsilon, device=device)
-                if exclude_class is None:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-                else:
-                    ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
-                    ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
-                np.savez(ind_savefile_name, ind)
-                np.savez(ood_savefile_name, ood)
-                auc, fpr = _score_npzs(ind, ood)
-                print('###############################################')
-                print()
-                print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
-                print()
-                print('###############################################')
-                print()
-                print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={best_T} and epsilon={best_epsilon}:")
-                print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-                print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-            else:
-                for T in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
-                    for epsilon in tqdm(np.arange(0, 0.004, 0.004/21, float).tolist()):
-
-                        if T==1 and epsilon==0:
-                            # baseline, skipping
-                            continue
-                        ind = _get_odin_scores(model, test_loader, device, T, epsilon, device=device)
-                        ood = _get_odin_scores(model, ood_loader, device, T, epsilon, device=device)
-
-                        if exclude_class is None:
-                            ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{T}_epsilon{epsilon}.npz'
-                            ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{epsilon}.npz'
-                        else:
-                            ind_savefile_name = f'npzs/odin_{ind_dataset}_temperature_{T}_epsilon{epsilon}_{exclude_class}.npz'
-                            ood_savefile_name = f'npzs/odin_{ood_dataset}_temperature_{T}_epsilon{epsilon}_{exclude_class}.npz'
-                        np.savez(ind_savefile_name, ind)
-                        np.savez(ood_savefile_name, ood)
-                        auc, fpr = _score_npzs(ind, ood)
-                        print('###############################################')
-                        print()
-                        print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
-                        print()
-                        print('###############################################')
-                        print()
-                        print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={T} and epsilon={epsilon}:")
-                        print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-                        print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+        ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
+        ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
+    np.savez(ind_savefile_name, ind)
+    np.savez(ood_savefile_name, ood)
+    auc, fpr, acc = _score_npzs(ind, ood)
+    print('###############################################')
+    print()
+    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
+    print()
+    print('###############################################')
+    print()
+    print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with T={best_T} and epsilon={best_epsilon}:")
+    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
+    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
 
 
 def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_classes=10, exclude_class=None, model_type='eb0', score_ind=True):
@@ -1223,11 +1004,8 @@ if __name__ == '__main__':
         _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
 
     elif ood_method == 'odin':
-        if args.temperature != 1 or args.epsilon != 0:
-            _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, T=args.temperature, epsilon=args.epsilon, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
-        else:
-            _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
-    #
+        _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, T=args.temperature, epsilon=args.epsilon, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+
     # elif ood_method == 'mahalanobis':
     #     if not args.with_FGSM:
     #         print('Mahalanobis method can only be used with FGSM, applying it either way')
