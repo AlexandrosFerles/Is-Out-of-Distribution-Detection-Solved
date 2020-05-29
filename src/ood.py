@@ -101,7 +101,15 @@ def _score_npzs(ind, ood, threshold):
     ind_[np.argwhere(ind > threshold)] = 1
     ood_[np.argwhere(ood < threshold)] = 1
 
-    acc = round(100*(np.sum(ind_) + np.sum(ood_)) / (ind_.shape[0] + ood_.shape[0]), 2)
+    bool_X = np.atleast_1d(X.astype(np.bool))
+    bool_y = np.atleast_1d(y.astype(np.bool))
+
+    tn = np.count_nonzero(~bool_X & ~bool_y)
+    fp = np.count_nonzero(bool_X & ~bool_y)
+    tp = np.count_nonzero(bool_X & bool_y)
+    fn = np.count_nonzero(~bool_X & bool_y)
+
+    acc = (tn+tp) / (tn+tp+fp+fn)
 
     return roc_auc, fpr, acc
 
