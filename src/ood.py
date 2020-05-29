@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 from sklearn.linear_model import LogisticRegressionCV
+from sklearn.metrics._plot import confusion_matrix
 from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
@@ -68,6 +69,19 @@ def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
     print(f'Accuracy on {dataset}: {accuracy}%')
 
 
+def _get_metrics(ind, ood):
+
+    fp = confusion_matrix.sum(axis=0) - np.diag(confusion_matrix)
+    tp = np.diag(confusion_matrix)
+    fn = confusion_matrix.sum(axis=1) - np.diag(confusion_matrix)
+    tn = confusion_matrix.sum() - (fp + fn + tp)
+
+    fpr = fp/(fp+tn)
+    acc = (tp+tn)/(tp+fp+fn+tn)
+
+    return fpr, acc
+
+
 def _score_npzs(ind, ood, threshold):
 
     ipdb.set_trace()
@@ -87,31 +101,17 @@ def _score_npzs(ind, ood, threshold):
     ind_[np.argwhere(ind > fpr_threshold)] = 1
     ood_[np.argwhere(ood > fpr_threshold)] = 1
 
-    X = np.append(ind_, ood_)
-    bool_X = np.atleast_1d(X.astype(np.bool))
-    bool_y = np.atleast_1d(y.astype(np.bool))
-
-    tn = np.count_nonzero(~bool_X & ~bool_y)
-    fp = np.count_nonzero(bool_X & ~bool_y)
-
-    fpr = round(100*fp/(fp+tn), 2)
+    fpr, _ = _get_metrics(ind_, ood_)
+    fpr = round(100*fpr, 2)
 
     ind_ = np.zeros(ind.shape)
     ood_ = np.zeros(ood.shape)
     ind_[np.argwhere(ind > threshold)] = 1
     ood_[np.argwhere(ood < threshold)] = 1
 
-    X = np.append(ind_, ood_)
-    bool_X = np.atleast_1d(X.astype(np.bool))
-    bool_y = np.atleast_1d(y.astype(np.bool))
-
-    tn = np.count_nonzero(~bool_X & ~bool_y)
-    fp = np.count_nonzero(bool_X & ~bool_y)
-    tp = np.count_nonzero(bool_X & bool_y)
-    fn = np.count_nonzero(~bool_X & bool_y)
-
-    acc = (tn+tp) / (tn+tp+fp+fn)
-
+    _, acc = _get_metrics(ind_, ood_)
+    acc = round(100*acc, 2)
+    
     return roc_auc, fpr, acc
 
 
