@@ -1170,7 +1170,7 @@ def get_triplets_loaders(ind_dataset, val_ood_dataset, ood_datasets, batch_size=
 
     _, transform_test = _get_image_transforms(ind_dataset, resize=True)
     ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
-    with open(f'train_indices_{ind_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'wb') as val_pickle:
+    with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
         trainset_indices = pickle.load(train_pickle)
         valset_indices = pickle.load(val_pickle)
 
@@ -1180,7 +1180,7 @@ def get_triplets_loaders(ind_dataset, val_ood_dataset, ood_datasets, batch_size=
         val_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
         test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
 
-    with open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_val_pickle:
+    with open(f'val_indices_{val_ood_dataset}.pickle', 'rb') as val_val_pickle:
         val_ood_trainset, _ = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
         val_valset_indices = pickle.load(val_val_pickle)
 
