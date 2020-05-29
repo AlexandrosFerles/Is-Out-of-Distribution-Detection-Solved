@@ -277,7 +277,10 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     print(f'Selected thresholds: {thresholds}')
     print()
 
-    aucs, fprs, accs = [], [], []
+    aucs_1, fprs_1, accs_1 = [], [], []
+    aucs_2, fprs_2, accs_2 = [], [], []
+    aucs_3, fprs_3, accs_3 = [], [], []
+    
     for (best_magnitude, regressor, threshold) in zip(best_magnitudes, regressors, thresholds):
         for i in range(num_output):
             M_test = lib_generation.get_Mahalanobis_score(model, test_ind_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
@@ -288,25 +291,60 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
                 Mahalanobis_test = np.concatenate((Mahalanobis_test, M_test.reshape((M_test.shape[0], -1))), axis=1)
 
         for i in range(num_output):
-            M_ood = lib_generation.get_Mahalanobis_score(model, test_ood_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
-            M_ood = np.asarray(M_ood, dtype=np.float32)
+            M_ood_1 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_1, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+            M_ood_1 = np.asarray(M_ood_1, dtype=np.float32)
             if i == 0:
-                Mahalanobis_ood = M_ood.reshape((M_ood.shape[0], -1))
+                Mahalanobis_ood_1 = M_ood_1.reshape((M_ood_1.shape[0], -1))
             else:
-                Mahalanobis_ood = np.concatenate((Mahalanobis_ood, M_ood.reshape((M_ood.shape[0], -1))), axis=1)
+                Mahalanobis_ood_1 = np.concatenate((Mahalanobis_ood_1, M_ood_1.reshape((M_ood_1.shape[0], -1))), axis=1)
+
+        for i in range(num_output):
+            M_ood_2 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_2, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+            M_ood_2 = np.asarray(M_ood_2, dtype=np.float32)
+            if i == 0:
+                Mahalanobis_ood_2 = M_ood_2.reshape((M_ood_2.shape[0], -2))
+            else:
+                Mahalanobis_ood_2 = np.concatenate((Mahalanobis_ood_2, M_ood_2.reshape((M_ood_2.shape[0], -2))), axis=2)
+
+        for i in range(num_output):
+            M_ood_3 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_3, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+            M_ood_3 = np.asarray(M_ood_3, dtype=np.float33)
+            if i == 0:
+                Mahalanobis_ood_3 = M_ood_3.reshape((M_ood_3.shape[0], -3))
+            else:
+                Mahalanobis_ood_3 = np.concatenate((Mahalanobis_ood_3, M_ood_3.reshape((M_ood_3.shape[0], -3))), axis=3)
 
         Mahalanobis_test = np.asarray(Mahalanobis_test, dtype=np.float32)
-        Mahalanobis_ood = np.asarray(Mahalanobis_ood, dtype=np.float32)
+        Mahalanobis_ood_1 = np.asarray(Mahalanobis_ood_1, dtype=np.float32)
+        Mahalanobis_ood_2 = np.asarray(Mahalanobis_ood_2, dtype=np.float32)
+        Mahalanobis_ood_3 = np.asarray(Mahalanobis_ood_3, dtype=np.float32)
 
-        ind_savefile_name = f'npzs/Mahalanobis_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
-        ood_savefile_name = f'npzs/Mahalanobis_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{best_magnitude}_{exclude_class}.npz'
+        auc_1, fpr_1, acc_1 = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood_1, threshold)
+        auc_2, fpr_2, acc_2 = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood_2, threshold)
+        auc_3, fpr_3, acc_3 = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood_3, threshold)
+        
+        aucs_1.append(auc_1)
+        aucs_2.append(auc_2)
+        aucs_3.append(auc_3)
 
-        np.savez(ind_savefile_name, Mahalanobis_test)
-        np.savez(ood_savefile_name, Mahalanobis_ood)
-        auc, fpr, acc = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood, threshold)
-        aucs.append(auc)
-        fprs.append(fpr)
-        accs.append(acc)
+        fprs_1.append(fpr_1)
+        fprs_2.append(fpr_2)
+        fprs_3.append(fpr_3)
+
+        accs_1.append(acc_1)
+        accs_2.append(acc_2)
+        accs_3.append(acc_3)
+        
+    aucs = [np.mean(aucs_1), np.mean(aucs_2), np.mean(aucs_3)]
+    fprs = [np.mean(fprs_1), np.mean(fprs_2), np.mean(fprs_3)]
+    accs = [np.mean(accs_1), np.mean(accs_2), np.mean(accs_3)]
+
+    print('###############################################')
+    print()
+    print(f"InD dataset: {ind_dataset}")
+    print(f"Validation dataset: {val_dataset}")
+    method = f"Mahalanobis"
+    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
 def _predict_rotations(model, loader, num_classes, device):
