@@ -358,59 +358,36 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, nu
     _, threshold = _find_threshold(val_ind_full, val_ood_full)
 
     _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
-    _, _, ood_full = _predict_rotations(model, test_ood_loader, num_classes, device=device)
+    _, _, ood_full_1 = _predict_rotations(model, test_ood_loader_1, num_classes, device=device)
+    _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, device=device)
+    _, _, ood_full_3 = _predict_rotations(model, test_ood_loader_3, num_classes, device=device)
 
-    if exclude_class is None:
-        # ind_savefile_name_kl_div = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div.npz'
-        # ind_savefile_name_rot_score = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_rot_score.npz'
-        ind_savefile_name_full = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_full.npz'
-        # ood_savefile_name_kl_div = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div.npz'
-        # ood_savefile_name_rot_score = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_rot_score.npz'
-        ood_savefile_name_full = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_full.npz'
-    else:
-        # ind_savefile_name_kl_div = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div_{exclude_class}.npz'
-        # ind_savefile_name_rot_score = f'npzs/self_supervision_{ind_dataset}__ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}rot_score_{exclude_class}.npz'
-        ind_savefile_name_full = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}full_{exclude_class}.npz'
-        # ood_savefile_name_kl_div = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div_{exclude_class}.npz'
-        # ood_savefile_name_rot_score = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_rot_score_{exclude_class}.npz'
-        ood_savefile_name_full = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_full_{exclude_class}.npz'
+    ind_savefile_name_full = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
+    ood_savefile_name_full_1 = f'npzs/self_supervision_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}.npz'
+    ood_savefile_name_full_2 = f'npzs/self_supervision_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}.npz'
+    ood_savefile_name_full_3 = f'npzs/self_supervision_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}.npz'
 
-    auc, fpr, acc = _score_npzs(ind_full, ood_full, threshold)
+    auc_1, fpr_1, acc_1 = _score_npzs(ind_full, ood_full_1, threshold)
+    auc_2, fpr_2, acc_2 = _score_npzs(ind_full, ood_full_2, threshold)
+    auc_3, fpr_3, acc_3 = _score_npzs(ind_full, ood_full_3, threshold)
 
-    # np.savez(ind_savefile_name_kl_div, ind_kl_div)
-    # np.savez(ind_savefile_name_rot_score, ind_rot_score)
+    aucs = [auc_1, auc_2, auc_3]
+    fprs = [fpr_1, fpr_2, fpr_3]
+    accs = [acc_1, acc_2, acc_3]
+
     np.savez(ind_savefile_name_full, ind_full)
-    # np.savez(ood_savefile_name_kl_div, ood_kl_div)
-    # np.savez(ood_savefile_name_rot_score, ood_rot_score)
-    np.savez(ood_savefile_name_full, ood_full)
-    # print('###############################################')
-    # print()
-    # print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_kl_div} and out-distribution ood scores to {ood_savefile_name_kl_div}')
-    # print()
-    # print('###############################################')
-    # print()
-    # print(f"Self-Supervision results (KL-Divergence) on {ind_dataset} (In) vs {ood_dataset}:")
-    # print(f'Area Under Receiver Operating Characteristic curve: {auc_kl_div}')
-    # print(f'False Positive Rate @ 95% True Positive Rate: {fpr_kl_div}')
-    # print('###############################################')
-    # print()
-    # print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_rot_score} and out-distribution ood scores to {ood_savefile_name_rot_score}')
-    # print()
-    # print('###############################################')
-    # print()
-    # print(f"Self-Supervision results (Rotation Score) on {ind_dataset} (In) vs {ood_dataset}:")
-    # print(f'Area Under Receiver Operating Characteristic curve: {auc_rot_score}')
-    # print(f'False Positive Rate @ 95% True Positive Rate: {fpr_rot_score}')
+    np.savez(ood_savefile_name_full_1, ood_full_1)
+    np.savez(ood_savefile_name_full_2, ood_full_2)
+    np.savez(ood_savefile_name_full_3, ood_full_3)
+
     print('###############################################')
     print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_full} and out-distribution ood scores to {ood_savefile_name_full}')
+    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_full} and out-distribution ood scores to {ood_savefile_name_full_1}, {ood_savefile_name_full_2} and {ood_savefile_name_full_3}')
     print()
     print('###############################################')
     print()
-    print(f"Self-Supervision results on {ind_dataset} (In) vs {ood_dataset} with Val Set {val_dataset}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-    print(f'OOD Detection Accuracy: {acc}')
+    method = f"Self-Supervision "
+    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
 def _process_gen_odin(model, images, epsilon, criterion=nn.CrossEntropyLoss()):
