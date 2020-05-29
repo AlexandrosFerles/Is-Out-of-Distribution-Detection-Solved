@@ -230,8 +230,6 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
 
 def _create_fgsm_loader(val_loader, gen_odin=False):
 
-    if gen_odin:
-        val_loader.drop_last = True
     sample, gts = next(iter(val_loader))
     sizes = sample.size()
     len_ = 0
@@ -265,7 +263,8 @@ def _create_fgsm_loader(val_loader, gen_odin=False):
 
     ood_data_x, ood_data_y = ood_data_x[:len_], ood_data_y[:len_]
     fgsm_dataset = TensorDataset(ood_data_x, ood_data_y)
-    fgsm_loader = DataLoader(fgsm_dataset, batch_size=val_loader.batch_size)
+    if gen_odin:
+        fgsm_loader = DataLoader(fgsm_dataset, batch_size=val_loader.batch_size, drop_last=True)
 
     return fgsm_loader
 
