@@ -61,8 +61,9 @@ def _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, ac
     print('###############################################')
 
 
-def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset_1, ood_dataset_2, ood_dataset_3, monte_carlo_steps=1, exclude_class=None):
+def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, monte_carlo_steps=1, exclude_class=None):
 
+    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
     model.eval()
 
@@ -677,7 +678,7 @@ if __name__ == '__main__':
 
     if ood_method == 'baseline':
         method_loaders = loaders[1:]
-        _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device)
+        _baseline(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, monte_carlo_steps=args.monte_carlo_steps)
     # elif ood_method == 'odin':
     #     method_loaders = loaders[1:]
     #     _odin(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
