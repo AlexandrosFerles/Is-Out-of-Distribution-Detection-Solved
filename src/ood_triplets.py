@@ -16,7 +16,7 @@ import os
 import random
 import pickle
 import ipdb
-from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy
+from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -124,41 +124,6 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, mo
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
-def _process(model, images, T, epsilon, device, criterion=nn.CrossEntropyLoss()):
-
-    model.eval()
-    if T == 1 and epsilon == 0:
-        outputs = model(images.to(device))
-        nnOutputs = outputs.detach().cpu().numpy()
-    else:
-        inputs = Variable(images.to(device), requires_grad=True)
-        outputs = model(inputs)
-        nnOutputs = outputs.data.cpu()
-        nnOutputs = nnOutputs.numpy()
-        nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
-        nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
-        outputs = outputs / T
-
-        maxIndexTemp = np.argmax(nnOutputs, axis=1)
-        labels = Variable(torch.LongTensor([maxIndexTemp]).to(device))
-        loss = criterion(outputs, labels[0])
-        loss.backward()
-
-        gradient = torch.ge(inputs.grad.data, 0)
-        gradient = (gradient.float() - 0.5) * 2
-
-        tempInputs = torch.add(inputs.data,  -epsilon, gradient)
-        outputs = model(Variable(tempInputs))
-        outputs = outputs / T
-
-        nnOutputs = outputs.data.cpu()
-        nnOutputs = nnOutputs.numpy()
-        nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
-        nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
-
-    return nnOutputs
-
-
 def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
 
     model.eval()
@@ -213,13 +178,10 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_datasets,):
     test_ood_2 = _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device)
     test_ood_3 = _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device)
 
-    ood_savefile_name_1 = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-    ood_savefile_name_2 = f'npzs/odin_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-    ood_savefile_name = f'npzs/odin_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-    ood_savefile_name_2 = f'npzs/odin_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-
-    np.savez(ind_savefile_name, ind)
-    np.savez(ood_savefile_name, ood)
+    ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
+    ood_savefile_name_1 = f'npzs/odin_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}_temperature_{best_T}_epsilon{best_epsilon}.npz'
+    ood_savefile_name_2 = f'npzs/odin_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}_temperature_{best_T}_epsilon{best_epsilon}.npz'
+    ood_savefile_name_3 = f'npzs/odin_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}_temperature_{best_T}_epsilon{best_epsilon}.npz'
 
     np.savez(ind_savefile_name, test_ind)
     np.savez(ood_savefile_name_1, test_ood_1)
@@ -236,14 +198,14 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_datasets,):
 
     print('###############################################')
     print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name}')
+    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name_1}, {ood_savefile_name_2} and {ood_savefile_name_3}')
     print()
     print('###############################################')
     print()
-    print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with Val Set {val_dataset} and chosen T={best_T}, epsilon={best_epsilon}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-    print(f'Detection Accuracy: {acc}')
+    print(f"InD dataset: {ind_dataset}")
+    print(f"Validation dataset: {val_dataset}")
+    method = f"Odin results with chosen T={best_T}, epsilon={best_epsilon}"
+    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
 def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes=10, exclude_class=None, model_type='eb0'):
