@@ -1170,6 +1170,7 @@ def get_triplets_loaders(ind_dataset, val_ood_dataset, ood_datasets, batch_size=
 
     _, transform_test = _get_image_transforms(ind_dataset, resize=True)
     ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
+    ipdb.set_trace()
     with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
         trainset_indices = pickle.load(train_pickle)
         valset_indices = pickle.load(val_pickle)
