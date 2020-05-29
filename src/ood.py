@@ -686,46 +686,66 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     print(f'Detection Accuracy: {acc}')
 
 
-def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, ood_dataset, T=1000, epsilon=0.002, mode='accuracy', scaling =True):
+def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
 
-    test_loader, ood_loader = loaders
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     index = 0
     for model_checkpoint in tqdm(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
         model.eval()
         if scaling:
             if index == 0:
-                ind = _get_odin_scores(model, test_loader, T, epsilon, device=device, score_entropy=True)
-                ood = _get_odin_scores(model, ood_loader, T, epsilon, device=device, score_entropy=True)
+                val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
+                val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
             else:
-                ind += _get_odin_scores(model, test_loader, T, epsilon, device=device, score_entropy=True)
-                ood += _get_odin_scores(model, ood_loader, T, epsilon, device=device, score_entropy=True)
+                val_ind += _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
+                val_ood += _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
         else:
             if index == 0:
-                ind = _get_odin_scores(model, test_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                ood = _get_odin_scores(model, ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                val_ind = _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                val_ood = _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
             else:
-                ind += _get_odin_scores(model, test_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                ood += _get_odin_scores(model, ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                val_ind += _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                val_ood += _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
         index += 1
 
-    ind_savefile_name = f'npzs/ensemble_{ind_dataset}_mode_{mode}.npz'
-    ood_savefile_name = f'npzs/ensemble_{ood_dataset}_mode_{mode}.npz'
+    val_ind = val_ind / (index-1)
+    val_ood = val_ood / (index-1)
+
+    _, threshold = _find_threshold(val_ind, val_ood)
+
+    if scaling:
+        ind = _get_odin_scores(model, test_ind_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
+        ood = _get_odin_scores(model, test_ood_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
+    else:
+        ind = _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
+        ood = _get_odin_scores(model, test_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
 
     ind = ind / (index-1)
     ood = ood / (index-1)
+
+    if scaling:
+        ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_scaling.npz'
+        ood_savefile_name = f'npzs/ensemble_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_scaling.npz'
+    else:
+        ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
+        ood_savefile_name = f'npzs/ensemble_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
+
+    auc, fpr, acc = _score_npzs(ind, ood, threshold)
+
     np.savez(ind_savefile_name, ind)
     np.savez(ood_savefile_name, ood)
-    auc, fpr = _score_npzs(ind, ood)
+
     print('###############################################')
     print()
     print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to {ood_savefile_name}')
     print()
     print('###############################################')
     print()
-    print(f"Leave-Out Ensemble results ({mode}) on {ind_dataset} (In) vs {ood_dataset}:")
+    print(f"Self-Ensemble results on {ind_dataset} (In) vs {ood_dataset} (Out) with Val Set {val_dataset}:")
     print(f'Area Under Receiver Operating Characteristic curve: {auc}')
     print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+    print(f'Detection Accuracy: {acc}')
 
 
 if __name__ == '__main__':
