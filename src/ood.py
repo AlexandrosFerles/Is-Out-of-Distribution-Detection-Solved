@@ -228,7 +228,7 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
     print(f'Detection Accuracy: {acc}')
 
 
-def _create_fgsm_loader(val_loader):
+def _create_fgsm_loader(val_loader, gen_odin=False):
 
     sample, gts = next(iter(val_loader))
     sizes = sample.size()
@@ -244,7 +244,10 @@ def _create_fgsm_loader(val_loader):
         labels = labels.to(device)
         input_var = torch.autograd.Variable(images, requires_grad=True)
         input_var = input_var.to(device)
-        output = model(input_var)
+        if gen_odin:
+            output, _, _ = model(input_var)
+        else:
+            output = model(input_var)
         if len(labels.size()) > 1:
             labels = torch.argmax(labels, dim=1)
         loss = criterion(output, labels)
@@ -802,13 +805,11 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
     if args.val_dataset == 'fgsm':
-        # fgsm_loader = _create_fgsm_loader(loaders[1])
-        # loaders[-2] = fgsm_loader
-        if not os.path.exists(f'{args.val_dataset}_fgsm_loader_{args.batch_size}.pth'):
-            fgsm_loader = _create_fgsm_loader(loaders[1])
-            torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader_{args.batch_size}.pth')
+        if not os.path.exists(f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth'):
+            fgsm_loader = _create_fgsm_loader(loaders[1], gen_odin= ood_method == 'generalizedodin')
+            torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth')
         else:
-            fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader_{args.batch_size}.pth')
+            fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth')
         loaders[-2] = fgsm_loader
 
     if ood_method == 'baseline':
@@ -824,9 +825,9 @@ if __name__ == '__main__':
         _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
     elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
         method_loaders = loaders[1:]
-        temp_loader = method_loaders[-2]
-        temp_loader.drop_last = True
-        method_loaders[-2] = temp_loader
+        # temp_loader = method_loaders[-2]
+        # temp_loader.drop_last = True
+        # method_loaders[-2] = temp_loader
         _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     elif ood_method == 'ensemble':
         method_loaders = loaders[1:]
