@@ -1038,7 +1038,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             dataset7point = ImageFolder(path_7_points, transform=transform_test)
             indexes = list(range(dataset7point.__len__()))
             random.shuffle(indexes)
-            indexes = indexes[:dataset_size]
+            indexes = indexes[:min(dataset_size, len(indexes))]
             val_sampler = SubsetRandomSampler(indexes)
             val_ood_loader = DataLoader(dataset7point, batch_size=batch_size, sampler=val_sampler, num_workers=3)
         elif val_ood_dataset == 'cifar10dogs':
