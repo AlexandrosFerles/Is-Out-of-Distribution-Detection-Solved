@@ -956,7 +956,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         val_batch_size = 10
     else:
         val_batch_size = batch_size
-        
+
     if ind_dataset == 'isic':
         _, transform_test = _get_transforms()
     else:
