@@ -438,7 +438,6 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         Mahalanobis_val_ind = np.asarray(Mahalanobis_val_ind, dtype=np.float32)
         Mahalanobis_val_ood = np.asarray(Mahalanobis_val_ood, dtype=np.float32)
 
-        ipdb.set_trace()
         regressor, auc, threshold = _score_mahalanobis(Mahalanobis_val_ind, Mahalanobis_val_ood)
         with open(f'lr_pickles/logistic_regressor_{exclude_class}_{magnitude}.pickle', 'wb') as lrp:
             pickle.dump(regressor, lrp, protocol=pickle.HIGHEST_PROTOCOL)
