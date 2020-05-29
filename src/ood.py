@@ -71,7 +71,7 @@ def _score_classification_accuracy(model, testloader, device, dataset, genOdin=F
             else:
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-                
+
     accuracy = round(100*correct/total, 2)
     print(f'Accuracy on {dataset}: {accuracy}%')
 
@@ -405,6 +405,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         feature_list[count] = out.size(1)
         count += 1
 
+    ipdb.set_trace()
     sample_mean, precision = lib_generation.sample_estimator(model, num_classes, feature_list, train_ind_loader, device=device)
 
     best_auc = 0
