@@ -996,14 +996,17 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
 
+
     if args.val_dataset == 'fgsm':
-        if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
-            fgsm_loader = _create_fgsm_loader(loaders[1])
-            torch.save(fgsm_loader, f'{args.in_distribution_dataset}_fgsm_loader.pth')
-        else:
-            fgsm_loader = torch.load(f'{args.in_distribution_dataset}_fgsm_loader.pth')
-        ipdb.set_trace()
+        fgsm_loader = _create_fgsm_loader(loaders[1])
         loaders[-2] = fgsm_loader
+        # if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
+        #     fgsm_loader = _create_fgsm_loader(loaders[1])
+        #     torch.save(fgsm_loader, f'{args.in_distribution_dataset}_fgsm_loader.pth')
+        # else:
+        #     fgsm_loader = torch.load(f'{args.in_distribution_dataset}_fgsm_loader.pth')
+        # ipdb.set_trace()
+        # loaders[-2] = fgsm_loader
 
     if ood_method == 'baseline':
         method_loaders = loaders[1:]
