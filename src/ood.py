@@ -665,192 +665,56 @@ def _process_gen_odin(model, images, epsilon, criterion=nn.CrossEntropyLoss()):
     return np.max(o.detach().cpu().numpy(), axis=1), np.max(h.detach().cpu().numpy(), axis=1), g.detach().cpu().numpy()
 
 
-def _gen_odin_temp(model, loaders, ind_dataset, device):
+def _process_gen_odin_loader(model, loader, device, epsilon):
 
-    model.eval()
-    test_loader, ood_loader = loaders
-
-    max_h_scores_ind = np.zeros(test_loader.batch_size*test_loader.__len__())
     len_ = 0
-    for index, data in enumerate(test_loader):
+    max_h = np.zeros(loader.batch_size*loader.__len__())
+    for index, data in enumerate(loader):
 
         images, _ = data
         images = images.to(device)
-        _, h, _ = model(images)
+        o, h, _ = _process_gen_odin(model, images, epsilon)
 
-        max_h_scores_ind[index*test_loader.batch_size:index*test_loader.batch_size + h.shape[0]] = np.max(h.detach().cpu().numpy(), axis=1)
-        len_ += h.shape[0]
-
-    max_h_scores_ind = max_h_scores_ind[:len_]
-
-    max_h_scores_ood = np.zeros(ood_loader.batch_size*ood_loader.__len__())
-    len_ = 0
-    for index, data in enumerate(ood_loader):
-
-        images, _ = data
-        images = images.to(device)
-        _, h, _ = model(images)
-
-        max_h_scores_ood[index*ood_loader.batch_size:index*ood_loader.batch_size + h.shape[0]] = np.max(h.detach().cpu().numpy(), axis=1)
-        len_ += h.shape[0]
-
-    max_h_scores_ood = max_h_scores_ood[:len_]
-    auc, fpr = _score_npzs(max_h_scores_ind, max_h_scores_ood)
-
-    print('#########################################')
-    print(f'Epsilon: {0}')
-    print('-----------------------------------------')
-    print(f'AUC: {auc}')
-    print(f'FPR: {fpr}')
-    print('#########################################')
-
-    epsilons = [0.0025, 0.005, 0.01, 0.02, 0.04, 0.08]
-    for epsilon in epsilons:
-
-        max_h_scores_ind = np.zeros(test_loader.batch_size*test_loader.__len__())
-        len_ = 0
-        for index, data in enumerate(test_loader):
-
-            images, _ = data
-            images = images.to(device)
-            _, h, _ = _process_gen_odin(model, images, epsilon)
-
-            max_h_scores_ind[index*test_loader.batch_size:index*test_loader.batch_size + h.shape[0]] = h
-            len_ += h.shape[0]
-
-        max_h_scores_ind = max_h_scores_ind[:len_]
-
-        max_h_scores_ood = np.zeros(ood_loader.batch_size*ood_loader.__len__())
-        len_ = 0
-        for index, data in enumerate(ood_loader):
-
-            images, _ = data
-            images = images.to(device)
-            _, h, _ = _process_gen_odin(model, images, epsilon)
-
-            max_h_scores_ood[index*ood_loader.batch_size:index*ood_loader.batch_size + h.shape[0]] = h
-            len_ += h.shape[0]
-
-        max_h_scores_ood = max_h_scores_ood[:len_]
-
-        auc, fpr = _score_npzs(max_h_scores_ind, max_h_scores_ood)
-
-        print('#########################################')
-        print(f'Epsilon: {epsilon}')
-        print('-----------------------------------------')
-        print(f'AUC: {auc}')
-        print(f'FPR: {fpr}')
-        print('#########################################')
-
-
-
-def _gen_odin_inference(model, loaders, ind_dataset, ood_dataset, mode, exclude_class=None):
-
-    model.eval()
-    val_loader_in, test_loader_in, ood_loader = loaders
-    epsilons = [0.0025, 0.005, 0.01, 0.02, 0.04, 0.08]
-
-    best_epsilon_g, best_epsilon_h, best_epsilon_o = 0, 0, 0
-    best_score_g, best_score_h, best_score_o = 0, 0, 0
-
-    for epsilon in epsilons:
-        len_ = 0
-        max_o = np.zeros(val_loader_in.batch_size*val_loader_in.__len__())
-        max_h = np.zeros(val_loader_in.batch_size*val_loader_in.__len__())
-        sigmoid = np.zeros(val_loader_in.batch_size*val_loader_in.__len__())
-        for index, data in enumerate(val_loader_in):
-
-            images, _ = data
-            images = images.to(device)
-            o, h, g = _process_gen_odin(model, images, epsilon)
-
-            max_o[index*val_loader_in.batch_size:index*val_loader_in.batch_size + o.shape[0]] = o
-            max_h[index*val_loader_in.batch_size:index*val_loader_in.batch_size + o.shape[0]] = h
-            sigmoid[index*val_loader_in.batch_size:index*val_loader_in.batch_size + o.shape[0]] = np.squeeze(g)
-            len_ += o.shape[0]
-
-        o = o[:len_]
-        h = h[:len_]
-        g = g[:len_]
-
-        score_g = np.average(g)
-        if score_g > best_score_g:
-            best_score_g = score_g
-            best_epsilon_g = epsilon
-
-        score_h = np.average(h)
-        if score_h > best_score_h:
-            best_score_h = score_h
-            best_epsilon_h = epsilon
-
-        score_o = np.average(o)
-        if score_o > best_score_o:
-            best_score_o = score_o
-            best_epsilon_o = epsilon
-
-    len_ = 0
-    max_o_scores_ind = np.zeros(test_loader_in.batch_size*test_loader_in.__len__())
-    max_h_scores_ind = np.zeros(test_loader_in.batch_size*test_loader_in.__len__())
-    sigmoid_scores_ind = np.zeros(test_loader_in.batch_size*test_loader_in.__len__())
-    for index, data in enumerate(test_loader_in):
-
-        images, _ = data
-        images = images.to(device)
-        o, _, _ = _process_gen_odin(model, images, best_epsilon_o)
-        _, h, _ = _process_gen_odin(model, images, best_epsilon_h)
-        _, _, g = _process_gen_odin(model, images, best_epsilon_g)
-
-        max_o_scores_ind[index*test_loader_in.batch_size:index*test_loader_in.batch_size + o.shape[0]] = o
-        max_h_scores_ind[index*test_loader_in.batch_size:index*test_loader_in.batch_size + o.shape[0]] = h
-        sigmoid_scores_ind[index*test_loader_in.batch_size:index*test_loader_in.batch_size + o.shape[0]] = np.squeeze(g)
+        max_h[index*loader.batch_size:index*loader.batch_size + o.shape[0]] = h
         len_ += o.shape[0]
 
-    max_o_scores_ind = max_o_scores_ind[:len_]
-    max_h_scores_ind = max_h_scores_ind[:len_]
-    sigmoid_scores_ind = sigmoid_scores_ind[:len_]
+    max_h = max_h[:len_]
+    return max_h
 
-    len_ = 0
-    max_o_scores_ood = np.zeros(ood_loader.batch_size*ood_loader.__len__())
-    max_h_scores_ood = np.zeros(ood_loader.batch_size*ood_loader.__len__())
-    sigmoid_scores_ood = np.zeros(ood_loader.batch_size*ood_loader.__len__())
-    for index, data in enumerate(ood_loader):
 
-        images, _ = data
-        images = images.to(device)
-        o, _, _ = _process_gen_odin(model, images, best_epsilon_o)
-        _, h, _ = _process_gen_odin(model, images, best_epsilon_h)
-        _, _, g = _process_gen_odin(model, images, best_epsilon_g)
+def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude_class=None):
 
-        max_o_scores_ood[index*ood_loader.batch_size:index*ood_loader.batch_size + o.shape[0]] = o
-        max_h_scores_ood[index*ood_loader.batch_size:index*ood_loader.batch_size + o.shape[0]] = h
-        sigmoid_scores_ood[index*ood_loader.batch_size:index*ood_loader.batch_size + o.shape[0]] = np.squeeze(g)
-        len_ += o.shape[0]
+    model.eval()
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
+    epsilons = [0, 0.0025, 0.005, 0.01, 0.02, 0.04, 0.08]
 
-    max_o_scores_ood = max_o_scores_ood[:len_]
-    max_h_scores_ood = max_h_scores_ood[:len_]
-    sigmoid_scores_ood = sigmoid_scores_ood[:len_]
+    best_auc, best_epsilon = 0, 0
+    for epsilon in epsilons:
+
+        val_ind_scores = _process_gen_odin_loader(model, val_ind_loader, device, epsilon)
+        val_ood_scores = _process_gen_odin_loader(model, val_ood_loader, device, epsilon)
+
+        auc, _, _ = _score_npzs(val_ind_scores, val_ood_scores, threshold=0)
+        if auc > best_auc:
+            best_auc = auc
+            best_epsilon = epsilon
+            best_val_ind_scores = val_ind_scores
+            best_val_ood_scores = val_ood_scores
+
+    _, threshold = _find_threshold(best_val_ind_scores, best_val_ood_scores)
+
+    test_ind_scores = _process_gen_odin_loader(model, test_ind_loader, device, best_epsilon)
+    test_ood_scores = _process_gen_odin_loader(model, test_ood_loader, device, best_epsilon)
 
     if exclude_class is None:
-        max_o_ind_savefile_name = f'npzs/max_o_gen_odin_{mode}_{ind_dataset}.npz'
-        max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{mode}_{ind_dataset}.npz'
-        sigmoid_ind_savefile_name = f'npzs/sigmoid_gen_odin_{mode}_{ood_dataset}.npz'
-        max_o_ood_savefile_name = f'npzs/max_o_gen_odin_{mode}_{ind_dataset}.npz'
-        max_h_ood_savefile_name = f'npzs/max_h_gen_odin_{mode}_{ind_dataset}.npz'
-        sigmoid_ood_savefile_name = f'npzs/sigmoid_gen_odin_{mode}_{ood_dataset}.npz'
+        max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
+        max_h_ood_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
     else:
-        max_o_ind_savefile_name = f'npzs/max_o_gen_odin_{mode}_{ind_dataset}_{exclude_class}.npz'
-        max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{mode}_{ind_dataset}_{exclude_class}.npz'
-        sigmoid_ind_savefile_name = f'npzs/sigmoid_gen_odin_{mode}_{ood_dataset}_{exclude_class}.npz'
-        max_o_ood_savefile_name = f'npzs/max_o_gen_odin_{mode}_{ind_dataset}_{exclude_class}.npz'
-        max_h_ood_savefile_name = f'npzs/max_h_gen_odin_{mode}_{ind_dataset}_{exclude_class}.npz'
-        sigmoid_ood_savefile_name = f'npzs/sigmoid_gen_odin_{mode}_{ood_dataset}_{exclude_class}.npz'
+        max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
+        max_h_ood_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
 
-    np.savez(max_o_ind_savefile_name, max_o_scores_ind)
     np.savez(max_h_ind_savefile_name, max_h_scores_ind)
-    np.savez(sigmoid_ind_savefile_name, sigmoid_scores_ind)
-    np.savez(max_o_ood_savefile_name, max_o_scores_ood)
     np.savez(max_h_ood_savefile_name, max_h_scores_ood)
-    np.savez(sigmoid_ood_savefile_name, sigmoid_scores_ood)
     auc_o, fpr_o = _score_npzs(max_o_scores_ind, max_o_scores_ood)
     auc_h, fpr_h = _score_npzs(max_h_scores_ind, max_h_scores_ood)
     auc_sigmoid, fpr_sigmoid = _score_npzs(sigmoid_scores_ind, sigmoid_scores_ood)
@@ -955,18 +819,18 @@ if __name__ == '__main__':
     elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
         method_loaders = loaders[1:]
         _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
-    #
+    elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
+        method_loaders = loaders[1:]
+        _gen_odin_inference(model, loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, mode=2, exclude_class=args.exclude_class)
+        # _gen_odin_temp(model, loaders, ind_dataset=args.in_distribution_dataset, device=device)
     # elif ood_method == 'ensemble':
     #     if args.with_FGSM:
     #         print('FGSM cannot be combined with the ensemble method, skipping this step')
     #     scaling = True if args.scaling == 1 else False
     #     _ensemble_inference(model_checkpoints, loaders, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, mode=args.ensemble_mode, device=device, scaling=scaling)
-    #
-    # elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-    #     # _gen_odin_inference(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, mode=args.gen_odin_mode, exclude_class=args.exclude_class)
-    #     _gen_odin_temp(model, loaders, ind_dataset=args.in_distribution_dataset, device=device)
     # else:
     #     raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
+
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)
