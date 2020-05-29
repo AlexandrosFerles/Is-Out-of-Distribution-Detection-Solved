@@ -16,7 +16,7 @@ import os
 import random
 import pickle
 import ipdb
-from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process
+from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process, _predict_rotations
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -347,63 +347,18 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
-def _predict_rotations(model, loader, num_classes, device):
+def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, num_classes,):
 
-    model.eval()
-    uniform = torch.zeros(num_classes)
-    for i in range(uniform.size()[0]):
-        uniform[i] = 1.0 / uniform.size()[0]
+    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
+    train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
-    uniform = uniform.to(device)
-
-    numpy_array_full = np.zeros(loader.batch_size*loader.__len__())
-    numpy_array_kl_div = np.zeros(loader.batch_size*loader.__len__())
-    numpy_array_rot_score = np.zeros(loader.batch_size*loader.__len__())
-    for index, data in tqdm(enumerate(loader)):
-
-        images, _ = data
-        images = images.to(device)
-
-        with torch.no_grad():
-            outputs = model(images)
-            log_softmax_outputs = torch.log_softmax(outputs, 1)
-            kl_div = F.kl_div(log_softmax_outputs, uniform)
-
-            # Rotation Loss
-            rot_gt = torch.cat((torch.zeros(images.size(0)),
-                                torch.ones(images.size(0)),
-                                2*torch.ones(images.size(0)),
-                                3*torch.ones(images.size(0))), 0).long().to(device)
-
-            rot_images = images.detach().cpu().numpy()
-            rot_images = np.concatenate((rot_images, np.rot90(rot_images, 1, axes=(2, 3)),
-                                         np.rot90(rot_images, 2, axes=(2, 3)), np.rot90(rot_images, 3, axes=(2, 3))), 0)
-
-            rot_images = torch.FloatTensor(rot_images)
-            rot_images = rot_images.to(device)
-
-            rot_preds = model(rot_images, rot=True)
-            ce_rot = F.cross_entropy(rot_preds, rot_gt)
-
-            numpy_array_kl_div[index] = kl_div.item()
-            numpy_array_rot_score[index] = - 0.25 * ce_rot.item()
-            anomaly_score = kl_div.item() - 0.25 * ce_rot.item()
-            numpy_array_full[index] = anomaly_score
-
-    return numpy_array_kl_div, numpy_array_rot_score, numpy_array_full
-
-
-def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes, exclude_class=None):
-
-    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
-
-    val_ind_kl_div, val_ind_rot_score, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
-    val_ood_kl_div, val_ood_rot_score, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
+    _, _, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
+    _, _, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
 
     _, threshold = _find_threshold(val_ind_full, val_ood_full)
 
-    ind_kl_div, ind_rot_score, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
-    ood_kl_div, ood_rot_score, ood_full = _predict_rotations(model, test_ood_loader, num_classes, device=device)
+    _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
+    _, _, ood_full = _predict_rotations(model, test_ood_loader, num_classes, device=device)
 
     if exclude_class is None:
         # ind_savefile_name_kl_div = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_kl_div.npz'
