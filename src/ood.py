@@ -482,7 +482,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset} (Out)  with Val Set {val_dataset}:')
         print(f'Area Under Receiver Operating Characteristic curve: {auc}')
         print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-        print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
+        print(f'Detection Accuracy : {acc}')
         print('###############################################')
         print()
 
