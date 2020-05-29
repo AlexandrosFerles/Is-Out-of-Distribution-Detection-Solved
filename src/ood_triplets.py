@@ -350,7 +350,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
 def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, num_classes,):
 
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
-    train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     _, _, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
     _, _, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
