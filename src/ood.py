@@ -806,7 +806,11 @@ if __name__ == '__main__':
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
     if args.val_dataset == 'fgsm':
         if args.fgsm_checkpoint is not None:
-            fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=args.fgsm_classes)
+            if args.fgsm_classes None:
+                fgsm_classes = args.num_classes
+            else:
+                fgsm_classes = args.fgsm_classes
+            fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=fgsm_classes)
         else:
             from copy import deepcopy
             fgsm_model = deepcopy(model)
