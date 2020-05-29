@@ -670,7 +670,7 @@ if __name__ == '__main__':
 
     ind_dataset = args.in_distribution_dataset.lower()
     val_dataset = args.val_dataset.lower()
-    all_datasets = ['cifar10', 'cifar100', 'svhn', 'stt', 'tinyimagenet']
+    all_datasets = ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']
     all_datasets.remove(ind_dataset)
     all_datasets.remove(val_dataset)
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = all_datasets
