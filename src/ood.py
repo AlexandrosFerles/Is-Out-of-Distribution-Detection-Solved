@@ -807,7 +807,7 @@ if __name__ == '__main__':
     if args.val_dataset == 'fgsm':
         fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=args.fgsm_classes)
         if not os.path.exists(f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth'):
-            fgsm_loader = _create_fgsm_loader(loaders[1])
+            fgsm_loader = _create_fgsm_loader(fgsm_model, loaders[1], device)
             torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth')
         else:
             fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader_{args.batch_size}_{ood_method}.pth')
