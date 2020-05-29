@@ -752,7 +752,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     device = torch.device(f'cuda:{args.device}')
-    score_ind = True if args.score_ind == 1 else False
 
     ood_method = args.ood_method.lower()
 
