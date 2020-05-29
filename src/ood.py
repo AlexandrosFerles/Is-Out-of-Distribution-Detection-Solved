@@ -824,6 +824,9 @@ if __name__ == '__main__':
         _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
     elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
         method_loaders = loaders[1:]
+        temp_loader = method_loaders[-2]
+        temp_loader.drop_last = True
+        method_loaders[-2] = temp_loader
         _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     elif ood_method == 'ensemble':
         method_loaders = loaders[1:]
