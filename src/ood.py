@@ -778,7 +778,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
     parser.add_argument('--exclude_class', '--ex', default=None, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
-    parser.add_argument('--fgsm_checkpoint', '--fgsm', required=False)
+    parser.add_argument('--fgsm_checkpoint', '--fgsm', default=None, required=False)
     parser.add_argument('--fgsm_classes', '--fgsmc', type=int, default=10, required=False)
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -805,7 +805,11 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
     if args.val_dataset == 'fgsm':
-        fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=args.fgsm_classes)
+        if args.fgsm_checkpoint is not None:
+            fgsm_model = build_model_with_checkpoint('eb0', args.fgsm_checkpoint, device=device, out_classes=args.fgsm_classes)
+        else:
+            from copy import deepcopy
+            fgsm_model = deepcopy(model)
         if not os.path.exists(f'{args.val_dataset}_fgsm_loader_{ood_method}.pth'):
             fgsm_loader = _create_fgsm_loader(fgsm_model, loaders[1], device)
             torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader_{ood_method}.pth')
@@ -826,9 +830,6 @@ if __name__ == '__main__':
         _rotation(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
     elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
         method_loaders = loaders[1:]
-        # temp_loader = method_loaders[-2]
-        # temp_loader.drop_last = True
-        # method_loaders[-2] = temp_loader
         _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     elif ood_method == 'ensemble':
         method_loaders = loaders[1:]
