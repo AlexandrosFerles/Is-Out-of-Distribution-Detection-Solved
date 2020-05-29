@@ -1210,17 +1210,23 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
 
+    if args.with_FGSM:
+        if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
+            fgsm_loader = _create_fgsm_loader(loaders[1])
+            torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader.pth')
+        else:
+            fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader.pth')
+        loaders[-2]
+
     if ood_method == 'baseline':
-        if args.with_FGSM:
-            print('FGSM cannot be combined with the baseline method, skipping this step')
         method_loaders = loaders[1:]
         _baseline(model, method_loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, monte_carlo_steps=args.monte_carlo_steps, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
 
-    # elif ood_method == 'odin':
-    #     if args.temperature != 1 or args.epsilon != 0:
-    #         _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, T=args.temperature, epsilon=args.epsilon, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
-    #     else:
-    #         _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+    elif ood_method == 'odin':
+        if args.temperature != 1 or args.epsilon != 0:
+            _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, T=args.temperature, epsilon=args.epsilon, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
+        else:
+            _odin(model, loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, with_fgsm=args.with_FGSM, exclude_class=args.exclude_class, device=device, score_ind=score_ind)
     #
     # elif ood_method == 'mahalanobis':
     #     if not args.with_FGSM:
