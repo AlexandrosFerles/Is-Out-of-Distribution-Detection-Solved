@@ -94,8 +94,8 @@ def _score_npzs(ind, ood, threshold):
 
     ind_ = np.zeros(ind.shape)
     ood_ = np.zeros(ood.shape)
-    ind_[np.argwhere(ind > fpr_threshold)] = 1
-    ood_[np.argwhere(ood > fpr_threshold)] = 1
+    ind_[np.argwhere(ind >= fpr_threshold)] = 1
+    ood_[np.argwhere(ood >= fpr_threshold)] = 1
     X = np.append(ind_, ood_, axis=0)
 
     fpr, _ = _get_metrics(X, y)
@@ -103,8 +103,8 @@ def _score_npzs(ind, ood, threshold):
 
     ind_ = np.zeros(ind.shape)
     ood_ = np.zeros(ood.shape)
-    ind_[np.argwhere(ind > threshold)] = 1
-    ood_[np.argwhere(ood < threshold)] = 1
+    ind_[np.argwhere(ind >= threshold)] = 1
+    ood_[np.argwhere(ood <= threshold)] = 1
     X = np.append(ind_, ood_, axis=0)
 
     _, acc = _get_metrics(X, y)
