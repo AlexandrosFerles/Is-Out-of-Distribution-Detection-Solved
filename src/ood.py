@@ -26,9 +26,6 @@ torch.cuda.manual_seed(global_seed)
 
 def _find_threshold(train_scores, val_scores):
 
-    # train_scores = np.sort(train_scores)
-    # val_scores = np.sort(val_scores)
-
     probs = np.append(train_scores, val_scores, axis=0)
     y_true = np.append(np.ones(train_scores.shape[0]), np.zeros(val_scores.shape[0]), axis=0)
     from sklearn.metrics import accuracy_score
@@ -40,30 +37,11 @@ def _find_threshold(train_scores, val_scores):
         accuracy_scores.append(accuracy_score(y_true, [1 if m > thresh else 0 for m in probs]))
 
     accuracies = np.array(accuracy_scores)
-    max_accuracy = accuracies.max()
+    max_accuracy = round(100*accuracies.max(), 2)
     max_accuracy_threshold = thresholds[accuracies.argmax()]
 
     print(f'Chosen threshold: {max_accuracy_threshold} yielding {max_accuracy}% accuracy')
     return max_accuracy, max_accuracy_threshold
-    # acc, threshold = 0, 0
-    # index = val_scores.shape[0] - 1
-    #
-    # while(True):
-    #
-    #     temp_threshold = val_scores[index]
-    #     ind_ = np.zeros(train_scores.shape)
-    #     ood_ = np.zeros(val_scores.shape)
-    #     ind_[np.argwhere(train_scores > temp_threshold)] = 1
-    #     ood_[np.argwhere(val_scores < temp_threshold)] = 1
-    #
-    #     temp_acc = (np.sum(ind_) + (np.sum(ood_) ) / (ind_.shape[0]  + ood_.shape[0]))
-    #     if temp_acc > acc:
-    #         acc, threshold = temp_acc, temp_threshold
-    #
-    #     if temp_threshold < train_scores[0]:
-    #         break
-    #
-    # return acc, threshold
 
 
 def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
@@ -92,6 +70,7 @@ def _score_classification_accuracy(model, testloader, dataset, genOdin=False):
 
 def _score_npzs(ind, ood, threshold):
 
+    ipdb.set_trace()
     y_known, y_novel = np.ones(ind.shape[0]), np.zeros(ood.shape[0])
     X, y = np.append(ind, ood), np.append(y_known, y_novel)
 
