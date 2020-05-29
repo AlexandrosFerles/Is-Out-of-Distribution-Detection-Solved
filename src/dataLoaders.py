@@ -952,6 +952,9 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
 
 def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=32, exclude_class=None, subset_index=None):
 
+    if val_ood_dataset == 'fgsm':
+        val_batch_size=10
+
     if ind_dataset == 'isic':
         _, transform_test = _get_transforms()
     else:
@@ -967,7 +970,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         ind_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
 
         train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3)
-        val_ind_loader = DataLoader(ind_valset, batch_size=batch_size, num_workers=3)
+        val_ind_loader = DataLoader(ind_valset, batch_size=val_batch_size, num_workers=3)
         test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
     elif ind_dataset == 'stanforddogs' or ind_dataset=='nabirds':
         if subset_index is None:
@@ -979,7 +982,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 train_sampler = SubsetRandomSampler(trainset_indices)
                 val_sampler = SubsetRandomSampler(valset_indices)
                 train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=train_sampler)
-                val_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+                val_ind_loader = DataLoader(ind_trainset, batch_size=val_batch_size, num_workers=3, sampler=val_sampler)
                 test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
         else:
             pass
@@ -992,7 +995,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             train_sampler = SubsetRandomSampler(trainset_indices)
             val_sampler = SubsetRandomSampler(valset_indices)
             train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=train_sampler)
-            val_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
+            val_ind_loader = DataLoader(ind_trainset, batch_size=val_batch_size, num_workers=3, sampler=val_sampler)
             test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
 
     if val_ood_dataset != 'fgsm':
