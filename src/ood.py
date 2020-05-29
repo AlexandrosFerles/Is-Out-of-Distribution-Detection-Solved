@@ -367,11 +367,11 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
     ood = _get_odin_scores(model, test_ood_loader, best_T, best_epsilon, device=device)
 
     if exclude_class is None:
-        ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-        ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
+        ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
+        ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
     else:
-        ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
-        ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
+        ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
+        ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
 
     np.savez(ind_savefile_name, ind)
     np.savez(ood_savefile_name, ood)
