@@ -485,9 +485,9 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         print('###############################################')
         print()
 
-    auc = round(100*np.mean(aucs), 2)
-    fpr = round(100*np.mean(fprs), 2)
-    acc = round(100*np.mean(accs), 2)
+    auc = round(np.mean(aucs), 2)
+    fpr = round(np.mean(fprs), 2)
+    acc = round(np.mean(accs), 2)
     print(f'Mahalanobis results on {ind_dataset} (In) vs {ood_dataset} (Out)  with Val Set {val_dataset}:')
     print(f'Area Under Receiver Operating Characteristic curve: {auc}')
     print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
