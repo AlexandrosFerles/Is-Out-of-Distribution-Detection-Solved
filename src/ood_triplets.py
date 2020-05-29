@@ -78,6 +78,7 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, mo
         val_ind = val_ind / monte_carlo_steps
         val_ood = val_ood / monte_carlo_steps
 
+    ipdb.set_trace()
     acc, threshold = _find_threshold(val_ind, val_ood)
 
     test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps)
