@@ -84,7 +84,7 @@ def build_model(args, rot=False):
         raise NotImplementedError('net not implemented')
 
 
-def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes, gen_odin_mode=0, input_features=3, rot=False):
+def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes, gen_odin_mode=2, input_features=3, rot=False):
 
     if 'wide' in modelName:
         from models.WideResNet import WideResNet
