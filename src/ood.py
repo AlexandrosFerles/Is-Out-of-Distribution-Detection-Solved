@@ -80,7 +80,6 @@ def _get_metrics(X, y):
 
 def _score_npzs(ind, ood, threshold):
 
-    ipdb.set_trace()
     y_known, y_novel = np.ones(ind.shape[0]), np.zeros(ood.shape[0])
     X, y = np.append(ind, ood), np.append(y_known, y_novel)
 
