@@ -843,7 +843,6 @@ if __name__ == '__main__':
                     images, _ = data
                     arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_size + images.size()[0]] = images.detach().cpu().numpy()
                     arr_len += images.size()[0]
-                ipdb.set_trace()
                 arr_ = torch.FloatTensor(arr[:arr_len])
                 from torch.utils.data import TensorDataset
                 fgsm_dataset = TensorDataset(arr_)
