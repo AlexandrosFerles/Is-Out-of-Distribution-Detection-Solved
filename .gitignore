@@ -35,7 +35,6 @@ src/npzs
 src/csvs
 src/wandb
 *.out
-src/results
 src/txts
 *.pickle
 *.csv
