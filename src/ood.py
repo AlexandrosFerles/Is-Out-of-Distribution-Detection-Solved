@@ -811,10 +811,10 @@ if __name__ == '__main__':
         else:
             model = build_model_with_checkpoint('eb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
     else:
+        ipdb.set_trace()
         model_checkpoints = []
         for line in open(args.model_checkpoints_file, 'r'):
             model_checkpoints.append(line.split('\n')[0])
-        ipdb.set_trace()
 
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
 
