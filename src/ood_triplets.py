@@ -299,7 +299,6 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
             else:
                 Mahalanobis_ood_1 = np.concatenate((Mahalanobis_ood_1, M_ood_1.reshape((M_ood_1.shape[0], -1))), axis=1)
 
-        ipdb.set_trace()
         for i in range(num_output):
             M_ood_2 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_2, num_classes, sample_mean, precision, i, best_magnitude, device=device)
             M_ood_2 = np.asarray(M_ood_2, dtype=np.float32)
@@ -308,6 +307,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
             else:
                 Mahalanobis_ood_2 = np.concatenate((Mahalanobis_ood_2, M_ood_2.reshape((M_ood_2.shape[0], -2))), axis=2)
 
+        ipdb.set_trace()
         for i in range(num_output):
             M_ood_3 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_3, num_classes, sample_mean, precision, i, best_magnitude, device=device)
             M_ood_3 = np.asarray(M_ood_3, dtype=np.float33)
