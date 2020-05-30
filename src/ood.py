@@ -843,7 +843,7 @@ if __name__ == '__main__':
                 arr_len = 0
                 for index, data in enumerate(fgsm_loader):
                     images, label = data
-                    arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_sizes + images.size()[0]] = images.detach().cpu().numpy()
+                    arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_size + images.size()[0]] = images.detach().cpu().numpy()
                     arr_len = images.size()[0]
                     labels.append(label.detach().cpu().numpy())
                 arr = torch.FloatTensor(arr[:arr_len])
