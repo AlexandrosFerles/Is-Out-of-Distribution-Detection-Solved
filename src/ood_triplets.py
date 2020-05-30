@@ -16,7 +16,7 @@ import os
 import random
 import pickle
 import ipdb
-from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process, _predict_rotations
+from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process, _predict_rotations, _process_gen_odin_loader, _process_gen_odin
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -350,7 +350,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
-def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, num_classes,):
+def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, num_classes):
 
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
@@ -393,52 +393,14 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, nu
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
-def _process_gen_odin(model, images, epsilon, criterion=nn.CrossEntropyLoss()):
+def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_datasets):
 
     model.eval()
-    inputs = Variable(images.to(device), requires_grad=True)
-    outputs, _, _ = model(inputs)
-    nnOutputs = outputs.data.cpu()
-    nnOutputs = nnOutputs.numpy()
-    nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
-    nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
+    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
-    maxIndexTemp = np.argmax(nnOutputs, axis=1)
-    labels = Variable(torch.LongTensor([maxIndexTemp]).to(device))
-    loss = criterion(outputs, labels[0])
-    loss.backward()
-
-    gradient = torch.ge(inputs.grad.data, 0)
-    gradient = (gradient.float() - 0.5) * 2
-
-    tempInputs = torch.add(inputs.data,  -epsilon, gradient)
-    o, h, g = model(Variable(tempInputs))
-
-    return np.max(o.detach().cpu().numpy(), axis=1), np.max(h.detach().cpu().numpy(), axis=1), g.detach().cpu().numpy()
-
-
-def _process_gen_odin_loader(model, loader, device, epsilon):
-
-    len_ = 0
-    max_h = np.zeros(loader.batch_size*loader.__len__())
-    for index, data in enumerate(loader):
-
-        images, _ = data
-        images = images.to(device)
-        o, h, _ = _process_gen_odin(model, images, epsilon)
-
-        max_h[index*loader.batch_size:index*loader.batch_size + o.shape[0]] = h
-        len_ += o.shape[0]
-
-    max_h = max_h[:len_]
-    return max_h
-
-
-def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude_class=None):
-
-    model.eval()
-    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     epsilons = [0, 0.0025, 0.005, 0.01, 0.02, 0.04, 0.08]
+    epsilons = [0]
 
     best_auc, best_epsilon = 0, 0
     for epsilon in epsilons:
@@ -456,29 +418,33 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     _, threshold = _find_threshold(best_val_ind_scores, best_val_ood_scores)
 
     test_ind_scores = _process_gen_odin_loader(model, test_ind_loader, device, best_epsilon)
-    test_ood_scores = _process_gen_odin_loader(model, test_ood_loader, device, best_epsilon)
+    test_ood_scores_1 = _process_gen_odin_loader(model, test_ood_loader_1, device, best_epsilon)
+    test_ood_scores_2 = _process_gen_odin_loader(model, test_ood_loader_2, device, best_epsilon)
+    test_ood_scores_3 = _process_gen_odin_loader(model, test_ood_loader_3, device, best_epsilon)
 
-    if exclude_class is None:
-        max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
-        max_h_ood_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
-    else:
-        max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
-        max_h_ood_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_{exclude_class}.npz'
+    max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
+    max_h_ood_savefile_name_1 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
+    max_h_ood_savefile_name_2 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}.npz'
+    max_h_ood_savefile_name_3 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}.npz'
 
     np.savez(max_h_ind_savefile_name, test_ind_scores)
-    np.savez(max_h_ood_savefile_name, test_ood_scores)
-    auc, fpr, acc = _score_npzs(test_ind_scores, test_ood_scores, threshold)
+    np.savez(max_h_ood_savefile_name_1, test_ood_scores_1)
+    np.savez(max_h_ood_savefile_name_2, test_ood_scores_2)
+    np.savez(max_h_ood_savefile_name_3, test_ood_scores_3)
 
+    auc_1, fpr_1, acc_1 = _score_npzs(test_ind_scores, test_ood_scores_1, threshold)
+    auc_2, fpr_2, acc_2 = _score_npzs(test_ind_scores, test_ood_scores_2, threshold)
+    auc_3, fpr_3, acc_3 = _score_npzs(test_ind_scores, test_ood_scores_3, threshold)
+
+    aucs = [auc_1, auc_2, auc_3]
+    fprs = [fpr_1, fpr_2, fpr_3]
+    accs = [acc_1, acc_2, acc_3]
     print('###############################################')
     print()
-    print(f'Succesfully stored in-distribution ood scores for maximum h to {max_h_ind_savefile_name} and out-distribution ood scores to {max_h_ood_savefile_name}')
+    print(f'Succesfully stored in-distribution ood scores for maximum h to {max_h_ind_savefile_name} and out-distribution ood scores to {max_h_ood_savefile_name_1}, {max_h_ood_savefile_name_2} and {max_h_ood_savefile_name_3}')
     print()
-    print('###############################################')
-    print()
-    print(f"Generalized-Odin results (sigmoid) on {ind_dataset} (In) vs {ood_dataset} (Out) with Val Dataset {val_dataset}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
-    print(f'Detection Accuracy: {acc}')
+    method = "Generalized-Odin results (Cosine Similarity) "
+    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
 def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
@@ -602,9 +568,9 @@ if __name__ == '__main__':
     elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
         method_loaders = loaders[1:]
         _rotation(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, num_classes=args.num_classes)
-    # elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-    #     method_loaders = loaders[1:]
-    #     _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
+    elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
+        method_loaders = loaders[1:]
+        _gen_odin_inference(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
     # elif ood_method == 'ensemble':
     #     method_loaders = loaders[1:]
     #     _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
