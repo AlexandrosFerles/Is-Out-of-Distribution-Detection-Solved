@@ -16,7 +16,7 @@ import os
 import random
 import pickle
 import ipdb
-from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process, _predict_rotations, _process_gen_odin_loader, _process_gen_odin
+from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process, _predict_rotations, _process_gen_odin_loader
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
