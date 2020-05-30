@@ -1,0 +1,50 @@
+Loaded pretrained weights for efficientnet-b0
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Using downloaded and verified file: /raid/ferles/data/train_32x32.mat
+Using downloaded and verified file: /raid/ferles/data/test_32x32.mat
+Files already downloaded and verified
+Files already downloaded and verified
+Chosen threshold: 0.12261728197336197 yielding 87.85% accuracy
+###############################################
+
+Succesfully stored in-distribution ood scores for maximum h to npzs/max_h_gen_odin_cifar10_ind_cifar10_val_tinyimagenet.npz and out-distribution ood scores to npzs/max_h_gen_odin_cifar10_ind_cifar10_val_tinyimagenet_ood_cifar100.npz, npzs/max_h_gen_odin_cifar10_ind_cifar10_val_tinyimagenet_ood_svhn.npz and npzs/max_h_gen_odin_cifar10_ind_cifar10_val_tinyimagenet_ood_stl.npz
+
+###############################################
+
+InD dataset: cifar10
+Validation dataset: tinyimagenet
+###############################################
+
+Generalized-Odin results (Cosine Similarity)  results on cifar100 (Out):
+
+Area Under Receiver Operating Characteristic curve: 92.67
+False Positive Rate @ 95% True Positive Rate: 39.82
+Detection Accuracy: 86.08
+###############################################
+
+Generalized-Odin results (Cosine Similarity)  results on svhn (Out):
+
+Area Under Receiver Operating Characteristic curve: 92.21
+False Positive Rate @ 95% True Positive Rate: 66.88
+Detection Accuracy: 88.63
+###############################################
+
+Generalized-Odin results (Cosine Similarity)  results on stl (Out):
+
+Area Under Receiver Operating Characteristic curve: 77.95
+False Positive Rate @ 95% True Positive Rate: 70.25
+Detection Accuracy: 72.17
+###############################################
+
+###############################################
+###############################################
+MEAN PERFORMANCE OF GENERALIZED-ODIN RESULTS (COSINE SIMILARITY) :
+Area Under Receiver Operating Characteristic curve: 87.61 with variance 6.83
+False Positive Rate @ 95% True Positive Rate: 58.98 with variance 13.62
+Detection Accuracy: 82.29 with variance 7.23
+###############################################
+###############################################
+00:04:41.66

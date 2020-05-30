@@ -1,0 +1,50 @@
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Using downloaded and verified file: /raid/ferles/data/train_32x32.mat
+Using downloaded and verified file: /raid/ferles/data/test_32x32.mat
+Files already downloaded and verified
+Files already downloaded and verified
+Chosen threshold: 0.5342872695865728 yielding 67.0% accuracy
+###############################################
+
+Selected magnitudes: [0.0]
+Selected thresholds: [0.5342872695865728]
+
+###############################################
+
+InD dataset: cifar100
+Validation dataset: cifar10
+###############################################
+
+Mahalanobis  results on svhn (Out):
+
+Area Under Receiver Operating Characteristic curve: 7.95
+False Positive Rate @ 95% True Positive Rate: 99.98
+Detection Accuracy: 14.63
+###############################################
+
+Mahalanobis  results on stl (Out):
+
+Area Under Receiver Operating Characteristic curve: 0.02
+False Positive Rate @ 95% True Positive Rate: 100.0
+Detection Accuracy: 25.67
+###############################################
+
+Mahalanobis  results on tinyimagenet (Out):
+
+Area Under Receiver Operating Characteristic curve: 0.17
+False Positive Rate @ 95% True Positive Rate: 99.99
+Detection Accuracy: 23.12
+###############################################
+
+###############################################
+###############################################
+MEAN PERFORMANCE OF MAHALANOBIS :
+Area Under Receiver Operating Characteristic curve: 2.71 with variance 3.7
+False Positive Rate @ 95% True Positive Rate: 99.99 with variance 0.01
+Detection Accuracy: 21.14 with variance 4.72
+###############################################
+###############################################
+01:31:29.84

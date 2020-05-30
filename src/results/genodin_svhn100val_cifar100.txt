@@ -1,0 +1,50 @@
+Loaded pretrained weights for efficientnet-b0
+Using downloaded and verified file: /raid/ferles/data/train_32x32.mat
+Using downloaded and verified file: /raid/ferles/data/test_32x32.mat
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Chosen threshold: 0.1555638313293457 yielding 92.7% accuracy
+###############################################
+
+Succesfully stored in-distribution ood scores for maximum h to npzs/max_h_gen_odin_svhn_ind_svhn_val_cifar100.npz and out-distribution ood scores to npzs/max_h_gen_odin_svhn_ind_svhn_val_cifar100_ood_cifar10.npz, npzs/max_h_gen_odin_svhn_ind_svhn_val_cifar100_ood_stl.npz and npzs/max_h_gen_odin_svhn_ind_svhn_val_cifar100_ood_tinyimagenet.npz
+
+###############################################
+
+InD dataset: svhn
+Validation dataset: cifar100
+###############################################
+
+Generalized-Odin results (Cosine Similarity)  results on cifar10 (Out):
+
+Area Under Receiver Operating Characteristic curve: 97.08
+False Positive Rate @ 95% True Positive Rate: 15.92
+Detection Accuracy: 90.23
+###############################################
+
+Generalized-Odin results (Cosine Similarity)  results on stl (Out):
+
+Area Under Receiver Operating Characteristic curve: 97.23
+False Positive Rate @ 95% True Positive Rate: 14.55
+Detection Accuracy: 90.05
+###############################################
+
+Generalized-Odin results (Cosine Similarity)  results on tinyimagenet (Out):
+
+Area Under Receiver Operating Characteristic curve: 96.77
+False Positive Rate @ 95% True Positive Rate: 17.55
+Detection Accuracy: 90.09
+###############################################
+
+###############################################
+###############################################
+MEAN PERFORMANCE OF GENERALIZED-ODIN RESULTS (COSINE SIMILARITY) :
+Area Under Receiver Operating Characteristic curve: 97.03 with variance 0.19
+False Positive Rate @ 95% True Positive Rate: 16.01 with variance 1.23
+Detection Accuracy: 90.12 with variance 0.08
+###############################################
+###############################################
+00:04:39.73
