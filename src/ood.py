@@ -190,9 +190,9 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
     if monte_carlo_steps > 1:
         model._dropout.train()
 
-    print(test_ind_loader.__len__() * test_ind_loader.batch_size)
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     _score_classification_accuracy(model, test_ind_loader, device, dataset=ind_dataset)
+    print(test_ind_loader.__len__() * test_ind_loader.batch_size)
     val_ind = _get_baseline_scores(model, val_ind_loader, device, monte_carlo_steps)
     val_ood = _get_baseline_scores(model, val_ood_loader, device, monte_carlo_steps)
 
