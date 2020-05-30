@@ -287,6 +287,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         for i in range(num_output):
             M_test = lib_generation.get_Mahalanobis_score(model, test_ind_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
             M_test = np.asarray(M_test, dtype=np.float32)
+            ipdb.set_trace()
             if i == 0:
                 Mahalanobis_test = M_test.reshape((M_test.shape[0], -1))
             else:
