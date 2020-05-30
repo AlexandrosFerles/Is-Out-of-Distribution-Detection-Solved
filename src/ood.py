@@ -838,18 +838,15 @@ if __name__ == '__main__':
                 sizes[0] = fgsm_loader.batch_size*fgsm_loader.__len__()
                 sizes = tuple(sizes)
                 arr = np.zeros(sizes)
-                labels = []
                 arr_len = 0
                 for index, data in enumerate(fgsm_loader):
-                    images, label = data
+                    images, _ = data
                     arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_size + images.size()[0]] = images.detach().cpu().numpy()
                     arr_len += images.size()[0]
-                    labels.append(label.detach().cpu().numpy())
                 ipdb.set_trace()
-                arr = torch.FloatTensor(arr[:arr_len])
-                labels = torch.LongTensor(labels[:arr_len])
+                arr_ = torch.FloatTensor(arr[:arr_len])
                 from torch.utils.data import TensorDataset
-                fgsm_dataset = TensorDataset(arr, labels)
+                fgsm_dataset = TensorDataset(arr_)
                 fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
 
         loaders[-2] = fgsm_loader
