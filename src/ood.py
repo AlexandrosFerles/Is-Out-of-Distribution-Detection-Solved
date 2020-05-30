@@ -182,7 +182,7 @@ def _get_baseline_scores(model, loader, device, monte_carlo_steps):
     return arr
 
 
-def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, monte_carlo_steps=1, exclude_class=None, score_ind=True):
+def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, monte_carlo_steps=1, exclude_class=None):
 
     model.eval()
 
@@ -616,7 +616,7 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num
     print(f'OOD Detection Accuracy: {acc}')
 
 
-def _process_gen_odin(model, images, epsilon, criterion=nn.CrossEntropyLoss()):
+def _process_gen_odin(model, images, device, epsilon, criterion=nn.CrossEntropyLoss()):
 
     model.eval()
     inputs = Variable(images.to(device), requires_grad=True)
@@ -648,7 +648,7 @@ def _process_gen_odin_loader(model, loader, device, epsilon):
 
         images, _ = data
         images = images.to(device)
-        o, h, _ = _process_gen_odin(model, images, epsilon)
+        o, h, _ = _process_gen_odin(model, images, device, epsilon)
 
         max_h[index*loader.batch_size:index*loader.batch_size + o.shape[0]] = h
         len_ += o.shape[0]
