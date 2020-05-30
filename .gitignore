@@ -42,3 +42,4 @@ src/txts
 src/parse_mahalanobis.py 
 /src/Notebooks/
 /src/data
+src/results/__init__.py
