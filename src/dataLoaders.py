@@ -1240,3 +1240,5 @@ def tinyImageNetLoader(dataset, batch_size=32):
     loader = DataLoader(dataset, batch_size=batch_size, num_workers=3)
 
     return loader
+
+
