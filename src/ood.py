@@ -846,27 +846,50 @@ if __name__ == '__main__':
             else:
                 from copy import deepcopy
                 fgsm_model = deepcopy(model)
-            if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
-                fgsm_loader = _create_fgsm_loader(fgsm_model, loaders[1], device)
-                torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader.pth')
+            if args.exclude_class is None:
+                if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
+                    fgsm_loader = _create_fgsm_loader(fgsm_model, loaders[1], device)
+                    torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader.pth')
+                else:
+                    fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader.pth')
+                    if fgsm_loader.batch_size != args.batch_size:
+                        sample, label = next(iter(fgsm_loader))
+                        sizes = (sample.size())
+                        sizes = list(sizes)
+                        sizes[0] = fgsm_loader.batch_size*fgsm_loader.__len__()
+                        sizes = tuple(sizes)
+                        arr = np.zeros(sizes)
+                        arr_len = 0
+                        for index, data in enumerate(fgsm_loader):
+                            images, _ = data
+                            arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_size + images.size()[0]] = images.detach().cpu().numpy()
+                            arr_len += images.size()[0]
+                        arr_ = torch.FloatTensor(arr[:arr_len])
+                        from torch.utils.data import TensorDataset
+                        fgsm_dataset = TensorDataset(arr_, arr_)
+                        fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
             else:
-                fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader.pth')
-                if fgsm_loader.batch_size != args.batch_size:
-                    sample, label = next(iter(fgsm_loader))
-                    sizes = (sample.size())
-                    sizes = list(sizes)
-                    sizes[0] = fgsm_loader.batch_size*fgsm_loader.__len__()
-                    sizes = tuple(sizes)
-                    arr = np.zeros(sizes)
-                    arr_len = 0
-                    for index, data in enumerate(fgsm_loader):
-                        images, _ = data
-                        arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_size + images.size()[0]] = images.detach().cpu().numpy()
-                        arr_len += images.size()[0]
-                    arr_ = torch.FloatTensor(arr[:arr_len])
-                    from torch.utils.data import TensorDataset
-                    fgsm_dataset = TensorDataset(arr_, arr_)
-                    fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
+                if not os.path.exists(f'{args.val_dataset}_{args.exclude_class}_fgsm_loader.pth'):
+                    fgsm_loader = _create_fgsm_loader(fgsm_model, loaders[1], device)
+                    torch.save(fgsm_loader, f'{args.val_dataset}_{args.exclude_class}_fgsm_loader.pth')
+                else:
+                    fgsm_loader = torch.load(f'{args.val_dataset}_{args.exclude_class}_fgsm_loader.pth')
+                    if fgsm_loader.batch_size != args.batch_size:
+                        sample, label = next(iter(fgsm_loader))
+                        sizes = (sample.size())
+                        sizes = list(sizes)
+                        sizes[0] = fgsm_loader.batch_size*fgsm_loader.__len__()
+                        sizes = tuple(sizes)
+                        arr = np.zeros(sizes)
+                        arr_len = 0
+                        for index, data in enumerate(fgsm_loader):
+                            images, _ = data
+                            arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_size + images.size()[0]] = images.detach().cpu().numpy()
+                            arr_len += images.size()[0]
+                        arr_ = torch.FloatTensor(arr[:arr_len])
+                        from torch.utils.data import TensorDataset
+                        fgsm_dataset = TensorDataset(arr_, arr_)
+                        fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
 
         loaders[-2] = fgsm_loader
 
