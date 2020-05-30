@@ -387,6 +387,10 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, nu
     print()
     print('###############################################')
     print()
+    print('###############################################')
+    print()
+    print(f"InD dataset: {ind_dataset}")
+    print(f"Validation dataset: {val_dataset}")
     method = f"Self-Supervision "
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
@@ -442,6 +446,10 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     print(f'Succesfully stored in-distribution ood scores for maximum h to {max_h_ind_savefile_name} and out-distribution ood scores to {max_h_ood_savefile_name_1}, {max_h_ood_savefile_name_2} and {max_h_ood_savefile_name_3}')
     print()
     method = "Generalized-Odin results (Cosine Similarity) "
+    print('###############################################')
+    print()
+    print(f"InD dataset: {ind_dataset}")
+    print(f"Validation dataset: {val_dataset}")
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
