@@ -406,7 +406,6 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         feature_list[count] = out.size(1)
         count += 1
 
-    ipdb.set_trace()
     sample_mean, precision = lib_generation.sample_estimator(model, num_classes, feature_list, train_ind_loader, device=device)
 
     best_auc = 0
@@ -814,7 +813,6 @@ if __name__ == '__main__':
             model_checkpoints.append(line.split('\n')[0])
 
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
-    # ipdb.set_trace()
 
     if args.val_dataset == 'fgsm':
         if args.fgsm_checkpoint is not None:
