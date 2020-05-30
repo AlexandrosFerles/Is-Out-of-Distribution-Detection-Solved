@@ -843,15 +843,15 @@ if __name__ == '__main__':
                 arr_len = 0
                 for index, data in enumerate(fgsm_loader):
                     images, label = data
-                    arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_sizez + images.size()[0]] = arr.detach().cpu().numpy()
+                    arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_sizes + images.size()[0]] = images.detach().cpu().numpy()
                     arr_len = images.size()[0]
-                    labels.append(label)
+                    labels.append(label.detach().cpu().numpy())
                 arr = torch.FloatTensor(arr[:arr_len])
                 labels = torch.LongTensor(labels[:arr_len])
                 from torch.utils.data import TensorDataset
                 fgsm_dataset = TensorDataset(arr, labels)
                 fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
-                
+
         loaders[-2] = fgsm_loader
 
     if ood_method == 'baseline':
