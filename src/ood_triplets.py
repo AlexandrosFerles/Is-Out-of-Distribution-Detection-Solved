@@ -309,7 +309,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
 
         for i in range(num_output):
             M_ood_3 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_3, num_classes, sample_mean, precision, i, best_magnitude, device=device)
-            M_ood_3 = np.asarray(M_ood_3, dtype=np.float33)
+            M_ood_3 = np.asarray(M_ood_3, dtype=np.float32)
             if i == 0:
                 Mahalanobis_ood_3 = M_ood_3.reshape((M_ood_3.shape[0], -3))
             else:
