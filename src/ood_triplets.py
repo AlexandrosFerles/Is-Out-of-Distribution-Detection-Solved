@@ -224,7 +224,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         # TODO: In case you wish to evaluate other models, you need to define a proper way to get middle level features
         pass
     features = [features[idx] for idx in idxs] + [x]
-    features = [x]
+    features = features[-2:]
     num_output = len(features)
     feature_list = np.empty(num_output)
     count = 0
