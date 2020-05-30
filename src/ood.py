@@ -830,7 +830,6 @@ if __name__ == '__main__':
             fgsm_loader = _create_fgsm_loader(fgsm_model, loaders[1], device)
             torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader.pth')
         else:
-            ipdb.set_trace()
             fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader.pth')
             if fgsm_loader.batch_size != args.batch_size:
                 sample, label = next(iter(fgsm_loader))
@@ -850,6 +849,7 @@ if __name__ == '__main__':
                 labels = torch.LongTensor(labels[:arr_len])
                 from torch.utils.data import TensorDataset
                 fgsm_dataset = TensorDataset(arr, labels)
+                ipdb.set_trace()
                 fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
 
         loaders[-2] = fgsm_loader
