@@ -224,6 +224,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
         # TODO: In case you wish to evaluate other models, you need to define a proper way to get middle level features
         pass
     features = [features[idx] for idx in idxs] + [x]
+    features = [x]
     num_output = len(features)
     feature_list = np.empty(num_output)
     count = 0
@@ -235,6 +236,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
 
     best_auc = 0
     m_list = [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]
+    m_list = [0.0]
 
     best_magnitudes, best_fprs, regressors, thresholds = [], [], [], []
     for magnitude in m_list:
