@@ -1,0 +1,8 @@
+> [0;32m/home/ferles/medusa/src/ood.py[0m(409)[0;36m_generate_Mahalanobis[0;34m()[0m
+[0;32m    408 [0;31m    [0mipdb[0m[0;34m.[0m[0mset_trace[0m[0;34m([0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[0;32m--> 409 [0;31m    [0msample_mean[0m[0;34m,[0m [0mprecision[0m [0;34m=[0m [0mlib_generation[0m[0;34m.[0m[0msample_estimator[0m[0;34m([0m[0mmodel[0m[0;34m,[0m [0mnum_classes[0m[0;34m,[0m [0mfeature_list[0m[0;34m,[0m [0mtrain_ind_loader[0m[0;34m,[0m [0mdevice[0m[0;34m=[0m[0mdevice[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[0;32m    410 [0;31m[0;34m[0m[0m
+[0m
+ipdb> --KeyboardInterrupt--
+ipdb> --KeyboardInterrupt--
+ipdb> 

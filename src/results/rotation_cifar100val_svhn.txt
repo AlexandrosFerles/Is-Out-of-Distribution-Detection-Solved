@@ -1,0 +1,10 @@
+Loaded pretrained weights for efficientnet-b0
+Files already downloaded and verified
+Files already downloaded and verified
+Using downloaded and verified file: /raid/ferles/data/train_32x32.mat
+Using downloaded and verified file: /raid/ferles/data/test_32x32.mat
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Chosen threshold: -0.8313216418027878 yielding 68.35% accuracy

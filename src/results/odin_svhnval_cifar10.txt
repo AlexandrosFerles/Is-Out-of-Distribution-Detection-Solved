@@ -1,0 +1,53 @@
+Using downloaded and verified file: /raid/ferles/data/train_32x32.mat
+Using downloaded and verified file: /raid/ferles/data/test_32x32.mat
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+###############################################
+
+Selected temperature: 1, selected epsilon: 0.0007619047619047619
+
+Chosen threshold: 0.9969502091407776 yielding 90.15% accuracy
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/odin_svhn_ind_svhn_val_cifar10_temperature_1_epsilon0.0007619047619047619.npz and out-distribution ood scores to: npzs/odin_cifar100_ind_svhn_val_cifar10_ood_cifar100_temperature_1_epsilon0.0007619047619047619.npz, npzs/odin_stl_ind_svhn_val_cifar10_ood_stl_temperature_1_epsilon0.0007619047619047619.npz and npzs/odin_tinyimagenet_ind_svhn_val_cifar10_ood_tinyimagenet_temperature_1_epsilon0.0007619047619047619.npz
+
+###############################################
+
+InD dataset: svhn
+Validation dataset: cifar10
+###############################################
+
+Odin results with chosen T=1, epsilon=0.0007619047619047619 results on cifar100 (Out):
+
+Area Under Receiver Operating Characteristic curve: 94.51
+False Positive Rate @ 95% True Positive Rate: 25.99
+Detection Accuracy: 88.24
+###############################################
+
+Odin results with chosen T=1, epsilon=0.0007619047619047619 results on stl (Out):
+
+Area Under Receiver Operating Characteristic curve: 95.66
+False Positive Rate @ 95% True Positive Rate: 21.35
+Detection Accuracy: 88.9
+###############################################
+
+Odin results with chosen T=1, epsilon=0.0007619047619047619 results on tinyimagenet (Out):
+
+Area Under Receiver Operating Characteristic curve: 94.89
+False Positive Rate @ 95% True Positive Rate: 24.51
+Detection Accuracy: 88.54
+###############################################
+
+###############################################
+###############################################
+MEAN PERFORMANCE OF ODIN RESULTS WITH CHOSEN T=1, EPSILON=0.0007619047619047619:
+Area Under Receiver Operating Characteristic curve: 95.02 with variance 0.48
+False Positive Rate @ 95% True Positive Rate: 23.95 with variance 1.94
+Detection Accuracy: 88.56 with variance 0.27
+###############################################
+###############################################
+00:37:59.68

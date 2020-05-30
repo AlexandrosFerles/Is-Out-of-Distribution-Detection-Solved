@@ -1,0 +1,10 @@
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/baseline_ISIC_monte_carlo_100.npz and out-distribution ood scores to: npzs/baseline_Dermofit-Out_monte_carlo_100.npz
+
+###############################################
+
+Baseline results with MC dropout (100 steps) on ISIC (In) vs Dermofit-Out (Out):
+
+Area Under Receiver Operating Characteristic curve: 62.96
+False Positive Rate @ 95% True Positive Rate: 86.27

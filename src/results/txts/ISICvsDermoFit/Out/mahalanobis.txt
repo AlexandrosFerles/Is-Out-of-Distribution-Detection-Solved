@@ -1,0 +1,81 @@
+###############################################
+
+Selected magnitudes: [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]
+
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_ISIC_0.0.npz and out-distribution ood scores to npzs/Mahalanobis_Dermofit-out_0.0.npz
+
+###############################################
+
+Mahalanobis results on ISIC (In) vs Dermofit-out:
+Area Under Receiver Operating Characteristic curve: 0.9997118594826806
+False Positive Rate @ 95% True Positive Rate: 0.0
+###############################################
+
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_ISIC_0.01.npz and out-distribution ood scores to npzs/Mahalanobis_Dermofit-out_0.01.npz
+
+###############################################
+
+Mahalanobis results on ISIC (In) vs Dermofit-out:
+Area Under Receiver Operating Characteristic curve: 0.48658241533193314
+False Positive Rate @ 95% True Positive Rate: 1.0
+###############################################
+
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_ISIC_0.005.npz and out-distribution ood scores to npzs/Mahalanobis_Dermofit-out_0.005.npz
+
+###############################################
+
+Mahalanobis results on ISIC (In) vs Dermofit-out:
+Area Under Receiver Operating Characteristic curve: 0.6439249977377397
+False Positive Rate @ 95% True Positive Rate: 0.95098
+###############################################
+
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_ISIC_0.002.npz and out-distribution ood scores to npzs/Mahalanobis_Dermofit-out_0.002.npz
+
+###############################################
+
+Mahalanobis results on ISIC (In) vs Dermofit-out:
+Area Under Receiver Operating Characteristic curve: 0.6494139555263445
+False Positive Rate @ 95% True Positive Rate: 0.9902
+###############################################
+
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_ISIC_0.0014.npz and out-distribution ood scores to npzs/Mahalanobis_Dermofit-out_0.0014.npz
+
+###############################################
+
+Mahalanobis results on ISIC (In) vs Dermofit-out:
+Area Under Receiver Operating Characteristic curve: 0.5599546595417375
+False Positive Rate @ 95% True Positive Rate: 1.0
+###############################################
+
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_ISIC_0.001.npz and out-distribution ood scores to npzs/Mahalanobis_Dermofit-out_0.001.npz
+
+###############################################
+
+Mahalanobis results on ISIC (In) vs Dermofit-out:
+Area Under Receiver Operating Characteristic curve: 0.7112974896055095
+False Positive Rate @ 95% True Positive Rate: 0.97059
+###############################################
+
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_ISIC_0.0005.npz and out-distribution ood scores to npzs/Mahalanobis_Dermofit-out_0.0005.npz
+
+###############################################
+
+Mahalanobis results on ISIC (In) vs Dermofit-out:
+Area Under Receiver Operating Characteristic curve: 0.9978949072949559
+False Positive Rate @ 95% True Positive Rate: 0.01961
+###############################################
+

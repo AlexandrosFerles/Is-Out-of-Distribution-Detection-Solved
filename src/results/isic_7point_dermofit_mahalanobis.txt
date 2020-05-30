@@ -1,0 +1,25 @@
+Chosen threshold: 0.5008933663258007 yielding 98.5% accuracy
+Chosen threshold: 0.448481132535392 yielding 76.65% accuracy
+Chosen threshold: 0.6786631126381925 yielding 98.2% accuracy
+Chosen threshold: 0.48977028909057174 yielding 99.15% accuracy
+Chosen threshold: 0.49459795461665373 yielding 98.65% accuracy
+Chosen threshold: 0.6598735501135535 yielding 98.35% accuracy
+Chosen threshold: 0.4812119863604091 yielding 98.2% accuracy
+###############################################
+
+Selected magnitudes: [0.002]
+Selected thresholds: [0.48977028909057174]
+
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_isic_ind_isic_val_7point_ood_dermofit_0.002.npz and out-distribution ood scores to npzs/Mahalanobis_dermofit_ind_isic_val_7point_ood_dermofit_0.002.npz
+
+###############################################
+
+Mahalanobis results on isic (In) vs dermofit (Out)  with Val Set 7point:
+Area Under Receiver Operating Characteristic curve: 95.61
+False Positive Rate @ 95% True Positive Rate: 27.85
+Detection Accuracy : 89.48
+###############################################
+
+00:16:34.23

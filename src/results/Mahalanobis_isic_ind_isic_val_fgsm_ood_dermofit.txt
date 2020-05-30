@@ -1,0 +1,12 @@
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/Mahalanobis_isic_ind_isic_val_fgsm_ood_dermofit_0.0005.npz and out-distribution ood scores to npzs/Mahalanobis_dermofit_ind_isic_val_fgsm_ood_dermofit_0.0005.npz
+
+###############################################
+
+Mahalanobis results on isic (In) vs dermofit (Out)  with Val Set fgsm:
+Area Under Receiver Operating Characteristic curve: 94.67
+False Positive Rate @ 95% True Positive Rate: 28.83
+Detection Accuracy : 87.18
+###############################################
+

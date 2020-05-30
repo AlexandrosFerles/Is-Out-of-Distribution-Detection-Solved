@@ -1,0 +1,35 @@
+###############################################
+
+InD dataset: cifar10
+Validation dataset: cifar100
+###############################################
+
+Mahalanobis  results on svhn (Out):
+
+Area Under Receiver Operating Characteristic curve: 98.97
+False Positive Rate @ 95% True Positive Rate: 3.78
+Detection Accuracy: 94.88
+###############################################
+
+Mahalanobis  results on stl (Out):
+
+Area Under Receiver Operating Characteristic curve: 99.92
+False Positive Rate @ 95% True Positive Rate: 0.1
+Detection Accuracy: 90.19
+###############################################
+
+Mahalanobis  results on tinyimagenet (Out):
+
+Area Under Receiver Operating Characteristic curve: 99.86
+False Positive Rate @ 95% True Positive Rate: 0.47
+Detection Accuracy: 91.15
+###############################################
+
+###############################################
+###############################################
+MEAN PERFORMANCE OF MAHALANOBIS :
+Area Under Receiver Operating Characteristic curve: 99.58 with variance 0.43
+False Positive Rate @ 95% True Positive Rate: 1.45 with variance 1.65
+Detection Accuracy: 92.07 with variance 2.02
+###############################################
+###############################################

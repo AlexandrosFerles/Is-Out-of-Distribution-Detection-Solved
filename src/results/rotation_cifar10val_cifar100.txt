@@ -1,0 +1,52 @@
+Loaded pretrained weights for efficientnet-b0
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Using downloaded and verified file: /raid/ferles/data/train_32x32.mat
+Using downloaded and verified file: /raid/ferles/data/test_32x32.mat
+Files already downloaded and verified
+Files already downloaded and verified
+Chosen threshold: -0.12480086088180542 yielding 85.2% accuracy
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/self_supervision_cifar10_ind_cifar10_val_cifar100.npz and out-distribution ood scores to npzs/self_supervision_svhn_ind_cifar10_val_cifar100.npz, npzs/self_supervision_stl_ind_cifar10_val_cifar100.npz and npzs/self_supervision_tinyimagenet_ind_cifar10_val_cifar100.npz
+
+###############################################
+
+###############################################
+
+InD dataset: cifar10
+Validation dataset: cifar100
+###############################################
+
+Self-Supervision  results on svhn (Out):
+
+Area Under Receiver Operating Characteristic curve: 99.52
+False Positive Rate @ 95% True Positive Rate: 2.52
+Detection Accuracy: 94.8
+###############################################
+
+Self-Supervision  results on stl (Out):
+
+Area Under Receiver Operating Characteristic curve: 99.08
+False Positive Rate @ 95% True Positive Rate: 4.15
+Detection Accuracy: 89.42
+###############################################
+
+Self-Supervision  results on tinyimagenet (Out):
+
+Area Under Receiver Operating Characteristic curve: 98.71
+False Positive Rate @ 95% True Positive Rate: 6.31
+Detection Accuracy: 90.16
+###############################################
+
+###############################################
+###############################################
+MEAN PERFORMANCE OF SELF-SUPERVISION :
+Area Under Receiver Operating Characteristic curve: 99.1 with variance 0.33
+False Positive Rate @ 95% True Positive Rate: 4.33 with variance 1.55
+Detection Accuracy: 91.46 with variance 2.38
+###############################################
+###############################################
+00:39:42.22

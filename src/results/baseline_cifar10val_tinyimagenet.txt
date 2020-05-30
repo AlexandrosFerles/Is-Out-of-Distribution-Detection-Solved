@@ -1,0 +1,50 @@
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Using downloaded and verified file: /raid/ferles/data/train_32x32.mat
+Using downloaded and verified file: /raid/ferles/data/test_32x32.mat
+Files already downloaded and verified
+Files already downloaded and verified
+Accuracy on cifar10: 97.34%
+Chosen threshold: 0.9988190531730652 yielding 87.9% accuracy
+###############################################
+
+Succesfully stored in-distribution ood scores to npzs/baseline_cifar10_ind_cifar10_val_tinyimagenet.npz and out-distribution ood scores to: npzs/baseline_cifar100_ind_cifar10_val_tinyimagenet_ood_cifar100.npz, npzs/baseline_svhn_ind_cifar10_val_tinyimagenet_ood_svhn.npz and npzs/baseline_stl_ind_cifar10_val_tinyimagenet_ood_stl.npz
+
+###############################################
+
+InD dataset: cifar10
+Validation dataset: tinyimagenet
+###############################################
+
+Baseline results on cifar100 (Out):
+
+Area Under Receiver Operating Characteristic curve: 93.48
+False Positive Rate @ 95% True Positive Rate: 38.19
+Detection Accuracy: 87.12
+###############################################
+
+Baseline results on svhn (Out):
+
+Area Under Receiver Operating Characteristic curve: 97.79
+False Positive Rate @ 95% True Positive Rate: 10.25
+Detection Accuracy: 95.09
+###############################################
+
+Baseline results on stl (Out):
+
+Area Under Receiver Operating Characteristic curve: 77.41
+False Positive Rate @ 95% True Positive Rate: 69.95
+Detection Accuracy: 72.26
+###############################################
+
+###############################################
+###############################################
+MEAN PERFORMANCE OF BASELINE:
+Area Under Receiver Operating Characteristic curve: 89.56 with variance 8.77
+False Positive Rate @ 95% True Positive Rate: 39.46 with variance 24.39
+Detection Accuracy: 84.82 with variance 9.46
+###############################################
+###############################################
+00:01:48.46
