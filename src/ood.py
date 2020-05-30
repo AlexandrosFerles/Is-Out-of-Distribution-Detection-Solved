@@ -845,11 +845,11 @@ if __name__ == '__main__':
                     arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_size + images.size()[0]] = images.detach().cpu().numpy()
                     arr_len += images.size()[0]
                     labels.append(label.detach().cpu().numpy())
+                ipdb.set_trace()
                 arr = torch.FloatTensor(arr[:arr_len])
                 labels = torch.LongTensor(labels[:arr_len])
                 from torch.utils.data import TensorDataset
                 fgsm_dataset = TensorDataset(arr, labels)
-                ipdb.set_trace()
                 fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
 
         loaders[-2] = fgsm_loader
