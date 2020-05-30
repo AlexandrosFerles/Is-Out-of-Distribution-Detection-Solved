@@ -1,3 +1,3 @@
-python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stl/genOdinSTL.pth --nc 10 --in stl --val tinyimagenet  --dv 6 > results/genodin_stlval_tinyimagenet.txt
-python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stl/genOdinSTL.pth --nc 10 --in stl --val svhn  --dv 6 > results/genodin_stlval_svhn.txt
-python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stl/genOdinSTL.pth --nc 10 --in stl --val cifar100  --dv 6 > results/genodin_stlval_cifar100.txt
+python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stl/genOdinSTL.pth --nc 10 --in stl --val tinyimagenet  --dv 2 > results/genodin_stlval_tinyimagenet.txt
+python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stl/genOdinSTL.pth --nc 10 --in stl --val svhn  --dv 2 > results/genodin_stlval_svhn.txt
+python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stl/genOdinSTL.pth --nc 10 --in stl --val cifar100  --dv 2 > results/genodin_stlval_cifar100.txt
