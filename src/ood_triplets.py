@@ -219,12 +219,12 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     temp_x = temp_x.to(device)
     if model_type == 'eb0':
         idxs = [0, 2, 4, 7, 10, 14, 15]
+        idxs = [15]
         x, features = model.extract_features(temp_x, mode='all')
     else:
         # TODO: In case you wish to evaluate other models, you need to define a proper way to get middle level features
         pass
     features = [features[idx] for idx in idxs] + [x]
-    features = features[-3:]
     num_output = len(features)
     feature_list = np.empty(num_output)
     count = 0
