@@ -422,7 +422,7 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     test_ood_scores_3 = _process_gen_odin_loader(model, test_ood_loader_3, device, best_epsilon)
 
     max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
-    max_h_ood_savefile_name_1 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
+    max_h_ood_savefile_name_1 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}.npz'
     max_h_ood_savefile_name_2 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}.npz'
     max_h_ood_savefile_name_3 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}.npz'
 
