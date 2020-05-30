@@ -814,8 +814,7 @@ if __name__ == '__main__':
 
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset)
     # ipdb.set_trace()
-    import time
-    start_fgsm = time.time()
+
     if args.val_dataset == 'fgsm':
         if args.fgsm_checkpoint is not None:
             if args.fgsm_classes is None:
@@ -832,6 +831,12 @@ if __name__ == '__main__':
         else:
             fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader_{ood_method}_{args.batch_size}.pth')
         loaders[-2] = fgsm_loader
+
+    import time
+    start_fgsm = time.time()
+
+    for elem in fgsm_loader:
+        continue
 
     end_fgsm = time.time()
     hours, rem = divmod(end_fgsm-start_fgsm, 3600)
