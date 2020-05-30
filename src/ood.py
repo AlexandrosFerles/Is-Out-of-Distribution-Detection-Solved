@@ -16,6 +16,7 @@ import os
 import random
 import pickle
 import ipdb
+from torch.utils.data import TensorDataset
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -825,25 +826,33 @@ if __name__ == '__main__':
         else:
             from copy import deepcopy
             fgsm_model = deepcopy(model)
-        if not os.path.exists(f'{args.val_dataset}_fgsm_loader_{ood_method}_{args.batch_size}.pth'):
+        if not os.path.exists(f'{args.val_dataset}_fgsm_loader.pth'):
             fgsm_loader = _create_fgsm_loader(fgsm_model, loaders[1], device)
-            torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader_{ood_method}_{args.batch_size}.pth')
+            torch.save(fgsm_loader, f'{args.val_dataset}_fgsm_loader.pth')
         else:
-            fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader_{ood_method}_{args.batch_size}.pth')
+            ipdb.set_trace()
+            fgsm_loader = torch.load(f'{args.val_dataset}_fgsm_loader.pth')
+            if fgsm_loader.batch_size != args.batch_size:
+                sample, label = next(iter(fgsm_loader))
+                sizes = (sample.size())
+                sizes = list(sizes)
+                sizes[0] = fgsm_loader.batch_size*fgsm_loader.__len__()
+                sizes = tuple(sizes)
+                arr = np.zeros(sizes)
+                labels = []
+                arr_len = 0
+                for index, data in enumerate(fgsm_loader):
+                    images, label = data
+                    arr[index*fgsm_loader.batch_size:index*fgsm_loader.batch_sizez + images.size()[0]] = arr.detach().cpu().numpy()
+                    arr_len = images.size()[0]
+                    labels.append(label)
+                arr = torch.FloatTensor(arr[:arr_len])
+                labels = torch.LongTensor(labels[:arr_len])
+                from torch.utils.data import TensorDataset
+                fgsm_dataset = TensorDataset(arr, labels)
+                fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
+                
         loaders[-2] = fgsm_loader
-
-    import time
-    start_fgsm = time.time()
-
-    for elem in fgsm_loader:
-        continue
-
-    end_fgsm = time.time()
-    hours, rem = divmod(end_fgsm-start_fgsm, 3600)
-    minutes, seconds = divmod(rem, 60)
-    print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
-
-    ipdb.set_trace()
 
     if ood_method == 'baseline':
         method_loaders = loaders[1:]
