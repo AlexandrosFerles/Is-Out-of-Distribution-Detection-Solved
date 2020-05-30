@@ -843,7 +843,7 @@ if __name__ == '__main__':
                     arr_len += images.size()[0]
                 arr_ = torch.FloatTensor(arr[:arr_len])
                 from torch.utils.data import TensorDataset
-                fgsm_dataset = TensorDataset(arr_)
+                fgsm_dataset = TensorDataset(arr_, arr_)
                 fgsm_loader = DataLoader(fgsm_dataset, batch_size=args.batch_size, num_workers=3)
 
         loaders[-2] = fgsm_loader
