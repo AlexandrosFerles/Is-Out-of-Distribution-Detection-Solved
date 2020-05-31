@@ -597,6 +597,7 @@ class GenericImageFolderDataset(data.Dataset):
                     dic = {}
                     with open(f'/raid/ferles/Dogs/Stanford/stanford_classes_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
+                        ipdb.set_trace()
                         for key, value in temp_dic.items():
                             if self.train:
                                 dic[os.path.join(self.root, "Train/", key)] = value
