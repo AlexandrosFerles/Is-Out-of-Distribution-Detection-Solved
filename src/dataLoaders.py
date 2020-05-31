@@ -782,6 +782,7 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
 def _get_fine_grained_transforms():
 
     normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+
     transform_train = transforms.Compose([
         transforms.Resize(256),
         transforms.RandomRotation(45),
@@ -798,7 +799,7 @@ def _get_fine_grained_transforms():
         normalize
     ]),
 
-    return transform_train, transform_test
+    return [transform_train, transform_test]
 
 
 def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
