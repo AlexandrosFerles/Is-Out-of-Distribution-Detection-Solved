@@ -604,6 +604,7 @@ def _get_subset(dataset, subset_index, transforms, single=False, test=False):
         else:
             raise NotImplementedError(f'{dataset} not implemented!')
 
+    ipdb.set_trace()
     transform_train, transform_test = transforms
     if dataset == 'stanforddogs':
         if not test:
