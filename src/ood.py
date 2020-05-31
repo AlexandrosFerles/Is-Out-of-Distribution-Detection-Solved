@@ -408,7 +408,8 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     for out in features:
         feature_list[count] = out.size(1)
         count += 1
-
+        
+    print(num_classes)
     sample_mean, precision = lib_generation.sample_estimator(model, num_classes, feature_list, train_ind_loader, device=device)
 
     best_auc = 0
