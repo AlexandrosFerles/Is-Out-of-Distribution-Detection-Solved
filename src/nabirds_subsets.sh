@@ -1,0 +1,5 @@
+python ood.py --m baseline --bs 30  --mc /raid/ferles/checkpoints/eb0/nabirds/Nabirds_subset_1.pth --dv 5 --in nabirds --val nabirds --out oxfordpets --sub 1 --nc 120 > results/baseline_val_nabirds_subset.txt
+python ood.py --m odin --bs 30  --mc /raid/ferles/checkpoints/eb0/nabirds/Nabirds_subset_1.pth --dv 5 --in nabirds --val nabirds --out oxfordpets --sub 1 --nc 120 > results/odin_val_nabirds_subset.txt
+python ood.py --m mahalanobis --bs 20  --mc /raid/ferles/checkpoints/eb0/nabirds/Nabirds_subset_1.pth --dv 5 --in nabirds --val nabirds --out oxfordpets --sub 1 --nc 120 > results/mahalanobis_val_nabirds_subset.txt
+python ood.py --m rotation --bs 1  --mc /raid/ferles/checkpoints/eb0/nabirds/rot_Nabirds_subset_1.pth --dv 5 --in nabirds --val nabirds --out oxfordpets --sub 1 --nc 120 results/rotation_val_nabirds_subset.txt
+python ood.py --m generalizedodin --bs 30  --mc /raid/ferles/checkpoints/eb0/nabirds/GenOdinNabirds_subset_1.pth --dv 5 --in nabirds --val nabirds --out oxfordpets --sub 1 --nc 120 > results/generalizedodin_val_nabirds_subset.txt
