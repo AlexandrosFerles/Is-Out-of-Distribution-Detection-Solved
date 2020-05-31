@@ -990,9 +990,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3)
         val_ind_loader = DataLoader(ind_valset, batch_size=val_batch_size, sampler=val_ind_sampler, num_workers=3)
         test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
-    elif ind_dataset == 'stanforddogs' or ind_dataset=='nabirds':
+    elif ind_dataset == 'stanforddogs' or ind_dataset == 'nabirds':
         if subset_index is None:
-            print(transform_test)
             ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
             with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
                 # print(f'train_indices_{ind_dataset}.pickle')
@@ -1033,7 +1032,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             random.shuffle(indexes)
             sampler = SubsetRandomSampler(indexes[:min(len(indexes), dataset_size)])
             val_ood_loader = DataLoader(val_ood_valset, batch_size=batch_size, sampler=sampler, num_workers=3)
-        elif val_ood_dataset=='stanforddogs' or val_ood_dataset=='nabirds':
+        elif val_ood_dataset == 'stanforddogs' or val_ood_dataset == 'nabirds':
             if subset_index is None:
                 val_ood_trainset, val_ood_testset = _get_dataset(val_ood_dataset, [transform_test, transform_test], test=True)
                 with open(f'train_indices_{val_ood_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_pickle:
@@ -1083,6 +1082,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_imagenet_path = '/raid/ferles/ImageNetVal/'
             else:
                 val_imagenet_path = '/home/ferles/ImageNetVal/'
+            ipdb.set_trace()
             dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
             val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
 
