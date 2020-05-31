@@ -614,7 +614,7 @@ class GenericImageFolderDataset(data.Dataset):
             else:
                 if os.path.exists('/raid/ferles/'):
                     dic = {}
-                    with open(f'/raid/ferles/Birds/nabirds/birdsdict_{self.subset_index}.pickle', 'rb') as dic_pickle:
+                    with open(f'/raid/ferles/Birds/nabirds/nabirds_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
