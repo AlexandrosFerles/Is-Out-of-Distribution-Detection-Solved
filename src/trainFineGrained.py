@@ -53,7 +53,7 @@ def train(args):
             pickle_files[1] = pickle_files[1].split(".pickle")[0]+f"_subset_{args.subset_index}.pickle"
             trainloader, val_loader, testloader, num_classes = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, pickle_files=pickle_files, ret_num_classes=True)
             print(num_classes)
-            
+
         if 'genOdin' in training_configurations.checkpoint:
             weight_decay=1e-4
             optimizer = optim.SGD([
@@ -76,7 +76,6 @@ def train(args):
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
-    ipdb.set_trace()
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
