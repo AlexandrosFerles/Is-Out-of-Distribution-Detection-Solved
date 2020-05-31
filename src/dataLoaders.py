@@ -970,6 +970,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
 
     if val_ood_dataset == '7point':
         dataset_size = 43
+    elif val_ood_dataset == 'soodogs':
+        dataset_size = 897
 
     if ind_dataset == 'isic':
         if os.path.exists('/raid/ferles'):
@@ -1113,7 +1115,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             else:
                 dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
             val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
-            
+
     if test_ood_dataset == 'isic':
         if os.path.exists('/raid/ferles'):
             path = '/raid/ferles/ISIC2019/folds/'
