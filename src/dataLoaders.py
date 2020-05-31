@@ -930,10 +930,10 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
             trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
 
-            if save_to_pickle:
-                with open(f'train_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as val_pickle:
-                    pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
-                    pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+            # if save_to_pickle:
+            with open(f'train_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as val_pickle:
+                pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
             if not single:
                 trainpickle, valpickle = pickle_files
