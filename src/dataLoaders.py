@@ -620,10 +620,10 @@ def _get_subset(dataset, subset_index, transforms, single=False, test=False):
             testset = GenericImageFolderDataset(root=root, type='birds', train=False, transform=transform_test, subset_index=subset_index)
     else:
         if test:
-            trainset = ImageFolder(os.path.join(root, 'Train'), transform=transform_test)
+            trainset = ImageFolder(os.path.join(root, 'Train'), transform=transform_test[0])
         else:
-            trainset = ImageFolder(os.path.join(root, 'Train'), transform=transform_train)
-        testset = ImageFolder(os.path.join(root, 'Test'), transform=transform_test)
+            trainset = ImageFolder(os.path.join(root, 'Train'), transform=transform_train[0])
+        testset = ImageFolder(os.path.join(root, 'Test'), transform=transform_test[0])
     ipdb.set_trace()
     return trainset, testset
 
