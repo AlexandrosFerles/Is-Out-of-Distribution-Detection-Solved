@@ -967,7 +967,6 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         _, transform_test = _get_image_transforms(ind_dataset, resize=True)
     else:
         _, transform_test = _get_fine_grained_transforms()
-        transform_test = transform_test[0]
 
     if val_ood_dataset == '7point':
         dataset_size = 43
@@ -1084,7 +1083,10 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_imagenet_path = '/raid/ferles/ImageNetVal/'
             else:
                 val_imagenet_path = '/home/ferles/ImageNetVal/'
-            dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
+            if ind_dataset == 'stanforddogs' or ind_dataset == 'nabirds':
+                dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test[0])
+            else:
+                dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
             val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
 
     if test_ood_dataset == 'isic':
