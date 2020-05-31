@@ -966,6 +966,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         _, transform_test = _get_image_transforms(ind_dataset, resize=True)
     else:
         _, transform_test = _get_fine_grained_transforms()
+        
     if val_ood_dataset == '7point':
         dataset_size = 43
 
