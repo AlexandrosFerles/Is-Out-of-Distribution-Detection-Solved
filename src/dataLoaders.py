@@ -966,7 +966,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         _, transform_test = _get_image_transforms(ind_dataset, resize=True)
     else:
         _, transform_test = _get_fine_grained_transforms()
-        
+
     if val_ood_dataset == '7point':
         dataset_size = 43
 
@@ -994,6 +994,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         if subset_index is None:
             ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
             with open(f'train_indices_{ind_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'wb') as val_pickle:
+                print(f'train_indices_{ind_dataset}.pickle')
+                print(f'val_indices_{ind_dataset}.pickle')
                 trainset_indices = pickle.load(train_pickle)
                 valset_indices = pickle.load(val_pickle)
 
