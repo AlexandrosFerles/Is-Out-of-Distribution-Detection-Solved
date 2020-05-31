@@ -23,7 +23,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}")
+    # wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}")
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -75,6 +75,7 @@ def train(args):
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
+    ipdb.set_trace()
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
