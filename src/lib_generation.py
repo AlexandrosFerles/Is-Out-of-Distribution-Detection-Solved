@@ -61,8 +61,6 @@ def sample_estimator(model, num_classes, feature_list, train_loader, device, fea
             data = data.to(device)
             if features_mode == 'all':
                 output, out_features = model.extract_features(data, mode=features_mode)
-                # idxs = [2, 8, 14, 22, 30, 41]
-                # EB-0
                 idxs = [0, 2, 4, 7, 10, 14, 15]
                 out_features = [out_features[idx] for idx in idxs] + [output]
             else:

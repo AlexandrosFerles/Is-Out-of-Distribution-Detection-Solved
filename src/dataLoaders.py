@@ -978,7 +978,10 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             path = '/home/ferles/ISIC2019/folds/'
 
         ind_trainset = PandasDataSetWithPaths(f'{path}Train_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
-        ind_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+        if exclude_class is None:
+            ind_valset = PandasDataSetWithPaths(f'{path}ValFold1NoPreproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+        else:
+            ind_valset = PandasDataSetSingleClass(f'{path}ValFold1NoPreproc.csv', transform=transform_test, single_class=exclude_class)
         ind_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
 
         if ind_valset.__len__() < dataset_size:
