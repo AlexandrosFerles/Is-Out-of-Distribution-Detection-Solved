@@ -534,6 +534,7 @@ class GenericImageFolderDataset(data.Dataset):
         self.type = type
         self.train_dir = os.path.join(self.root, "Train")
         self.val_dir = os.path.join(self.root, "Test")
+        self.subset_index = subset_index
 
         if self.train:
             self._create_class_idx_dict(self.train_dir)
@@ -541,8 +542,6 @@ class GenericImageFolderDataset(data.Dataset):
         else:
             self._create_class_idx_dict(self.val_dir)
             self._make_dataset(self.val_dir)
-
-        self.subset_index = subset_index
 
     def _create_class_idx_dict(self, dir):
         num_images = 0

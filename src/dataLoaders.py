@@ -608,16 +608,16 @@ def _get_subset(dataset, subset_index, transforms, single=False, test=False):
     transform_train, transform_test = transforms
     if dataset == 'stanforddogs':
         if not test:
-            trainset = GenericImageFolderDataset(root=root, transform=transform_train)
+            trainset = GenericImageFolderDataset(root=root, transform=transform_train, subset_index=subset_index)
         else:
-            trainset = GenericImageFolderDataset(root=root, transform=transform_test)
-        testset = GenericImageFolderDataset(root=root, train=False, transform=transform_test)
+            trainset = GenericImageFolderDataset(root=root, transform=transform_test, subset_index=subset_index)
+        testset = GenericImageFolderDataset(root=root, train=False, transform=transform_test, subset_index=subset_index)
     elif dataset == 'nabirds':
         if not test:
-            trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_train)
+            trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_train, subset_index=subset_index)
         else:
-            trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_test)
-        testset = GenericImageFolderDataset(root=root, type='birds', train=False, transform=transform_test)
+            trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_test, subset_index=subset_index)
+        testset = GenericImageFolderDataset(root=root, type='birds', train=False, transform=transform_test, subset_index=subset_index)
 
     return trainset, testset
 
