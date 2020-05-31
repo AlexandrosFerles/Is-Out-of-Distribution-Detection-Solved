@@ -965,6 +965,9 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
     else:
         _, transform_test = _get_image_transforms(ind_dataset, resize=True)
 
+    if val_ood_dataset == '7point':
+        dataset_size = 43
+
     if ind_dataset == 'isic':
         if os.path.exists('/raid/ferles'):
             path = '/raid/ferles/ISIC2019/folds/'
@@ -1042,9 +1045,9 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
         elif val_ood_dataset == '7point':
             if os.path.exists('/raid/ferles'):
-                path_7_points = '/raid/ferles/7-point/7_point_images'
+                path_7_points = '/raid/ferles/7-point/non_overlapping'
             else:
-                path_7_points = '/home/ferles/7-point/7_point_images'
+                path_7_points = '/home/ferles/7-point/non_overlapping'
             dataset7point = ImageFolder(path_7_points, transform=transform_test)
             indexes = list(range(dataset7point.__len__()))
             random.shuffle(indexes)
