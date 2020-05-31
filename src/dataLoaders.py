@@ -1059,7 +1059,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_ood_loader = DataLoader(val_trainset, batch_size=val_batch_size, num_workers=3, sampler=val_sampler)
         elif val_ood_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
             val_ood_trainset, val_ood_testset = _get_dataset(val_ood_dataset, [transform_test, transform_test], test=True)
-            with open(f'train_indices_{val_ood_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_pickle:
+            with open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_pickle:
                 valset_val_oodices = pickle.load(val_pickle)
                 val_sampler = SubsetRandomSampler(valset_val_oodices)
                 val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
