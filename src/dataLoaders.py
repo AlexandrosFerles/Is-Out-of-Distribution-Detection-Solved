@@ -1152,25 +1152,25 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200':
         if os.path.exists('/raid/ferles'):
-            dermofit_path = '/raid/ferles/Birds/CUB200/images/'
+            cub_path = '/raid/ferles/Birds/CUB200/images/'
         else:
-            dermofit_path = '/raid/ferles/Birds/CUB200/images/'
-        dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
-        test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
+            cub_path = '/raid/ferles/Birds/CUB200/images/'
+        dataset_cub = ImageFolder(dermofit_path, transform=transform_test[0])
+        test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200-in':
         if os.path.exists('/raid/ferles'):
-            dermofit_path = '/raid/ferles/Birds/CUB200/images/In/'
+            cub_path = '/raid/ferles/Birds/CUB200/images/In/'
         else:
-            dermofit_path = '/raid/ferles/Birds/CUB200/images/In/'
-        dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
-        test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
+            cub_path = '/raid/ferles/Birds/CUB200/images/In/'
+        dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
+        test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200-out':
         if os.path.exists('/raid/ferles'):
-            dermofit_path = '/raid/ferles/Birds/CUB200/images/Out'
+            cub_path = '/raid/ferles/Birds/CUB200/images/Out/'
         else:
-            dermofit_path = '/raid/ferles/Birds/CUB200/images/Out'
-        dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
-        test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
+            cub_path = '/raid/ferles/Birds/CUB200/images/Out/'
+        dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
+        test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
 
     if val_ood_dataset != 'fgsm':
         return train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader
