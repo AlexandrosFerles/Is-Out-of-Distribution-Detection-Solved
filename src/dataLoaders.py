@@ -992,6 +992,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
     elif ind_dataset == 'stanforddogs' or ind_dataset=='nabirds':
         if subset_index is None:
+            print(transform_test)
             ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
             with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
                 # print(f'train_indices_{ind_dataset}.pickle')
