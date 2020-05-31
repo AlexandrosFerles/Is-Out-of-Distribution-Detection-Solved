@@ -934,6 +934,16 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
             with open(f'train_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as val_pickle:
                 pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
                 pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+
+            train_sampler = SubsetRandomSampler(trainset_indices)
+            test_sampler = SubsetRandomSampler(valset_indices)
+            trainloader = DataLoader(trainset, batch_size=train_batch_size, sampler=train_sampler, num_workers=3)
+            val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=3)
+
+            if ret_num_classes:
+                return trainloader, val_loader, testloader, trainset.num_classes
+            else:
+                return trainloader, val_loader, testloader
         else:
             if not single:
                 trainpickle, valpickle = pickle_files
