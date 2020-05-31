@@ -605,19 +605,25 @@ def _get_subset(dataset, subset_index, transforms, single=False, test=False):
             raise NotImplementedError(f'{dataset} not implemented!')
 
     transform_train, transform_test = transforms
-    ipdb.set_trace()
-    if dataset == 'stanforddogs':
-        if not test:
-            trainset = GenericImageFolderDataset(root=root, transform=transform_train, subset_index=subset_index)
+    if not single:
+        if dataset == 'stanforddogs':
+            if not test:
+                trainset = GenericImageFolderDataset(root=root, transform=transform_train, subset_index=subset_index)
+            else:
+                trainset = GenericImageFolderDataset(root=root, transform=transform_test, subset_index=subset_index)
+            testset = GenericImageFolderDataset(root=root, train=False, transform=transform_test, subset_index=subset_index)
+        elif dataset == 'nabirds':
+            if not test:
+                trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_train, subset_index=subset_index)
+            else:
+                trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_test, subset_index=subset_index)
+            testset = GenericImageFolderDataset(root=root, type='birds', train=False, transform=transform_test, subset_index=subset_index)
+    else:
+        if test:
+            trainset = ImageFolder(os.path.join(root, 'Train'), transform=transform_test)
         else:
-            trainset = GenericImageFolderDataset(root=root, transform=transform_test, subset_index=subset_index)
-        testset = GenericImageFolderDataset(root=root, train=False, transform=transform_test, subset_index=subset_index)
-    elif dataset == 'nabirds':
-        if not test:
-            trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_train, subset_index=subset_index)
-        else:
-            trainset = GenericImageFolderDataset(root=root, type='birds', transform=transform_test, subset_index=subset_index)
-        testset = GenericImageFolderDataset(root=root, type='birds', train=False, transform=transform_test, subset_index=subset_index)
+            trainset = ImageFolder(os.path.join(root, 'Train'), transform=transform_train)
+        testset = ImageFolder(os.path.join(root, 'Test'), transform=transform_test)
 
     return trainset, testset
 
