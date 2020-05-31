@@ -799,7 +799,7 @@ def _get_fine_grained_transforms():
         normalize
     ]),
 
-    return [transform_train, transform_test]
+    return transform_train, transform_test
 
 
 def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
@@ -967,6 +967,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         _, transform_test = _get_image_transforms(ind_dataset, resize=True)
     else:
         _, transform_test = _get_fine_grained_transforms()
+        transform_test = transform_test[0]
 
     if val_ood_dataset == '7point':
         dataset_size = 43
@@ -1083,7 +1084,6 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_imagenet_path = '/raid/ferles/ImageNetVal/'
             else:
                 val_imagenet_path = '/home/ferles/ImageNetVal/'
-            ipdb.set_trace()
             dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
             val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
 
