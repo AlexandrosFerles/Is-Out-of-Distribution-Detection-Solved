@@ -971,6 +971,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
     if val_ood_dataset == '7point':
         dataset_size = 43
 
+    ipdb.set_trace()
     if ind_dataset == 'isic':
         if os.path.exists('/raid/ferles'):
             path = '/raid/ferles/ISIC2019/folds/'
