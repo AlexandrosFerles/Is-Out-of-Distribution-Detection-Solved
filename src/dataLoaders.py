@@ -624,7 +624,7 @@ def _get_subset(dataset, subset_index, transforms, single=False, test=False):
         else:
             trainset = ImageFolder(os.path.join(root, 'Train'), transform=transform_train[0])
         testset = ImageFolder(os.path.join(root, 'Test'), transform=transform_test[0])
-    ipdb.set_trace()
+    # ipdb.set_trace()
     return trainset, testset
 
 
