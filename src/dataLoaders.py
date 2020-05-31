@@ -914,7 +914,7 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
     return train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loaders, test_ind_loaders, test_ood_loaders
 
 
-def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None):
+def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, ret_num_classes=False):
 
     transforms = _get_fine_grained_transforms()
     trainset, testset = _get_subset(dataset, subset_index, transforms, single, test)
@@ -947,7 +947,10 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
                 trainloader = DataLoader(trainset, batch_size=train_batch_size, sampler=train_sampler, num_workers=3)
                 val_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=test_sampler, num_workers=3)
 
-                return trainloader, val_loader, testloader, trainset.num_classes
+                if ret_num_classes:
+                    return trainloader, val_loader, testloader, trainset.num_classes
+                else:
+                    return trainloader, val_loader, testloader
 
             else:
                 trainloader = DataLoader(trainset, batch_size=train_batch_size, num_workers=3)
