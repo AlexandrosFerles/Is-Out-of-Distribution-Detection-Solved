@@ -1155,7 +1155,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             cub_path = '/raid/ferles/Birds/CUB200/images/'
         else:
             cub_path = '/raid/ferles/Birds/CUB200/images/'
-        dataset_cub = ImageFolder(dermofit_path, transform=transform_test[0])
+        dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200-in':
         if os.path.exists('/raid/ferles'):
