@@ -633,6 +633,8 @@ class GenericImageFolderDataset(data.Dataset):
         self.tgt_idx_to_class = {v: k for k, v in dic.items()}
         self.class_to_tgt_idx = dic
 
+        self.num_classes = len(self.tgt_idx_to_class.keys())
+
     def _make_dataset(self, dir):
         self.images = []
         img_root_dir = dir
