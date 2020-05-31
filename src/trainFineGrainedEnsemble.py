@@ -100,10 +100,10 @@ def train(args):
             ce_loss = criterion(outputs, labels)
 
             try:
-                ood_inputs  = next(ood_loader_iter)
+                ood_inputs, _ = next(ood_loader_iter)
             except:
                 ood_loader_iter = iter(train_ood_loader)
-                ood_inputs  = next(ood_loader_iter)
+                ood_inputs, _ = next(ood_loader_iter)
 
             ood_inputs = ood_inputs.to(device)
             ood_outputs = model(ood_inputs)
