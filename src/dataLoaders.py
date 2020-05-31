@@ -1188,6 +1188,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
 
+
     if val_ood_dataset != 'fgsm':
         return train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader
     else:
