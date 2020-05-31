@@ -580,7 +580,7 @@ def _get_subset(dataset, subset_index, transforms, single=False, test=False):
     if os.path.exists('/raid/ferles'):
         if dataset == 'stanforddogs':
             if single:
-                root = f'/raid/ferles/Dogs/Stanford/Subset{subset_index}'
+                    root = f'/raid/ferles/Dogs/Stanford/Subset{subset_index}'
             else:
                 root = f'/raid/ferles/Dogs/Stanford/Dataset{subset_index}'
         elif dataset == 'nabirds':
@@ -605,6 +605,7 @@ def _get_subset(dataset, subset_index, transforms, single=False, test=False):
             raise NotImplementedError(f'{dataset} not implemented!')
 
     transform_train, transform_test = transforms
+    ipdb.set_trace()
     if dataset == 'stanforddogs':
         if not test:
             trainset = GenericImageFolderDataset(root=root, transform=transform_train, subset_index=subset_index)
