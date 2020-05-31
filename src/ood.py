@@ -740,12 +740,15 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
 
     _, threshold = _find_threshold(val_ind, val_ood)
 
-    if scaling:
-        ind = _get_odin_scores(model, test_ind_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
-        ood = _get_odin_scores(model, test_ood_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
-    else:
-        ind = _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-        ood = _get_odin_scores(model, test_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+    for model_checkpoint in tqdm(model_checkpoints):
+        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
+        model.eval()
+        if scaling:
+            ind = _get_odin_scores(model, test_ind_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
+            ood = _get_odin_scores(model, test_ood_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
+        else:
+            ind = _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
+            ood = _get_odin_scores(model, test_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
 
     ind = ind / (index-1)
     ood = ood / (index-1)
