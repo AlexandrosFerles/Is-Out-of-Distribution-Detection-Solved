@@ -1103,7 +1103,17 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             else:
                 dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
             val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
-
+        elif val_ood_dataset == 'soodogs':
+            if os.path.exists('/raid/ferles'):
+                val_imagenet_path = '/raid/ferles/Dogs/SOODogs/'
+            else:
+                val_imagenet_path = '/home/ferles/Dogs/SOODogs/'
+            if ind_dataset == 'stanforddogs' or ind_dataset == 'nabirds':
+                dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test[0])
+            else:
+                dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
+            val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
+            
     if test_ood_dataset == 'isic':
         if os.path.exists('/raid/ferles'):
             path = '/raid/ferles/ISIC2019/folds/'
