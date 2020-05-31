@@ -789,6 +789,7 @@ if __name__ == '__main__':
     parser.add_argument('--monte_carlo_steps', '--mcdo', type=int, default=1, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
     parser.add_argument('--exclude_class', '--ex', default=None, required=False)
+    parser.add_argument('--subset_index', '--sub', default=None, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
     parser.add_argument('--fgsm_checkpoint', '--fgsm', default=None, required=False)
     parser.add_argument('--fgsm_classes', '--fgsmc', type=int, default=10, required=False)
