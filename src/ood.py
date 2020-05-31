@@ -665,6 +665,7 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
 
     model.eval()
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
+    _score_classification_accuracy(model, test_ind_loader, device, dataset=ind_dataset)
     epsilons = [0, 0.0025, 0.005, 0.01, 0.02, 0.04, 0.08]
 
     best_auc, best_epsilon = 0, 0
