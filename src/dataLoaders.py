@@ -1007,7 +1007,16 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_ind_loader = DataLoader(ind_trainset, batch_size=val_batch_size, num_workers=3, sampler=val_sampler)
                 test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
         else:
-            pass
+            ind_trainset, ind_testset = _get_subset(ind_dataset, subset_index, [transform_test, transform_test], test=True)
+            with open(f'train_indices_{ind_dataset}_subset_{subset_index}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}_subset_{subset_index}.pickle', 'rb') as val_pickle:
+                trainset_indices = pickle.load(train_pickle)
+                valset_indices = pickle.load(val_pickle)
+
+                train_sampler = SubsetRandomSampler(trainset_indices)
+                val_sampler = SubsetRandomSampler(valset_indices)
+                train_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=train_sampler)
+                val_ind_loader = DataLoader(ind_trainset, batch_size=val_batch_size, num_workers=3, sampler=val_sampler)
+                test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
     elif ind_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
         ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
         with open(f'train_indices_{ind_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'wb') as val_pickle:
@@ -1042,7 +1051,12 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                     val_sampler = SubsetRandomSampler(valset_indices)
                     val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
             else:
-                pass
+                val_trainset, _ = _get_subset(ind_dataset, subset_index, [transform_test, transform_test], test=True)
+                indexes = list(range(val_trainset.__len__()))
+                random.shuffle(indexes)
+                indexes = indexes[:dataset_size]
+                val_sampler = SubsetRandomSampler(indexes)
+                val_ood_loader = DataLoader(val_trainset, batch_size=val_batch_size, num_workers=3, sampler=val_sampler)
         elif val_ood_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
             val_ood_trainset, val_ood_testset = _get_dataset(val_ood_dataset, [transform_test, transform_test], test=True)
             with open(f'train_indices_{val_ood_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_pickle:
@@ -1102,7 +1116,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             _, test_ood_testset = _get_dataset(test_ood_dataset, [transform_test, transform_test], test=True)
             test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
         else:
-            pass
+            _, test_ood_testset = _get_subset(ind_dataset, subset_index, [transform_test, transform_test], single=True, test=True)
+            test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
         _, test_ood_testset = _get_dataset(test_ood_dataset, [transform_test, transform_test], test=True)
         test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
