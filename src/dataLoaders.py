@@ -1051,7 +1051,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                     val_sampler = SubsetRandomSampler(valset_indices)
                     val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
             else:
-                val_trainset, _ = _get_subset(ind_dataset, subset_index, [transform_test, transform_test], test=True)
+                val_trainset, _ = _get_subset(ind_dataset, subset_index, [transform_test, transform_test], single=True, test=True)
                 indexes = list(range(val_trainset.__len__()))
                 random.shuffle(indexes)
                 indexes = indexes[:dataset_size]
