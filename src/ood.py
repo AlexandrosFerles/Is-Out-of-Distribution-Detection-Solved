@@ -668,7 +668,7 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     epsilons = [0, 0.0025, 0.005, 0.01, 0.02, 0.04, 0.08]
 
     best_auc, best_epsilon = 0, 0
-    for epsilon in epsilons:
+    for epsilon in tqdm(epsilons):
 
         val_ind_scores = _process_gen_odin_loader(model, val_ind_loader, device, epsilon)
         val_ood_scores = _process_gen_odin_loader(model, val_ood_loader, device, epsilon)
