@@ -56,7 +56,7 @@ def train(args):
     if args.subset_index is not None:
         ipdb.set_trace()
         model = build_model(args)
-        if 'genOdin' in training_configurations.checkpoint.lower():
+        if 'genodin' in training_configurations.checkpoint.lower():
             from efficientnet_pytorch.gen_odin_model import CosineSimilarity
             model._fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=num_classes)
         else:
