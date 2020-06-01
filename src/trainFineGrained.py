@@ -1,3 +1,4 @@
+zeus
 import torch
 from torch import nn as nn
 from torch.optim.lr_scheduler import MultiStepLR
@@ -52,7 +53,6 @@ def train(args):
             pickle_files[0] = pickle_files[0].split(".pickle")[0]+f"_subset_{args.subset_index}.pickle"
             pickle_files[1] = pickle_files[1].split(".pickle")[0]+f"_subset_{args.subset_index}.pickle"
             trainloader, val_loader, testloader, num_classes = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, pickle_files=pickle_files, ret_num_classes=True)
-            print(num_classes)
 
         if 'genOdin' in training_configurations.checkpoint:
             weight_decay=1e-4
