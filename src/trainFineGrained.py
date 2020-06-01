@@ -69,7 +69,7 @@ def train(args):
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
 
-    if 'genOdin' in training_configurations.checkpoint:
+    if 'genodin' in training_configurations.checkpoint:
         weight_decay=1e-4
         optimizer = optim.SGD([
             {'params': model._conv_stem.parameters(), 'weight_decay':  weight_decay},
