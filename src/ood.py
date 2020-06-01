@@ -192,8 +192,6 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_dataset, mon
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
-    _score_classification_accuracy(model, test_ind_loader, device, dataset=ind_dataset)
-
     val_ind = _get_baseline_scores(model, val_ind_loader, device, monte_carlo_steps)
     val_ood = _get_baseline_scores(model, val_ood_loader, device, monte_carlo_steps)
 
