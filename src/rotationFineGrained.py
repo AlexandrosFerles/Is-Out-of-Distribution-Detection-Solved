@@ -56,21 +56,7 @@ def train(args):
         else:
             pickle_files[0] = pickle_files[0].split(".pickle")[0]+f"_subset_{args.subset_index}.pickle"
             pickle_files[1] = pickle_files[1].split(".pickle")[0]+f"_subset_{args.subset_index}.pickle"
-            trainloader, val_loader, testloader = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, pickle_files=pickle_files)
-
-        if 'genOdin' in training_configurations.checkpoint:
-            weight_decay=1e-4
-            optimizer = optim.SGD([
-                {'params': model._conv_stem.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._bn0.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._blocks.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._conv_head.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._bn1.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._fc_denominator.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._denominator_batch_norm.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._fc_nominator.parameters(), 'weight_decay':  0},
-            ], lr=1.25e-2, momentum=0.9, nesterov=True)
-            scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+            trainloader, val_loader, testloader, num_classes = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, pickle_files=pickle_files, ret_num_classes=True)
 
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
