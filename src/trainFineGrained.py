@@ -54,7 +54,6 @@ def train(args):
             trainloader, val_loader, testloader, num_classes = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, pickle_files=pickle_files, ret_num_classes=True)
 
     if args.subset_index is not None:
-        ipdb.set_trace()
         model = build_model(args)
         if 'genOdin' in training_configurations.checkpoint.lower():
             from efficientnet_pytorch.gen_odin_model import CosineSimilarity
