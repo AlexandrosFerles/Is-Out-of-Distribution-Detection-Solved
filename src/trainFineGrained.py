@@ -54,23 +54,12 @@ def train(args):
             pickle_files[1] = pickle_files[1].split(".pickle")[0]+f"_subset_{args.subset_index}.pickle"
             trainloader, val_loader, testloader, num_classes = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, pickle_files=pickle_files, ret_num_classes=True)
 
-        if 'genOdin' in training_configurations.checkpoint:
-            weight_decay=1e-4
-            optimizer = optim.SGD([
-                {'params': model._conv_stem.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._bn0.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._blocks.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._conv_head.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._bn1.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._fc_denominator.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._denominator_batch_norm.parameters(), 'weight_decay':  weight_decay},
-                {'params': model._fc_nominator.parameters(), 'weight_decay':  0},
-            ], lr=1.25e-2, momentum=0.9, nesterov=True)
-            scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
-
     if args.subset_index is not None:
         model = build_model(args)
-        model._fc = nn.Linear(model._fc.in_features, num_classes)
+        if 'genOdin' in training_configurations.checkpoint:
+            model._fc_nominator = CosineSimilarity(feat_dim=1280, num_centers=num_classes)
+        else:
+            model._fc = nn.Linear(model._fc.in_features, num_classes)
         model = model.to(device)
         epochs = 40
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
@@ -78,6 +67,21 @@ def train(args):
 
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
+
+    if 'genOdin' in training_configurations.checkpoint:
+        weight_decay=1e-4
+        optimizer = optim.SGD([
+            {'params': model._conv_stem.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._bn0.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._blocks.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._conv_head.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._bn1.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._fc_denominator.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._denominator_batch_norm.parameters(), 'weight_decay':  weight_decay},
+            {'params': model._fc_nominator.parameters(), 'weight_decay':  0},
+        ], lr=1.25e-2, momentum=0.9, nesterov=True)
+        scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+
 
     for epoch in tqdm(range(epochs)):
 
