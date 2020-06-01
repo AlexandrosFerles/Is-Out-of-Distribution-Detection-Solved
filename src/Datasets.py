@@ -604,7 +604,7 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Test/", value)] = key
                 else:
                     dic = {}
-                    with open(f'/home/ferles/Dogs/Stanford/stanford_classes_dict_{self.subset_index}.pickle', 'rb') as dic_pickle:
+                    with open(f'/home/ferles/Dogs/Stanford/stanford_classes_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
