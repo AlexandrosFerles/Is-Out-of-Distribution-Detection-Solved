@@ -556,7 +556,7 @@ def _predict_rotations(model, loader, num_classes, device):
 def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes, exclude_class=None):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
-    _score_classification_accuracy(model, test_ind_loader, device, ind_dataset)
+    # _score_classification_accuracy(model, test_ind_loader, device, ind_dataset)
 
     val_ind_kl_div, val_ind_rot_score, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
     val_ood_kl_div, val_ood_rot_score, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
