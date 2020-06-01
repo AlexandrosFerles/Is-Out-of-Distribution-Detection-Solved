@@ -23,7 +23,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}")
+    # wandb.init(name=f"{training_configurations.checkpoint}_subset_{args.subset_index}")
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -54,6 +54,7 @@ def train(args):
             trainloader, val_loader, testloader, num_classes = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, pickle_files=pickle_files, ret_num_classes=True)
 
     if args.subset_index is not None:
+        ipdb.set_trace()
         model = build_model(args)
         if 'genOdin' in training_configurations.checkpoint.lower():
             from efficientnet_pytorch.gen_odin_model import CosineSimilarity
