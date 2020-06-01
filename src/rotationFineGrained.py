@@ -34,7 +34,7 @@ def train(args):
 
     if args.subset_index is None:
         model = build_model(args, rot=True)
-        model = nn.DataParallel(model)
+        model = nn.DataParallel(model).to(device)
         epochs = 40
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
@@ -57,7 +57,7 @@ def train(args):
     if args.subset_index is not None:
         model = build_model(args)
         model._fc = nn.Linear(model._fc.in_features, num_classes)
-        model = nn.DataParallel(model)
+        model = nn.DataParallel(model).to(device)
         epochs = 40
         optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
