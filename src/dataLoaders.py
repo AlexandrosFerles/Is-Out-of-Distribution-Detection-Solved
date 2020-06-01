@@ -1109,7 +1109,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 birds_path = '/raid/ferles/Birds/temp_birdsnap/OutBirdsNap'
             else:
                 birds_path = '/home/ferles/Birds/temp_birdsnap/OutBirdsNap/'
-            dataset_birdsnap = ImageFolder(birds_path, transform=transform_test)
+            dataset_birdsnap = ImageFolder(birds_path, transform=transform_test[0])
             val_ood_loader = DataLoader(dataset_birdsnap, batch_size=batch_size, num_workers=3)
         elif val_ood_dataset == 'imagenet':
             if os.path.exists('/raid/ferles'):
