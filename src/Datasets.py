@@ -618,7 +618,6 @@ class GenericImageFolderDataset(data.Dataset):
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
-                                ipdb.set_trace()
                                 dic[os.path.join(self.root, "Train/", key)] = value
                             else:
                                 dic[os.path.join(self.root, "Test/", key)] = value
