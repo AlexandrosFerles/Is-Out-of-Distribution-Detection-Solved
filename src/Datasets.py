@@ -608,9 +608,9 @@ class GenericImageFolderDataset(data.Dataset):
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
-                                dic[os.path.join(self.root, "Train/", key)] = value
+                                dic[os.path.join(self.root, "Train/", value)] = key
                             else:
-                                dic[os.path.join(self.root, "Test/", key)] = value
+                                dic[os.path.join(self.root, "Test/", value)] = key
             else:
                 if os.path.exists('/raid/ferles/'):
                     dic = {}
