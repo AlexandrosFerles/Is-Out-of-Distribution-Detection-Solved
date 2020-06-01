@@ -55,7 +55,7 @@ def train(args):
             trainloader, val_loader, testloader, num_classes = fine_grained_image_loaders_subset(dataset, subset_index=args.subset_index, validation_test_split=800, pickle_files=pickle_files, ret_num_classes=True)
 
     if args.subset_index is not None:
-        model = build_model(args)
+        model = build_model(args, rot=True)
         model._fc = nn.Linear(model._fc.in_features, num_classes)
         model = nn.DataParallel(model).to(device)
         epochs = 40
