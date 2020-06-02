@@ -36,16 +36,12 @@ def train(args):
 
     dataset = args.dataset.lower()
 
-    if 'wide' in training_configurations.model.lower():
-        resize = False
-        epochs = 200
-        optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
-        scheduler = MultiStepLR(optimizer, milestones=[60, 120, 160], gamma=0.2)
-    else:
-        resize = True
-        epochs = 40
-        optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
-        scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+    resize = True
+    # epochs = 40
+    epochs = 90
+    optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
+    # scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+    scheduler = MultiStepLR(optimizer, milestones=[30, 60, 80], gamma=0.1)
 
     if 'genOdin' in training_configurations.checkpoint:
         weight_decay=1e-4
@@ -123,9 +119,11 @@ def train(args):
         if epoch_val_accuracy > best_val_acc:
             best_val_acc = epoch_val_accuracy
             if os.path.exists('/raid/ferles/'):
-                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                # torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/extended_{training_configurations.checkpoint}.pth')
             else:
-                torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                # torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+                torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/extended_{training_configurations.checkpoint}.pth')
             # if best_val_acc - checkpoint_val_accuracy > 0.05:
             #     checkpoint_val_accuracy = best_val_acc
             #     torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_epoch_{epoch}_accuracy_{best_val_acc}.pth')
