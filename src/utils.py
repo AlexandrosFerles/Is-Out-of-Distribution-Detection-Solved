@@ -24,7 +24,7 @@ def json_file_to_pyobj(filename):
     return json2obj(open(filename).read())
 
 
-def build_model(args, rot=False):
+def build_model(args, rot=False, dropout=None):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
@@ -52,7 +52,8 @@ def build_model(args, rot=False):
             if not pretrained:
                 net._conv_stem = nn.Conv2d(1, net._conv_stem.out_channels, kernel_size=3, stride=2, bias=False)
             net._fc = nn.Linear(model._fc.in_features, out_classes)
-            net._dropout = torch.nn.Dropout(p=0.5)
+            if dropout is not None:
+                net._dropout = torch.nn.Dropout(p=dropout)
             return net
         else:
             raise NotImplementedError('net not implemented')
