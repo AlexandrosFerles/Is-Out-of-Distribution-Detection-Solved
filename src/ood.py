@@ -82,7 +82,7 @@ def _get_metrics(X, y):
 
     tn, fp, fn, tp = confusion_matrix(y, X).ravel()
     fpr = fp/(fp+tn)
-    acc = (tp+tn)/(tp+fp+fn+tn)
+    acc = balanced_accuracy_score(y, X)
 
     return fpr, acc
 
