@@ -6,7 +6,7 @@ from sklearn.metrics import confusion_matrix
 from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve, auc, balanced_accuracy_score
 from utils import build_model_with_checkpoint
 from dataLoaders import get_ood_loaders
 from tqdm import tqdm
@@ -17,6 +17,7 @@ import random
 import pickle
 import ipdb
 from torch.utils.data import TensorDataset
+
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -36,7 +37,7 @@ def _find_threshold(train_scores, val_scores):
     fpr, tpr, thresholds = roc_curve(y_true, probs)
     accuracy_scores = []
     for thresh in thresholds:
-        accuracy_scores.append(accuracy_score(y_true, [1 if m > thresh else 0 for m in probs]))
+        accuracy_scores.append(balanced_accuracy_score(y_true, [1 if m > thresh else 0 for m in probs]))
 
     accuracies = np.array(accuracy_scores)
     max_accuracy = round(100*accuracies.max(), 2)
@@ -81,7 +82,7 @@ def _get_metrics(X, y):
 
     tn, fp, fn, tp = confusion_matrix(y, X).ravel()
     fpr = fp/(fp+tn)
-    acc = (tp+tn)/(tp+fp+fn+tn)
+    acc = balanced_accuracy_score(y, X)
 
     return fpr, acc
 
