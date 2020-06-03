@@ -39,7 +39,7 @@ def train(args):
 
     resize = True
     epochs = 40
-    epochs = 90
+    # epochs = 90
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
     scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
     # scheduler = MultiStepLR(optimizer, milestones=[30, 60, 80], gamma=0.1)
