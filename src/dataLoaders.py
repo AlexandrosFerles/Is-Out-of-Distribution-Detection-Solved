@@ -1134,9 +1134,9 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
 
     if test_ood_dataset == 'isic':
         if os.path.exists('/raid/ferles'):
-            path = '/raid/ferles/ISIC2019/folds/'
+            path = '/raid/ferles/ISIC2019/'
         else:
-            path = '/home/ferles/ISIC2019/folds/'
+            path = '/home/ferles/ISIC2019/'
         test_ood_testset = PandasDataSetSingleClass(f'{path}Training_paths_and_classes_no_preproc.csv', transform=transform_test, single_class=exclude_class)
         test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset=='stanforddogs' or test_ood_dataset=='nabirds':
