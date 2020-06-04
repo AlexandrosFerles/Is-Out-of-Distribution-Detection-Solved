@@ -1137,7 +1137,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             path = '/raid/ferles/ISIC2019/folds/'
         else:
             path = '/home/ferles/ISIC2019/folds/'
-        test_ood_testset = PandasDataSetWithPaths(f'{path}Val_Fold_new_no_preproc.csv', transform=transform_test, exclude_class=exclude_class, ret_path=False)
+        test_ood_testset = PandasDataSetSingleClass(f'{path}Training_paths_and_classes_no_preproc.csv', transform=transform_test, single_class=exclude_class)
         test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset=='stanforddogs' or test_ood_dataset=='nabirds':
         if subset_index is None:
