@@ -1203,16 +1203,16 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200-in':
         if os.path.exists('/raid/ferles'):
-            cub_path = '/raid/ferles/Birds/CUB200/images/In/'
+            cub_path = '/raid/ferles/Birds/CUB200/In/'
         else:
-            cub_path = '/raid/ferles/Birds/CUB200/images/In/'
+            cub_path = '/raid/ferles/Birds/CUB200/In/'
         dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200-out':
         if os.path.exists('/raid/ferles'):
-            cub_path = '/raid/ferles/Birds/CUB200/images/Out/'
+            cub_path = '/raid/ferles/Birds/CUB200/Out/'
         else:
-            cub_path = '/home/ferles/Birds/CUB200/images/Out/'
+            cub_path = '/home/ferles/Birds/CUB200/Out/'
         dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'birdsnap':
