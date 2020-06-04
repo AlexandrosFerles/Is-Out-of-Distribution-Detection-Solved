@@ -1177,21 +1177,21 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         if os.path.exists('/raid/ferles'):
             dermofit_path = '/raid/ferles/DermoFit/'
         else:
-            dermofit_path = '/raid/ferles/DermoFit/'
+            dermofit_path = '/home/ferles/DermoFit/'
         dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
         test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'dermofit-in':
         if os.path.exists('/raid/ferles'):
-            dermofit_path = '/raid/ferles/DermoFit/In'
+            dermofit_path = '/raid/ferles/DermoFitIn/'
         else:
-            dermofit_path = '/raid/ferles/DermoFit/In'
+            dermofit_path = '/home/ferles/DermoFitIn/'
         dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
         test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'dermofit-out':
         if os.path.exists('/raid/ferles'):
-            dermofit_path = '/raid/ferles/DermoFit/Out/'
+            dermofit_path = '/raid/ferles/DermoFitOut/'
         else:
-            dermofit_path = '/raid/ferles/DermoFit/Out/'
+            dermofit_path = '/home/ferles/DermoFitOut/'
         dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
         test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200':
