@@ -1157,21 +1157,21 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         if ind_dataset == 'stanforddogs' or ind_dataset == 'nabirds':
             dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test[0])
         else:
-            dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test)
+            dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_oxford_pets, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'oxfordpets-in':
         if os.path.exists('/raid/ferles'):
             oxford_pets_path = '/raid/ferles/Dogs/Oxford/In/'
         else:
             oxford_pets_path = '/home/ferles/Dogs/Oxford/In/'
-        dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test)
+        dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_oxford_pets, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'oxfordpets-out':
         if os.path.exists('/raid/ferles'):
             oxford_pets_path = '/raid/ferles/Dogs/Oxford/Out/'
         else:
             oxford_pets_path = '/home/ferles/Dogs/Oxford/Out/'
-        dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test)
+        dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_oxford_pets, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'dermofit':
         if os.path.exists('/raid/ferles'):
