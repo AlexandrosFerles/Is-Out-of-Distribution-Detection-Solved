@@ -10,8 +10,8 @@
 #python ood.py --m rotation --mc /raid/ferles/checkpoints/eb0/stanforddogs/rot_StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-in --nc 120 --bs 1 > results/dogs/panelB/rotation.txt
 #python ood.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stanforddogs/GenOdinStanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-in --nc 120 > results/dogs/panelB/generalizedodin.txt
 
-python ood.py --m baseline --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 > results/dogs/panelC/baseline.txt
-python ood.py --m odin --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 > results/dogs/panelC/odin.txt
-python ood.py --m mahalanobis --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 --bs 20  > results/dogs/panelC/mahalanobis.txt
-python ood.py --m rotation --mc /raid/ferles/checkpoints/eb0/stanforddogs/rot_StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 --bs 1 > results/dogs/panelC/rotation.txt
-python ood.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stanforddogs/GenOdinStanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 > results/dogs/panelC/generalizedodin.txt
+python ood.py --m baseline --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 --dv 6 > results/dogs/panelC/baseline.txt
+python ood.py --m odin --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 --dv 6  > results/dogs/panelC/odin.txt
+python ood.py --m mahalanobis --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 --bs 20  --dv 6  > results/dogs/panelC/mahalanobis.txt
+python ood.py --m rotation --mc /raid/ferles/checkpoints/eb0/stanforddogs/rot_StanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 --bs 1 --dv 6  > results/dogs/panelC/rotation.txt
+python ood.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/stanforddogs/GenOdinStanfordDogs.pth --in stanforddogs --val imagenet --out oxfordpets-out --nc 120 --dv 6  > results/dogs/panelC/generalizedodin.txt
