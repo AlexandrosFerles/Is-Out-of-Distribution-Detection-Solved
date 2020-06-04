@@ -1220,8 +1220,18 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             birdsnap_path = '/raid/ferles/Birds/birdsnap/'
         else:
             birdsnap_path = '/home/ferles/Birds/birdsnap'
-        dataset_birdsnao = ImageFolder(birdsnap_path, transform=transform_test[0])
-        test_ood_loader = DataLoader(dataset_birdsnao, batch_size=batch_size, num_workers=3)
+        dataset_birdsnap = ImageFolder(birdsnap_path, transform=transform_test[0])
+        test_ood_loader = DataLoader(dataset_birdsnap, batch_size=batch_size, num_workers=3)
+    elif test_ood_dataset == 'places':
+        if os.path.exists('/raid/ferles'):
+            places_path = '/raid/ferles/Places'
+        else:
+            places_path = '/home/ferles/Places'
+        if ind_dataset == 'stanforddogs' or ind_dataset=='nabirds':
+            dataset_places = ImageFolder(places_path, transform=transform_test[0])
+        else:
+            dataset_places = ImageFolder(places_path, transform=transform_test)
+        test_ood_loader = DataLoader(dataset_places, batch_size=batch_size, num_workers=3)
 
     if val_ood_dataset != 'fgsm':
         return train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader
