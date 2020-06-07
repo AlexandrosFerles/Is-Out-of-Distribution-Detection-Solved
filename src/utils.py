@@ -87,43 +87,7 @@ def build_model(args, rot=False, dropout=None):
 
 def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes, gen_odin_mode=2, input_features=3, rot=False):
 
-    if 'wide' in modelName:
-        from models.WideResNet import WideResNet
-        strides = [1, 1, 2, 2]
-        net = WideResNet(d=40, k=2, n_classes=out_classes, input_features=input_features, output_features=16, strides=strides, rot=rot)
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
-    elif 'genDense' in modelName:
-        from models.DenseNet import DenseNet
-        print(gen_odin_mode)
-        net = DenseNet(mode=gen_odin_mode)
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
-    elif 'senet154' in modelName:
-        from models.SENets import senet154
-        net = senet154(num_classes=1000)
-        net.last_linear = nn.Linear(net.last_linear.in_features, out_classes)
-        net = net.to(device)
-        print('Loading model....')
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(os.path.join(model_checkpoint))
-        new_state_dict = collections.OrderedDict()
-        for key, value in state_dict.items():
-            new_key = key.split('module.')[1]
-            new_state_dict[new_key] = value
-        torch.save(new_state_dict, os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth')
-        net.load_state_dict(torch.load(os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth', map_location=device))
-        os.system(f"rm {os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth'}")
-    elif 'rot' in modelName:
+    if 'rot' in modelName:
         from efficientnet_pytorch.rot_model import RotEfficientNet
         model = RotEfficientNet.from_pretrained('efficientnet-b0')
         model._fc = nn.Linear(model._fc.in_features, out_classes)
@@ -157,7 +121,6 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
             model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
         state_dict = torch.load(model_checkpoint, map_location=device)
         net.load_state_dict(state_dict)
-        net._dropout = nn.Dropout(p=0.5)
         net = net.to(device)
         return net
     elif 'geneb6' in modelName:
