@@ -762,8 +762,6 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, out_cla
     ind = ind / index
     ood = ood / index
 
-    ipdb.set_trace()
-
     if scaling:
         ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_scaling.npz'
         ood_savefile_name = f'npzs/ensemble_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_scaling.npz'
