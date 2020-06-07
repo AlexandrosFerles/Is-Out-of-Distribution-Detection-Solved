@@ -817,7 +817,9 @@ if __name__ == '__main__':
     else:
         model_checkpoints = []
         for line in open(args.model_checkpoints_file, 'r'):
-            model_checkpoints.append(line.split('\n')[0])
+            model_checkpoint, num_classes = line.split('\n')[0].split(',')
+            num_classes = int(num_classes)
+            ipdb.set_trace()
 
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class, subset_index=args.subset_index)
 
