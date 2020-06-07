@@ -737,6 +737,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, out_cla
     val_ind = val_ind / (index-1)
     val_ood = val_ood / (index-1)
 
+    ipdb.set_trace()
     _, threshold = _find_threshold(val_ind, val_ood)
 
     for index, model_checkpoint in enumerate(model_checkpoints):
