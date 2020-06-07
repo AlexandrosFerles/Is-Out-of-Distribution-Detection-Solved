@@ -87,7 +87,17 @@ def build_model(args, rot=False, dropout=None):
 
 def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes, gen_odin_mode=2, input_features=3, rot=False):
 
-    if 'rot' in modelName:
+    if 'eb0' in modelName:
+        from efficientnet_pytorch import EfficientNet
+        net = EfficientNet.from_name('efficientnet-b0')
+        net._fc = nn.Linear(net._fc.in_features, out_classes)
+        if 'checkpoints' not in model_checkpoint:
+            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
+        state_dict = torch.load(model_checkpoint, map_location=device)
+        net.load_state_dict(state_dict)
+        net = net.to(device)
+        return net
+    elif 'roteb0' in modelName:
         from efficientnet_pytorch.rot_model import RotEfficientNet
         model = RotEfficientNet.from_pretrained('efficientnet-b0')
         model._fc = nn.Linear(model._fc.in_features, out_classes)
@@ -113,49 +123,5 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
         model.load_state_dict(torch.load(model_checkpoint, map_location=device))
         model = model.to(device)
         return model
-    elif 'eb0' in modelName:
-        from efficientnet_pytorch import EfficientNet
-        net = EfficientNet.from_name('efficientnet-b0')
-        net._fc = nn.Linear(net._fc.in_features, out_classes)
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
-    elif 'geneb6' in modelName:
-        from efficientnet_pytorch.gen_odin_model import GenOdinEfficientNet
-        model = GenOdinEfficientNet.from_name('efficientnet-b6')
-        net = deepcopy(model)
-        net._fc_nominator = nn.Linear(model._fc_nominator.in_features, out_classes)
-        net._fc_denominator = nn.Linear(model._fc_denominator.in_features, out_classes)
-        net._denominator_batch_norm = nn.BatchNorm1d(out_classes)
-        net = net.to(device)
-        print('Loading model....')
-        state_dict = torch.load(os.path.join(model_checkpoint))
-        new_state_dict = collections.OrderedDict()
-        for key, value in state_dict.items():
-            new_key = key.split('module.')[1]
-            new_state_dict[new_key] = value
-        torch.save(new_state_dict, os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth')
-        net.load_state_dict(torch.load(os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth', map_location=device))
-        os.system(f"rm {os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth'}")
-        return net
-    elif 'eb6' in modelName:
-        ipdb.set_trace()
-        from efficientnet_pytorch import EfficientNet
-        net = EfficientNet.from_name('efficientnet-b6')
-        net._fc = nn.Linear(net._fc.in_features, out_classes)
-        net = net.to(device)
-        print('Loading model....')
-        state_dict = torch.load(os.path.join(model_checkpoint))
-        new_state_dict = collections.OrderedDict()
-        for key, value in state_dict.items():
-            new_key = key.split('module.')[1]
-            new_state_dict[new_key] = value
-        torch.save(new_state_dict, os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth')
-        net.load_state_dict(torch.load(os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth', map_location=device))
-        os.system(f"rm {os.path.join(model_checkpoint).split('.pth')[0]+'correct.pth'}")
-        return net
     else:
         return NotImplementedError("Model and/or checkpoint not available!")
