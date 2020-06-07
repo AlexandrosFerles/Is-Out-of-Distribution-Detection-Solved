@@ -715,7 +715,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, out_cla
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     index = 0
 
-    for index, model_checkpoint in enumerate(model_checkpoints):
+    for model_checkpoint in tqdm(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
         if scaling:
@@ -734,23 +734,33 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, out_cla
                 val_ood += _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
         index += 1
 
-    val_ind = val_ind / (index-1)
-    val_ood = val_ood / (index-1)
+    val_ind = val_ind / index
+    val_ood = val_ood / index
 
     _, threshold = _find_threshold(val_ind, val_ood)
 
-    for index, model_checkpoint in enumerate(model_checkpoints):
+    index = 0
+    for model_checkpoint in tqdm(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
         if scaling:
-            ind = _get_odin_scores(model, test_ind_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
-            ood = _get_odin_scores(model, test_ood_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
+            if index == 0:
+                ind = _get_odin_scores(model, test_ind_loader, T, epsilon, device=device, score_entropy=True)
+                ood = _get_odin_scores(model, test_ood_loader, T, epsilon, device=device, score_entropy=True)
+            else:
+                ind += _get_odin_scores(model, test_ind_loader, T, epsilon, device=device, score_entropy=True)
+                ood += _get_odin_scores(model, test_ood_loader, T, epsilon, device=device, score_entropy=True)
         else:
-            ind = _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-            ood = _get_odin_scores(model, test_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+            if index == 0:
+                ind = _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                ood = _get_odin_scores(model, test_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+            else:
+                ind += _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                ood += _get_odin_scores(model, test_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+        index += 1
 
-    ind = ind / (index-1)
-    ood = ood / (index-1)
+    ind = ind / index
+    ood = ood / index
 
     ipdb.set_trace()
 
