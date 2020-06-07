@@ -714,7 +714,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, out_cla
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     index = 0
-    ipdb.set_trace()
+
     for index, model_checkpoint in enumerate(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
