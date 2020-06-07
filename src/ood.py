@@ -710,12 +710,12 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
 # def _get_ensemble_scores(model, loader, device):
 
 
-def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
+def _ensemble_inference(model_checkpoints, num_classes, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     index = 0
-    for model_checkpoint in tqdm(model_checkpoints):
-        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
+    for index, model_checkpoint in enumerate(model_checkpoints):
+        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
         if scaling:
             if index == 0:
@@ -738,8 +738,8 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
 
     _, threshold = _find_threshold(val_ind, val_ood)
 
-    for model_checkpoint in tqdm(model_checkpoints):
-        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
+    for index, model_checkpoint in enumerate(model_checkpoints):
+        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
         if scaling:
             ind = _get_odin_scores(model, test_ind_loader, T=T, epsilon=epsilon, device=device, score_entropy=True)
@@ -815,11 +815,12 @@ if __name__ == '__main__':
         else:
             model = build_model_with_checkpoint('eb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
     else:
-        model_checkpoints = []
+        model_checkpoints, num_classes = [], []
         for line in open(args.model_checkpoints_file, 'r'):
-            model_checkpoint, num_classes = line.split('\n')[0].split(',')
-            num_classes = int(num_classes)
-            ipdb.set_trace()
+            model_checkpoint, nc = line.split('\n')[0].split(',')
+            nc = int(nc)
+            model_checkpoints.append(model_checkpoint)
+            num_classes.append(nc)
 
     loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset=args.val_dataset, test_ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class, subset_index=args.subset_index)
 
@@ -915,7 +916,7 @@ if __name__ == '__main__':
         _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     elif ood_method == 'ensemble':
         method_loaders = loaders[1:]
-        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
+        _ensemble_inference(model_checkpoints, num_classes, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
     else:
         raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
