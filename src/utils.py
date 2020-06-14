@@ -96,7 +96,6 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
             model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
         state_dict = torch.load(model_checkpoint, map_location=device)
         new_state_dict = OrderedDict()
-        ipdb.set_trace()
         for key, value in state_dict.items():
             new_key = key.split('module.')[1]
             new_state_dict[new_key] = value
