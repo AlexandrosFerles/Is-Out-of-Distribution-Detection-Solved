@@ -87,17 +87,7 @@ def build_model(args, rot=False, dropout=None):
 
 def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes, gen_odin_mode=2, input_features=3, rot=False):
 
-    if 'eb0' in modelName:
-        from efficientnet_pytorch import EfficientNet
-        net = EfficientNet.from_name('efficientnet-b0')
-        net._fc = nn.Linear(net._fc.in_features, out_classes)
-        if 'checkpoints' not in model_checkpoint:
-            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
-        state_dict = torch.load(model_checkpoint, map_location=device)
-        net.load_state_dict(state_dict)
-        net = net.to(device)
-        return net
-    elif 'roteb0' in modelName:
+    if 'roteb0' in modelName:
         from efficientnet_pytorch.rot_model import RotEfficientNet
         model = RotEfficientNet.from_pretrained('efficientnet-b0')
         model._fc = nn.Linear(model._fc.in_features, out_classes)
@@ -124,5 +114,15 @@ def build_model_with_checkpoint(modelName, model_checkpoint, device, out_classes
         model.load_state_dict(torch.load(model_checkpoint, map_location=device))
         model = model.to(device)
         return model
+    elif 'eb0' in modelName:
+        from efficientnet_pytorch import EfficientNet
+        net = EfficientNet.from_name('efficientnet-b0')
+        net._fc = nn.Linear(net._fc.in_features, out_classes)
+        if 'checkpoints' not in model_checkpoint:
+            model_checkpoint = os.path.join('./checkpoints', model_checkpoint)
+        state_dict = torch.load(model_checkpoint, map_location=device)
+        net.load_state_dict(state_dict)
+        net = net.to(device)
+        return net
     else:
         return NotImplementedError("Model and/or checkpoint not available!")
