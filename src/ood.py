@@ -555,11 +555,12 @@ def _predict_rotations(model, loader, num_classes, device):
 def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes, exclude_class=None):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
-    # _score_classification_accuracy(model, test_ind_loader, device, ind_dataset)
 
     val_ind_kl_div, val_ind_rot_score, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
     val_ood_kl_div, val_ood_rot_score, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
 
+    _, threshold_kl_div = _find_threshold(val_ind_kl_div, val_ood_kl_div)
+    _, threshold_rot_score = _find_threshold(val_ind_rot_score, val_ood_rot_score)
     _, threshold = _find_threshold(val_ind_full, val_ood_full)
 
     ind_kl_div, ind_rot_score, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
@@ -580,6 +581,8 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num
         # ood_savefile_name_rot_score = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_rot_score_{exclude_class}.npz'
         ood_savefile_name_full = f'npzs/self_supervision_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_full_{exclude_class}.npz'
 
+    auc_kl_div, fpr_kl_div, acc_kl_div = _score_npzs(ind_kl_div, ood_kl_div, threshold_kl_div)
+    auc_rot_score, fpr_rot_score, acc_rot_score = _score_npzs(ind_rot_score, ood_rot_score, threshold_rot_score)
     auc, fpr, acc = _score_npzs(ind_full, ood_full, threshold)
 
     # np.savez(ind_savefile_name_kl_div, ind_kl_div)
