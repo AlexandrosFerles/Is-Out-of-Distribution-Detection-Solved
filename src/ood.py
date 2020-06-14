@@ -707,9 +707,6 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     print(f'Detection Accuracy: {acc}')
 
 
-# def _get_ensemble_scores(model, loader, device):
-
-
 def _ensemble_inference(model_checkpoints, num_classes, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
