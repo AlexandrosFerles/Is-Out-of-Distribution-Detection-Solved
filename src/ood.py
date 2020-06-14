@@ -814,6 +814,7 @@ if __name__ == '__main__':
     if args.model_checkpoint is None and args.model_checkpoints_file is None:
         raise NotImplementedError('You need to specify either a single or multiple checkpoints')
     elif args.model_checkpoint is not None:
+        ipdb.set_trace()
         if ood_method == 'self-supervision' or ood_method == 'selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
             model = build_model_with_checkpoint('roteb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
         elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
