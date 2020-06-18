@@ -402,6 +402,7 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     epsilons = [0, 0.0025, 0.005, 0.01, 0.02, 0.04, 0.08]
+    epsilons = [0]
 
     best_auc, best_epsilon = 0, 0
     for epsilon in epsilons:
@@ -456,7 +457,6 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     index = 0
-
     for model_checkpoint in tqdm(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
         model.eval()
@@ -476,8 +476,8 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
                 val_ood += _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
         index += 1
 
-    val_ind = val_ind / index
-    val_ood = val_ood / index
+    val_ind = val_ind / (index-1)
+    val_ood = val_ood / (index-1)
 
     _, threshold = _find_threshold(val_ind, val_ood)
 
@@ -577,11 +577,11 @@ if __name__ == '__main__':
     elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
         method_loaders = loaders[1:]
         _gen_odin_inference(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
-    elif ood_method == 'ensemble':
-        method_loaders = loaders[1:]
-        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
-    else:
-        raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
+    # elif ood_method == 'ensemble':
+    #     method_loaders = loaders[1:]
+    #     _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
+    # else:
+    #     raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)

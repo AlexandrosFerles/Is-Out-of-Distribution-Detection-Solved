@@ -705,7 +705,7 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     print(f'Detection Accuracy: {acc}')
 
 
-def _ensemble_inference(model_checkpoints, num_classes, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
+def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
     index = 0
@@ -922,7 +922,7 @@ if __name__ == '__main__':
         _gen_odin_inference(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
     elif ood_method == 'ensemble':
         method_loaders = loaders[1:]
-        _ensemble_inference(model_checkpoints, num_classes, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
+        _ensemble_inference(model_checkpoints, num_classes, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
     else:
         raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
