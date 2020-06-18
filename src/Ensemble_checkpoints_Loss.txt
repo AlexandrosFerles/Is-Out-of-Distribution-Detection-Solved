@@ -1,5 +1,0 @@
-EnsembleCifar10_best_loss_ensemble_0.pth
-EnsembleCifar10_best_loss_ensemble_1.pth
-EnsembleCifar10_best_loss_ensemble_2.pth
-EnsembleCifar10_best_loss_ensemble_3.pth
-EnsembleCifar10_best_loss_ensemble_4.pth
