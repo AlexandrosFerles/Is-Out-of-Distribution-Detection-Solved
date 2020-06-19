@@ -452,7 +452,7 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
-def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
+def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
@@ -558,6 +558,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_checkpoints_file', '--mcf', default=None, required=False)
     parser.add_argument('--monte_carlo_steps', '--mcdo', type=int, default=1, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
+    parser.add_argument('--scaling', '--sc', type=bool, default=True, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -607,7 +608,7 @@ if __name__ == '__main__':
         _gen_odin_inference(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
     elif ood_method == 'ensemble':
         method_loaders = loaders[1:]
-        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset)
+        _ensemble_inference(model_checkpoints, method_loaders, device, out_classes=args.num_classes, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, scaling=args.scaling)
     else:
         raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
