@@ -458,6 +458,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dat
 
     index = 0
     for model_checkpoint in tqdm(model_checkpoints):
+        ipdb.set_trace()
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
         if scaling:
