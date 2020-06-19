@@ -22,3 +22,8 @@ python ood_triplets.py --in cifar10 --nc 10 --in cifar10 --val cifar100 --mc /ra
 python ood_triplets.py --in cifar10 --nc 10 --in cifar10 --val stl --mc /raid/ferles/checkpoints/eb0/cifar10/genOdinCifar10.pth --m rotation
 python ood_triplets.py --in cifar10 --nc 10 --in cifar10 --val tinyimagenet --mc /raid/ferles/checkpoints/eb0/cifar10/genOdinCifar10.pth --m rotation
 python ood_triplets.py --in cifar10 --nc 10 --in cifar10 --val svhn --mc /raid/ferles/checkpoints/eb0/cifar10/genOdinCifar10.pth --m rotation
+
+python ood_triplets.py --m ensemble --mcf ensemblesCifar.txt --nc 8 --in cifar10 --val cifar100
+python ood_triplets.py --m ensemble --mcf ensemblesCifar.txt --nc 8 --in cifar10 --val stl
+python ood_triplets.py --m ensemble --mcf ensemblesCifar.txt --nc 8 --in cifar10 --val tinyimagenet
+python ood_triplets.py --m ensemble --mcf ensemblesCifar.txt --nc 8 --in cifar10 --val svhn
