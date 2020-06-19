@@ -514,6 +514,35 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
     test_ood_2 = test_ood_2 / index
     test_ood_3 = test_ood_3 / index
 
+    test_ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
+    test_ood_savefile_name_1 = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}.npz'
+    test_ood_savefile_name_2 = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}.npz'
+    test_ood_savefile_name_3 = f'npzs/ensemble_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}.npz'
+
+    np.savez(max_h_ind_savefile_name, test_ind_scores)
+    np.savez(max_h_ood_savefile_name_1, test_ood_scores_1)
+    np.savez(max_h_ood_savefile_name_2, test_ood_scores_2)
+    np.savez(max_h_ood_savefile_name_3, test_ood_scores_3)
+
+    auc_1, fpr_1, acc_1 = _score_npzs(test_ind_scores, test_ood_scores_1, threshold)
+    auc_2, fpr_2, acc_2 = _score_npzs(test_ind_scores, test_ood_scores_2, threshold)
+    auc_3, fpr_3, acc_3 = _score_npzs(test_ind_scores, test_ood_scores_3, threshold)
+
+    aucs = [auc_1, auc_2, auc_3]
+    fprs = [fpr_1, fpr_2, fpr_3]
+    accs = [acc_1, acc_2, acc_3]
+    print('###############################################')
+    print()
+    print(f'Succesfully stored in-distribution ood scores for maximum h to {max_h_ind_savefile_name} and out-distribution ood scores to {max_h_ood_savefile_name_1}, {max_h_ood_savefile_name_2} and {max_h_ood_savefile_name_3}')
+    print()
+    method = "Generalized-Odin results (Cosine Similarity) "
+    print('###############################################')
+    print()
+    print(f"InD dataset: {ind_dataset}")
+    print(f"Validation dataset: {val_dataset}")
+    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
+
+
 if __name__ == '__main__':
 
     import time
