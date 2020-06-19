@@ -452,13 +452,13 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
 
-def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dataset, val_dataset, T=1000, epsilon=0.002, scaling=True):
+def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dataset, val_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     index = 0
     for model_checkpoint in tqdm(model_checkpoints):
-        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
+        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
         if scaling:
             if index == 0:
@@ -483,7 +483,7 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
 
     index = 0
     for model_checkpoint in tqdm(model_checkpoints):
-        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=out_classes)
+        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
         if scaling:
             if index == 0:
@@ -579,9 +579,12 @@ if __name__ == '__main__':
         else:
             model = build_model_with_checkpoint('eb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
     else:
-        model_checkpoints = []
+        model_checkpoints, num_classes = [], []
         for line in open(args.model_checkpoints_file, 'r'):
-            model_checkpoints.append(line.split('\n')[0])
+            model_checkpoint, nc = line.split('\n')[0].split(',')
+            nc = int(nc)
+            model_checkpoints.append(model_checkpoint)
+            num_classes.append(nc)
 
     ind_dataset = args.in_distribution_dataset.lower()
     val_dataset = args.val_dataset.lower()
