@@ -509,8 +509,10 @@ def _ensemble_inference(model_checkpoints, loaders, device, out_classes, ind_dat
                 test_ood_3 += _get_odin_scores(model, test_ood_loader_3, T=1, epsilon=0, device=device, score_entropy=True)
         index += 1
 
-    val_ind = val_ind / index
-    val_ood = val_ood / index
+    test_ind = test_ind / index
+    test_ood_1 = test_ood_1 / index
+    test_ood_2 = test_ood_2 / index
+    test_ood_3 = test_ood_3 / index
 
 if __name__ == '__main__':
 
