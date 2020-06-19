@@ -612,7 +612,7 @@ if __name__ == '__main__':
         _gen_odin_inference(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
     elif ood_method == 'ensemble':
         method_loaders = loaders[1:]
-        _ensemble_inference(model_checkpoints, nc, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, scaling=args.scaling)
+        _ensemble_inference(model_checkpoints, num_classes, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, scaling=args.scaling)
     else:
         raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
