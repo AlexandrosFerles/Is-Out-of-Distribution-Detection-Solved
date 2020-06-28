@@ -677,7 +677,7 @@ def _get_image_transforms(dataset, resize):
 
             image_size = 224
             transform_train = transforms.Compose([
-                transforms.Resize(32),
+                # transforms.Resize(32),
                 transforms.Resize(256),
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomCrop(image_size),
@@ -686,7 +686,7 @@ def _get_image_transforms(dataset, resize):
             ])
 
             transform_test = transforms.Compose([
-                transforms.Resize(32),
+                # transforms.Resize(32),
                 transforms.Resize(256),
                 transforms.CenterCrop(image_size),
                 transforms.ToTensor(),
