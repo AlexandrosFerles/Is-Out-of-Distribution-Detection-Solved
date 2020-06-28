@@ -1,4 +1,3 @@
-python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/cifar10/genOdinCifar10.pth --in cifar10 --val cifar100 --nc 10 --dv 4 > results/genOdin_cifar10_val_cifar100.txt
 python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/cifar10/genOdinCifar10.pth --in cifar10 --val svhn --nc 10 --dv 4 > results/genOdin_cifar10_val_svhn.txt
 python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/cifar10/genOdinCifar10.pth --in cifar10 --val stl --nc 10 --dv 4 > results/genOdin_cifar10_val_stl.txt
 python ood_triplets.py --m generalizedodin --mc /raid/ferles/checkpoints/eb0/cifar10/genOdinCifar10.pth --in cifar10 --val tinyimagenet --nc 10 --dv 4 > results/genOdin_cifar10_val_tinyimagenet.txt
