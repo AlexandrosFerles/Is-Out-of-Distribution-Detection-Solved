@@ -708,7 +708,7 @@ def _get_image_transforms(dataset, resize):
                 normalize,
             ])
 
-    elif dataset=='fashionmnist':
+    elif dataset == 'fashionmnist':
 
         if resize:
 
