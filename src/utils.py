@@ -69,7 +69,6 @@ def build_model(args, rot=False, dropout=None):
         else:
             raise NotImplementedError('net not implemented')
     elif modelName == 'genodinefficientnet':
-        print('Utiiils')
         gen_odin_mode = training_configurations.gen_odin_mode
         if depth in range(8):
             from efficientnet_pytorch.gen_odin_model import GenOdinEfficientNet
