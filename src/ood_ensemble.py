@@ -186,8 +186,8 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
         if idx == 0:
             test_ind = regressor.predict_proba(Mahalanobis_test)[:, 1]
             test_ood_1 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-            test_ood_2 = regressor.predict_proba(Mahalanobis_ood_1)[:, 2]
-            test_ood_3 = regressor.predict_proba(Mahalanobis_ood_1)[:, 3]
+            test_ood_2 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
+            test_ood_3 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
         else:
             test_ind += regressor.predict_proba(Mahalanobis_test)[:, 1]
             test_ood_1 += regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
