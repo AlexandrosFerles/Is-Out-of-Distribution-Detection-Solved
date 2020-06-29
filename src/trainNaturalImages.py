@@ -39,10 +39,10 @@ def train(args):
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
 
     resize = True
-    # epochs = 40
-    # scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
-    epochs = 90
-    scheduler = MultiStepLR(optimizer, milestones=[30, 60, 80], gamma=0.1)
+    epochs = 40
+    scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+    # epochs = 90
+    # scheduler = MultiStepLR(optimizer, milestones=[30, 60, 80], gamma=0.1)
 
     if 'genOdin' in training_configurations.checkpoint:
         weight_decay=1e-4
