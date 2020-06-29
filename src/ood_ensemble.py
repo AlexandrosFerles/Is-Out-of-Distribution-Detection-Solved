@@ -1,12 +1,6 @@
 import torch
-import torch.nn.functional as F
 import numpy as np
-from sklearn.linear_model import LogisticRegressionCV
-from sklearn.metrics import confusion_matrix
-from torch import nn
 from torch.autograd import Variable
-from torch.utils.data import DataLoader, TensorDataset
-from sklearn.metrics import roc_curve, auc
 from utils import build_model_with_checkpoint
 from dataLoaders import get_triplets_loaders
 from tqdm import tqdm
@@ -15,8 +9,9 @@ import argparse
 import os
 import random
 import pickle
-import ipdb
+from ood_triplets import _verbose
 from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _get_odin_scores, _process, _predict_rotations, _process_gen_odin_loader
+import ipdb
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -26,52 +21,19 @@ torch.manual_seed(global_seed)
 torch.cuda.manual_seed(global_seed)
 
 
-def _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs):
-
-    print('###############################################')
-    print()
-    print(f"{method} results on {ood_dataset_1} (Out):")
-    print()
-    print(f'Area Under Receiver Operating Characteristic curve: {aucs[0]}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fprs[0]}')
-    print(f'Detection Accuracy: {accs[0]}')
-    print('###############################################')
-    print()
-    print(f"{method} results on {ood_dataset_2} (Out):")
-    print()
-    print(f'Area Under Receiver Operating Characteristic curve: {aucs[1]}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fprs[1]}')
-    print(f'Detection Accuracy: {accs[1]}')
-    print('###############################################')
-    print()
-    print(f"{method} results on {ood_dataset_3} (Out):")
-    print()
-    print(f'Area Under Receiver Operating Characteristic curve: {aucs[2]}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {fprs[2]}')
-    print(f'Detection Accuracy: {accs[2]}')
-    print('###############################################')
-    print()
-    print('###############################################')
-    print('###############################################')
-    print(f"MEAN PERFORMANCE OF {method.upper()}:")
-    print(f'Area Under Receiver Operating Characteristic curve: {round(np.mean(aucs), 2)} with variance {round(np.std(aucs), 2)}')
-    print(f'False Positive Rate @ 95% True Positive Rate: {round(np.mean(fprs), 2)} with variance {round(np.std(fprs), 2)}')
-    print(f'Detection Accuracy: {round(np.mean(accs), 2)} with variance {round(np.std(accs), 2)}')
-    print('###############################################')
-    print('###############################################')
-
-
 def _baseline(model, loaders, device):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
     model.eval()
 
+    val_ind = _get_baseline_scores(model, val_ind_loader, device, monte_carlo_steps=1)
+    val_ood = _get_baseline_scores(model, val_ood_loader, device, monte_carlo_steps=1)
     test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps=1)
     test_ood_1 = _get_baseline_scores(model, test_ood_loader_1, device, monte_carlo_steps=1)
     test_ood_2 = _get_baseline_scores(model, test_ood_loader_2, device, monte_carlo_steps=1)
     test_ood_3 = _get_baseline_scores(model, test_ood_loader_3, device, monte_carlo_steps=1)
 
-    return test_ind, test_ood_1, test_ood_2, test_ood_3
+    return val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _odin(model, loaders, device):
@@ -105,7 +67,7 @@ def _odin(model, loaders, device):
     test_ood_2 = _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device)
     test_ood_3 = _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device)
 
-    return test_ind, test_ood_1, test_ood_2, test_ood_3
+    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0'):
@@ -165,10 +127,19 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
             best_magnitudes = [magnitude]
             regressors = [regressor]
             thresholds = [threshold]
+            best_val_ind = Mahalanobis_val_ind
+            best_val_ood = Mahalanobis_val_ood
+            cnt = 1
         elif auc == best_auc:
             best_magnitudes.append(magnitude)
             regressors.append(regressor)
             thresholds.append(threshold)
+            best_val_ind += Mahalanobis_val_ind
+            best_val_ood += Mahalanobis_val_ood
+            cnt += 1
+
+    best_val_ind /= cnt
+    best_val_ood /= cnt
 
     print('###############################################')
     print()
@@ -210,24 +181,24 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
             else:
                 Mahalanobis_ood_3 = np.concatenate((Mahalanobis_ood_3, M_ood_3.reshape((M_ood_3.shape[0], -3))), axis=1)
 
-            if idx == 0:
-                test_ind = regressor.predict_proba(Mahalanobis_test)[:, 1]
-                test_ood_1 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-                test_ood_2 = regressor.predict_proba(Mahalanobis_ood_1)[:, 2]
-                test_ood_3 = regressor.predict_proba(Mahalanobis_ood_1)[:, 3]
-            else:
-                test_ind += regressor.predict_proba(Mahalanobis_test)[:, 1]
-                test_ood_1 += regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-                test_ood_2 += regressor.predict_proba(Mahalanobis_ood_1)[:, 2]
-                test_ood_3 += regressor.predict_proba(Mahalanobis_ood_1)[:, 3]
-            idx += 1
+        if idx == 0:
+            test_ind = regressor.predict_proba(Mahalanobis_test)[:, 1]
+            test_ood_1 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
+            test_ood_2 = regressor.predict_proba(Mahalanobis_ood_1)[:, 2]
+            test_ood_3 = regressor.predict_proba(Mahalanobis_ood_1)[:, 3]
+        else:
+            test_ind += regressor.predict_proba(Mahalanobis_test)[:, 1]
+            test_ood_1 += regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
+            test_ood_2 += regressor.predict_proba(Mahalanobis_ood_1)[:, 2]
+            test_ood_3 += regressor.predict_proba(Mahalanobis_ood_1)[:, 3]
+        idx += 1
 
-        test_ind /= idx
-        test_ood_1 /= idx
-        test_ood_2 /= idx
-        test_ood_3 /= idx
+    test_ind /= idx
+    test_ood_1 /= idx
+    test_ood_2 /= idx
+    test_ood_3 /= idx
 
-    return test_ind, test_ood_1, test_ood_2, test_ood_3
+    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _rotation(model, loaders, device, num_classes):
@@ -310,19 +281,24 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, T=1000,
     return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
-def _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=False):
+def _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=False):
 
     if expand:
+        val_ind = np.append(np.expand_dims(val_ind, axis=1), np.expand_dims(temp_val_ind, axis=1), axis=1)
+        val_ood = np.append(np.expand_dims(val_ood, axis=1), np.expand_dims(temp_val_ood, axis=1), axis=1)
         test_ind = np.append(np.expand_dims(test_ind, axis=1), np.expand_dims(temp_ind, axis=1), axis=1)
         test_ood_1 = np.append(np.expand_dims(test_ood_1, axis=1), np.expand_dims(temp_ood_1, axis=1), axis=1)
         test_ood_2 = np.append(np.expand_dims(test_ood_2, axis=1), np.expand_dims(temp_ood_2, axis=1), axis=1)
         test_ood_3 = np.append(np.expand_dims(test_ood_3, axis=1), np.expand_dims(temp_ood_3, axis=1), axis=1)
     else:
+        val_ind = np.append(val_ind, np.expand_dims(temp_val_ind, axis=1), axis=1)
+        val_ood = np.append(val_ood, np.expand_dims(temp_val_ood, axis=1), axis=1)
         test_ind = np.append(test_ind, np.expand_dims(temp_ind, axis=1), axis=1)
         test_ood_1 = np.append(test_ood_1, np.expand_dims(temp_ood_1, axis=1), axis=1)
         test_ood_2 = np.append(test_ood_2, np.expand_dims(temp_ood_2, axis=1), axis=1)
         test_ood_3 = np.append(test_ood_3, np.expand_dims(temp_ood_3, axis=1), axis=1)
-    return test_ind, test_ood_1, test_ood_2, test_ood_3
+
+    return val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 if __name__ == '__main__':
@@ -379,10 +355,10 @@ if __name__ == '__main__':
     loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
     method_loaders = loaders[1:]
-    test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
 
-    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, method_loaders, device, num_classes=args.num_classes)
-    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, method_loaders, device, num_classes=args.num_classes)
+    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
 
     temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
@@ -391,10 +367,9 @@ if __name__ == '__main__':
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
 
     temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device, scaling=args.scaling)
-    # elif ood_method == 'mahalanobis':
-    #     _generate_Mahalanobis(model, loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, num_classes=args.num_classes)
+    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
 
-
+    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, loaders, device, num_classes=args.num_classes)
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)
