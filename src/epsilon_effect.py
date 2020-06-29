@@ -231,12 +231,8 @@ def _odin(model, loaders, device, ind_dataset, ood_dataset):
     ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device)
     ood = _get_odin_scores(model, test_ood_loader, best_T, best_epsilon, device=device)
 
-    if exclude_class is None:
-        ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-        ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-    else:
-        ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
-        ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
+    ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
+    ood_savefile_name = f'npzs/odin_{ood_dataset}_ind_{ind_dataset}_ood_{ood_dataset}_temperature_{best_T}_epsilon{best_epsilon}_{exclude_class}.npz'
 
     np.savez(ind_savefile_name, ind)
     np.savez(ood_savefile_name, ood)
@@ -249,7 +245,7 @@ def _odin(model, loaders, device, ind_dataset, ood_dataset):
     print()
     print('###############################################')
     print()
-    print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) with Val Set {val_dataset} and chosen T={best_T}, epsilon={best_epsilon}:")
+    print(f"Odin results on {ind_dataset} (In) vs {ood_dataset} (Out) and chosen T={best_T}, epsilon={best_epsilon}:")
     print(f'Area Under Receiver Operating Characteristic curve: {auc}')
     print(f'False Positive Rate @ 95% True Positive Rate: {fpr}')
     print(f'Detection Accuracy: {acc}')
