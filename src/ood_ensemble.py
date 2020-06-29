@@ -234,11 +234,6 @@ def _rotation(model, loaders, device, num_classes):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
-    _, _, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
-    _, _, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
-
-    _, threshold = _find_threshold(val_ind_full, val_ood_full)
-
     _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
     _, _, ood_full_1 = _predict_rotations(model, test_ood_loader_1, num_classes, device=device)
     _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, device=device)
@@ -351,8 +346,6 @@ if __name__ == '__main__':
         model_checkpoint = line.split('\n')[0]
         model_checkpoints.append(model_checkpoint)
 
-    ipdb.set_trace()
-
     standard_checkpoint = model_checkpoints[0]
     standard_model = build_model_with_checkpoint('eb0', standard_checkpoint, device=device, out_classes=args.num_classes)
 
@@ -384,6 +377,7 @@ if __name__ == '__main__':
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
 
     temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, method_loaders, device, num_classes=args.num_classes)
+    ipdb.set_trace()
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
 
     # if ood_method == 'odin':
