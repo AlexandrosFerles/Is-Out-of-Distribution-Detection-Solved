@@ -1,11 +1,9 @@
 import torch
-import torch.nn.functional as F
 import numpy as np
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn.metrics import confusion_matrix
 from torch import nn
 from torch.autograd import Variable
-from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import roc_curve, auc, balanced_accuracy_score
 from utils import build_model_with_checkpoint
 from dataLoaders import get_ood_loaders
@@ -14,10 +12,7 @@ import lib_generation
 import argparse
 import os
 import random
-import pickle
 import ipdb
-from torch.utils.data import TensorDataset
-
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -205,7 +200,7 @@ def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
     return arr[:len_]
 
 
-def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude_class=None):
+def _odin(model, loaders, device, ind_dataset, ood_dataset):
 
     model.eval()
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
@@ -260,7 +255,7 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_dataset, exclude
     print(f'Detection Accuracy: {acc}')
 
 
-def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_dataset, num_classes, exclude_class=None, model_type='eb0'):
+def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_classes, model_type='eb0'):
 
     model.eval()
     train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
@@ -328,11 +323,9 @@ if __name__ == '__main__':
     parser.add_argument('--ood_method', '--m', required=True)
     parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--in_distribution_dataset', '--in', required=True)
-    parser.add_argument('--val_dataset', '--val', required=True)
     parser.add_argument('--out_distribution_dataset', '--out', required=True)
     parser.add_argument('--model_checkpoint', '--mc', default=None, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
-    parser.add_argument('--exclude_class', '--ex', default=None, required=False)
     parser.add_argument('--subset_index', '--sub', default=None, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
@@ -365,9 +358,9 @@ if __name__ == '__main__':
 
     if ood_method == 'odin':
         method_loaders = loaders[1:]
-        _odin(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class)
+        _odin(model, method_loaders, device, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset)
     elif ood_method == 'mahalanobis':
-        _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, exclude_class=args.exclude_class, device=device)
+        _generate_Mahalanobis(model, loaders=loaders, ind_dataset=args.in_distribution_dataset, ood_dataset=args.out_distribution_dataset, num_classes=args.num_classes, device=device)
     else:
         raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
 
