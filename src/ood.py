@@ -549,7 +549,7 @@ def _predict_rotations(model, loader, num_classes, device):
             numpy_array_rot_score[index] = - 0.25 * ce_rot.item()
             anomaly_score = kl_div.item() - 0.25 * ce_rot.item()
             numpy_array_full[index] = anomaly_score
-            arr_len += data.size()[0]
+            arr_len += images.size()[0]
 
     numpy_array_kl_div = numpy_array_kl_div[:arr_len]
     numpy_array_rot_score = numpy_array_rot_score[:arr_len]
