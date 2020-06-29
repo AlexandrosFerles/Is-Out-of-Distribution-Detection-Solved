@@ -310,13 +310,18 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dat
     return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
-def _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3):
+def _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=False):
 
-    test_ind = np.append(test_ind, temp_ind, axis=1)
-    test_ood_1 = np.append(test_ood_1, temp_ood_1, axis=1)
-    test_ood_2 = np.append(test_ood_2, temp_ood_2, axis=1)
-    test_ood_3 = np.append(test_ood_3, temp_ood_3, axis=1)
-
+    if expand:
+        test_ind = np.append(np.expand_dims(test_ind, axis=1), np.expand_dims(temp_ind, axis=1), axis=1)
+        test_ood_1 = np.append(np.expand_dims(test_ood_1, axis=1), np.expand_dims(temp_ood_1, axis=1), axis=1)
+        test_ood_2 = np.append(np.expand_dims(test_ood_2, axis=1), np.expand_dims(temp_ood_2, axis=1), axis=1)
+        test_ood_3 = np.append(np.expand_dims(test_ood_3, axis=1), np.expand_dims(temp_ood_3, axis=1), axis=1)
+    else:
+        test_ind = np.append(test_ind, np.expand_dims(temp_ind, axis=1), axis=1)
+        test_ood_1 = np.append(test_ood_1, np.expand_dims(temp_ood_1, axis=1), axis=1)
+        test_ood_2 = np.append(test_ood_2, np.expand_dims(temp_ood_2, axis=1), axis=1)
+        test_ood_3 = np.append(test_ood_3, np.expand_dims(temp_ood_3, axis=1), axis=1)
     return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
@@ -377,9 +382,10 @@ if __name__ == '__main__':
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
 
     temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, method_loaders, device, num_classes=args.num_classes)
+    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
     ipdb.set_trace()
+    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-
     # if ood_method == 'odin':
     #     method_loaders = loaders[1:]
     #     _odin(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
