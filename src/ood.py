@@ -518,6 +518,7 @@ def _predict_rotations(model, loader, num_classes, device):
     numpy_array_full = np.zeros(loader.batch_size*loader.__len__())
     numpy_array_kl_div = np.zeros(loader.batch_size*loader.__len__())
     numpy_array_rot_score = np.zeros(loader.batch_size*loader.__len__())
+    arr_len = 0
     for index, data in tqdm(enumerate(loader)):
 
         images, _ = data
@@ -548,6 +549,11 @@ def _predict_rotations(model, loader, num_classes, device):
             numpy_array_rot_score[index] = - 0.25 * ce_rot.item()
             anomaly_score = kl_div.item() - 0.25 * ce_rot.item()
             numpy_array_full[index] = anomaly_score
+            arr_len += data.size()[0]
+
+    numpy_array_kl_div = numpy_array_kl_div[:arr_len]
+    numpy_array_rot_score = numpy_array_rot_score[:arr_len]
+    numpy_array_full = numpy_array_full[:arr_len]
 
     return numpy_array_kl_div, numpy_array_rot_score, numpy_array_full
 
