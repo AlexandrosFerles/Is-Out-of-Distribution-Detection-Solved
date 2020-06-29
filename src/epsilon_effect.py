@@ -350,7 +350,7 @@ if __name__ == '__main__':
             model_checkpoints.append(model_checkpoint)
             num_classes.append(nc)
 
-    loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset='cifar10', test_ood_dataset=args.out_distribution_dataset, exclude_class=args.exclude_class, subset_index=args.subset_index)
+    loaders = get_ood_loaders(batch_size=args.batch_size, ind_dataset=args.in_distribution_dataset, val_ood_dataset='cifar10', test_ood_dataset=args.out_distribution_dataset, exclude_class=None, subset_index=args.subset_index)
 
     if ood_method == 'odin':
         method_loaders = loaders[1:]
