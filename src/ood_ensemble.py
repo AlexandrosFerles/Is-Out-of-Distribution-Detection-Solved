@@ -270,7 +270,7 @@ def _gen_odin_inference(model, loaders, device):
     return test_ind_scores, test_ood_scores_1, test_ood_scores_2, test_ood_scores_3
 
 
-def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dataset, val_dataset, T=1000, epsilon=0.002, scaling=True):
+def _ensemble_inference(model_checkpoints, num_classes, loaders, device, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
@@ -383,20 +383,18 @@ if __name__ == '__main__':
 
     temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, method_loaders, device, num_classes=args.num_classes)
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
-    ipdb.set_trace()
+
     temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-    # if ood_method == 'odin':
-    #     method_loaders = loaders[1:]
-    #     _odin(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
+
+    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
+    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+
+    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device, scaling=args.scaling)
     # elif ood_method == 'mahalanobis':
     #     _generate_Mahalanobis(model, loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, num_classes=args.num_classes)
-    # elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-    #     method_loaders = loaders[1:]
-    #     _gen_odin_inference(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
-    # elif ood_method == 'ensemble':
-    #     method_loaders = loaders[1:]
-    #     _ensemble_inference(model_checkpoints, num_classes, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, scaling=args.scaling)
+
+
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)
