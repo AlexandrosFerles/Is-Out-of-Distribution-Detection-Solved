@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from sklearn.linear_model import LogisticRegressionCV
 from torch.autograd import Variable
 from utils import build_model_with_checkpoint
 from dataLoaders import get_triplets_loaders
@@ -205,12 +206,14 @@ def _rotation(model, loaders, device, num_classes):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
+    _, _, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
+    _, _, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
     _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
     _, _, ood_full_1 = _predict_rotations(model, test_ood_loader_1, num_classes, device=device)
     _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, device=device)
     _, _, ood_full_3 = _predict_rotations(model, test_ood_loader_3, num_classes, device=device)
 
-    return ind_full, ood_full_1, ood_full_2, ood_full_3
+    return val_ind_full, val_ood_full, ind_full, ood_full_1, ood_full_2, ood_full_3
 
 
 def _gen_odin_inference(model, loaders, device):
@@ -238,12 +241,35 @@ def _gen_odin_inference(model, loaders, device):
     test_ood_scores_2 = _process_gen_odin_loader(model, test_ood_loader_2, device, best_epsilon)
     test_ood_scores_3 = _process_gen_odin_loader(model, test_ood_loader_3, device, best_epsilon)
 
-    return test_ind_scores, test_ood_scores_1, test_ood_scores_2, test_ood_scores_3
+    return best_val_ind_scores, best_val_ood_scores, test_ind_scores, test_ood_scores_1, test_ood_scores_2, test_ood_scores_3
 
 
 def _ensemble_inference(model_checkpoints, num_classes, loaders, device, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
+
+    index = 0
+    for model_checkpoint in tqdm(model_checkpoints):
+        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
+        model.eval()
+        if scaling:
+            if index == 0:
+                val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
+                val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
+            else:
+                val_ind += _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
+                val_ood += _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
+        else:
+            if index == 0:
+                val_ind = _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                val_ood = _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+            else:
+                val_ind += _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
+                val_ood += _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
+        index += 1
+
+    val_ind = val_ind / index
+    val_ood = val_ood / index
 
     index = 0
     for model_checkpoint in tqdm(model_checkpoints):
@@ -278,7 +304,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, T=1000,
     test_ood_2 = test_ood_2 / index
     test_ood_3 = test_ood_3 / index
 
-    return test_ind, test_ood_1, test_ood_2, test_ood_3
+    return val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=False):
@@ -354,22 +380,47 @@ if __name__ == '__main__':
 
     loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
+    # baseline
     method_loaders = loaders[1:]
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
 
+    # odin
+    temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
+
+    # mahalanobis
+    temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, loaders, device, num_classes=args.num_classes)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
+
+    # self-supervised
     temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, method_loaders, device, num_classes=args.num_classes)
-    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
 
-    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
-    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    # generalized-odin
+    temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
 
-    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
-    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    # self-ensemble
+    temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device, scaling=args.scaling)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
 
-    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device, scaling=args.scaling)
-    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    X = np.append(val_ind, val_ood, axis=1)
+    y = np.append(np.ones(val_ind.shape, val_ood.shape))
 
-    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, loaders, device, num_classes=args.num_classes)
+    indices = np.arange(X.shape[0])
+    np.random.shuffle(indices)
+
+    X = X[indices]
+    y = y[indices]
+
+    ensemble_ood_lr = LogisticRegressionCV(n_jobs=-1, cv=5, max_iter=1000).fit(X, y)
+
+    pred_ind = ensemble_ood_lr.predict_proba(test_ind)[:, 1]
+    pred_ood_1 = ensemble_ood_lr.predict_proba(test_ood_1)[:, 1]
+    pred_ood_2 = ensemble_ood_lr.predict_proba(test_ood_2)[:, 1]
+    pred_ood_3 = ensemble_ood_lr.predict_proba(test_ood_3)[:, 1]
+
+    
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)
