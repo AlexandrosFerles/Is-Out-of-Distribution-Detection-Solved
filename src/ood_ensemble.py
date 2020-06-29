@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from sklearn.linear_model import LogisticRegressionCV
+from sklearn.utils.tests.test_pprint import LogisticRegression
 from torch.autograd import Variable
 from utils import build_model_with_checkpoint
 from dataLoaders import get_triplets_loaders
@@ -380,6 +381,7 @@ if __name__ == '__main__':
 
     loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
+    ipdb.set_trace()
     # baseline
     method_loaders = loaders[1:]
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
@@ -413,14 +415,27 @@ if __name__ == '__main__':
     X = X[indices]
     y = y[indices]
 
-    ensemble_ood_lr = LogisticRegressionCV(n_jobs=-1, cv=5, max_iter=1000).fit(X, y)
+    ensemble_ood_lr = LogisticRegression(n_jobs=-1, cv=3, max_iter=1000).fit(X, y)
+    pred_val_ind = ensemble_ood_lr.predict_proba(val_ind)[:, 1]
+    pred_val_ood = ensemble_ood_lr.predict_proba(val_ood)[:, 1]
+    threshold = _find_threshold(pred_val_ind, pred_val_ood)
 
     pred_ind = ensemble_ood_lr.predict_proba(test_ind)[:, 1]
     pred_ood_1 = ensemble_ood_lr.predict_proba(test_ood_1)[:, 1]
-    pred_ood_2 = ensemble_ood_lr.predict_proba(test_ood_2)[:, 1]
-    pred_ood_3 = ensemble_ood_lr.predict_proba(test_ood_3)[:, 1]
+    auc1, fpr1, acc1 = _score_npzs(pred_ind, pred_ood_1, threshold)
 
-    
+    pred_ood_2 = ensemble_ood_lr.predict_proba(test_ood_2)[:, 1]
+    auc2, fpr2, acc2 = _score_npzs(pred_ind, pred_ood_1, threshold)
+
+    pred_ood_3 = ensemble_ood_lr.predict_proba(test_ood_3)[:, 1]
+    auc3, fpr3, acc3 = _score_npzs(pred_ind, pred_ood_1, threshold)
+
+    aucs = [auc1, auc2, auc3]
+    fprs = [fpr1, fpr2, fpr3]
+    accs = [acc1, acc2, acc3]
+
+    method = "Ensemble of OOD detectors"
+    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)
