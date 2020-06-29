@@ -85,43 +85,7 @@ def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, mo
     test_ood_2 = _get_baseline_scores(model, test_ood_loader_2, device, monte_carlo_steps)
     test_ood_3 = _get_baseline_scores(model, test_ood_loader_3, device, monte_carlo_steps)
 
-    if monte_carlo_steps == 1:
-        ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
-        ood_savefile_name_1 = f'npzs/baseline_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}.npz'
-        ood_savefile_name_2 = f'npzs/baseline_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}.npz'
-        ood_savefile_name_3 = f'npzs/baseline_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}.npz'
-    else:
-        ind_savefile_name = f'npzs/baseline_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_monte_carlo_{monte_carlo_steps}.npz'
-        ood_savefile_name_1 = f'npzs/baseline_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}_monte_carlo_{monte_carlo_steps}.npz'
-        ood_savefile_name_2 = f'npzs/baseline_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}_monte_carlo_{monte_carlo_steps}.npz'
-        ood_savefile_name_3 = f'npzs/baseline_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}_monte_carlo_{monte_carlo_steps}.npz'
-
-    np.savez(ind_savefile_name, test_ind)
-    np.savez(ood_savefile_name_1, test_ood_1)
-    np.savez(ood_savefile_name_2, test_ood_2)
-    np.savez(ood_savefile_name_3, test_ood_3)
-
-    auc_1, fpr_1, acc_1 = _score_npzs(test_ind, test_ood_1, threshold)
-    auc_2, fpr_2, acc_2 = _score_npzs(test_ind, test_ood_2, threshold)
-    auc_3, fpr_3, acc_3 = _score_npzs(test_ind, test_ood_3, threshold)
-
-    aucs = [auc_1, auc_2, auc_3]
-    fprs = [fpr_1, fpr_2, fpr_3]
-    accs = [acc_1, acc_2, acc_3]
-
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name_1}, {ood_savefile_name_2} and {ood_savefile_name_3}')
-    print()
-    print('###############################################')
-    print()
-    print(f"InD dataset: {ind_dataset}")
-    print(f"Validation dataset: {val_dataset}")
-    if monte_carlo_steps == 1:
-        method = f"Baseline"
-    else:
-        method = f"Baseline results with MC dropout ({monte_carlo_steps} steps)"
-    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
+    return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
@@ -235,6 +199,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
 
     best_auc = 0
     m_list = [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]
+    m_list = [0.0]
 
     best_magnitudes, best_fprs, regressors, thresholds = [], [], [], []
     for magnitude in m_list:
