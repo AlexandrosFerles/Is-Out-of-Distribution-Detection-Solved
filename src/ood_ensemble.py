@@ -389,9 +389,9 @@ if __name__ == '__main__':
     # temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
     # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
 
-    ipdb.set_trace()
     # mahalanobis
     temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, loaders, device, num_classes=args.num_classes)
+    ipdb.set_trace()
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
 
     # self-supervised
