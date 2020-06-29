@@ -16,7 +16,7 @@ import os
 import random
 import pickle
 import ipdb
-from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process, _predict_rotations, _process_gen_odin_loader
+from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _get_odin_scores, _process, _predict_rotations, _process_gen_odin_loader
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -61,57 +61,22 @@ def _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, ac
     print('###############################################')
 
 
-def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, monte_carlo_steps=1, exclude_class=None):
+def _baseline(model, loaders, device):
 
-    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
     model.eval()
-    _score_classification_accuracy(model, testloader=test_ind_loader, device=device, dataset=ind_dataset)
 
-    if monte_carlo_steps > 1:
-        model._dropout.train()
-
-    val_ind = _get_baseline_scores(model, val_ind_loader, device, monte_carlo_steps)
-    val_ood = _get_baseline_scores(model, val_ood_loader, device, monte_carlo_steps)
-
-    if monte_carlo_steps > 1:
-        val_ind = val_ind / monte_carlo_steps
-        val_ood = val_ood / monte_carlo_steps
-
-    acc, threshold = _find_threshold(val_ind, val_ood)
-
-    test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps)
-    test_ood_1 = _get_baseline_scores(model, test_ood_loader_1, device, monte_carlo_steps)
-    test_ood_2 = _get_baseline_scores(model, test_ood_loader_2, device, monte_carlo_steps)
-    test_ood_3 = _get_baseline_scores(model, test_ood_loader_3, device, monte_carlo_steps)
+    test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps=1)
+    test_ood_1 = _get_baseline_scores(model, test_ood_loader_1, device, monte_carlo_steps=1)
+    test_ood_2 = _get_baseline_scores(model, test_ood_loader_2, device, monte_carlo_steps=1)
+    test_ood_3 = _get_baseline_scores(model, test_ood_loader_3, device, monte_carlo_steps=1)
 
     return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
-def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
+def _odin(model, loaders, device):
 
     model.eval()
-
-    len_ = 0
-    arr = np.zeros(loader.batch_size*loader.__len__())
-    for index, data in enumerate(loader):
-        images, _ = data
-        nnOutputs = _process(model, images, T, epsilon, device=device)
-        top_class_probability = np.max(nnOutputs, axis=1)
-        if not score_entropy:
-            arr[index*loader.batch_size:index*loader.batch_size + top_class_probability.shape[0]] = top_class_probability
-        else:
-            entropy = -np.sum(np.log(nnOutputs) * nnOutputs, axis=1)
-            arr[index*loader.batch_size:index*loader.batch_size + top_class_probability.shape[0]] = top_class_probability - entropy
-        len_ += top_class_probability.shape[0]
-
-    return arr[:len_]
-
-
-def _odin(model, loaders, device, ind_dataset, val_dataset, ood_datasets):
-
-    model.eval()
-    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     best_auc = 0
@@ -135,47 +100,17 @@ def _odin(model, loaders, device, ind_dataset, val_dataset, ood_datasets):
     print(f'Selected temperature: {best_T}, selected epsilon: {best_epsilon}')
     print()
 
-    _, threshold = _find_threshold(best_val_ind, best_val_ood)
-
     test_ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device)
     test_ood_1 = _get_odin_scores(model, test_ood_loader_1, best_T, best_epsilon, device=device)
     test_ood_2 = _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device)
     test_ood_3 = _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device)
 
-    ind_savefile_name = f'npzs/odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-    ood_savefile_name_1 = f'npzs/odin_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-    ood_savefile_name_2 = f'npzs/odin_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-    ood_savefile_name_3 = f'npzs/odin_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}_temperature_{best_T}_epsilon{best_epsilon}.npz'
-
-    np.savez(ind_savefile_name, test_ind)
-    np.savez(ood_savefile_name_1, test_ood_1)
-    np.savez(ood_savefile_name_2, test_ood_2)
-    np.savez(ood_savefile_name_3, test_ood_3)
-
-    auc_1, fpr_1, acc_1 = _score_npzs(test_ind, test_ood_1, threshold)
-    auc_2, fpr_2, acc_2 = _score_npzs(test_ind, test_ood_2, threshold)
-    auc_3, fpr_3, acc_3 = _score_npzs(test_ind, test_ood_3, threshold)
-
-    aucs = [auc_1, auc_2, auc_3]
-    fprs = [fpr_1, fpr_2, fpr_3]
-    accs = [acc_1, acc_2, acc_3]
-
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name} and out-distribution ood scores to: {ood_savefile_name_1}, {ood_savefile_name_2} and {ood_savefile_name_3}')
-    print()
-    print('###############################################')
-    print()
-    print(f"InD dataset: {ind_dataset}")
-    print(f"Validation dataset: {val_dataset}")
-    method = f"Odin results with chosen T={best_T}, epsilon={best_epsilon}"
-    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
+    return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
-def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_datasets, num_classes, model_type='eb0'):
+def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0'):
 
     model.eval()
-    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     temp_x = torch.rand(2, 3, 224, 224).to(device)
@@ -199,7 +134,6 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
 
     best_auc = 0
     m_list = [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]
-    m_list = [0.0]
 
     best_magnitudes, best_fprs, regressors, thresholds = [], [], [], []
     for magnitude in m_list:
@@ -242,10 +176,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     print(f'Selected thresholds: {thresholds}')
     print()
 
-    aucs_1, fprs_1, accs_1 = [], [], []
-    aucs_2, fprs_2, accs_2 = [], [], []
-    aucs_3, fprs_3, accs_3 = [], [], []
-    
+    idx = 0
     for (best_magnitude, regressor, threshold) in zip(best_magnitudes, regressors, thresholds):
         for i in range(num_output):
             M_test = lib_generation.get_Mahalanobis_score(model, test_ind_loader, num_classes, sample_mean, precision, i, best_magnitude, device=device)
@@ -279,42 +210,28 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
             else:
                 Mahalanobis_ood_3 = np.concatenate((Mahalanobis_ood_3, M_ood_3.reshape((M_ood_3.shape[0], -3))), axis=1)
 
-        Mahalanobis_test = np.asarray(Mahalanobis_test, dtype=np.float32)
-        Mahalanobis_ood_1 = np.asarray(Mahalanobis_ood_1, dtype=np.float32)
-        Mahalanobis_ood_2 = np.asarray(Mahalanobis_ood_2, dtype=np.float32)
-        Mahalanobis_ood_3 = np.asarray(Mahalanobis_ood_3, dtype=np.float32)
+            if idx == 0:
+                test_ind = regressor.predict_proba(Mahalanobis_test)[:, 1]
+                test_ood_1 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
+                test_ood_2 = regressor.predict_proba(Mahalanobis_ood_1)[:, 2]
+                test_ood_3 = regressor.predict_proba(Mahalanobis_ood_1)[:, 3]
+            else:
+                test_ind += regressor.predict_proba(Mahalanobis_test)[:, 1]
+                test_ood_1 += regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
+                test_ood_2 += regressor.predict_proba(Mahalanobis_ood_1)[:, 2]
+                test_ood_3 += regressor.predict_proba(Mahalanobis_ood_1)[:, 3]
+            idx += 1
 
-        auc_1, fpr_1, acc_1 = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood_1, threshold)
-        auc_2, fpr_2, acc_2 = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood_2, threshold)
-        auc_3, fpr_3, acc_3 = _predict_mahalanobis(regressor, Mahalanobis_test, Mahalanobis_ood_3, threshold)
-        
-        aucs_1.append(auc_1)
-        aucs_2.append(auc_2)
-        aucs_3.append(auc_3)
+        test_ind /= idx
+        test_ood_1 /= idx
+        test_ood_2 /= idx
+        test_ood_3 /= idx
 
-        fprs_1.append(fpr_1)
-        fprs_2.append(fpr_2)
-        fprs_3.append(fpr_3)
-
-        accs_1.append(acc_1)
-        accs_2.append(acc_2)
-        accs_3.append(acc_3)
-        
-    aucs = [np.mean(aucs_1), np.mean(aucs_2), np.mean(aucs_3)]
-    fprs = [np.mean(fprs_1), np.mean(fprs_2), np.mean(fprs_3)]
-    accs = [np.mean(accs_1), np.mean(accs_2), np.mean(accs_3)]
-
-    print('###############################################')
-    print()
-    print(f"InD dataset: {ind_dataset}")
-    print(f"Validation dataset: {val_dataset}")
-    method = f"Mahalanobis "
-    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
+    return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
-def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, num_classes):
+def _rotation(model, loaders, device, num_classes):
 
-    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     _, _, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
@@ -327,47 +244,17 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, nu
     _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, device=device)
     _, _, ood_full_3 = _predict_rotations(model, test_ood_loader_3, num_classes, device=device)
 
-    ind_savefile_name_full = f'npzs/self_supervision_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
-    ood_savefile_name_full_1 = f'npzs/self_supervision_{ood_dataset_1}_ind_{ind_dataset}_val_{val_dataset}.npz'
-    ood_savefile_name_full_2 = f'npzs/self_supervision_{ood_dataset_2}_ind_{ind_dataset}_val_{val_dataset}.npz'
-    ood_savefile_name_full_3 = f'npzs/self_supervision_{ood_dataset_3}_ind_{ind_dataset}_val_{val_dataset}.npz'
-
-    auc_1, fpr_1, acc_1 = _score_npzs(ind_full, ood_full_1, threshold)
-    auc_2, fpr_2, acc_2 = _score_npzs(ind_full, ood_full_2, threshold)
-    auc_3, fpr_3, acc_3 = _score_npzs(ind_full, ood_full_3, threshold)
-
-    aucs = [auc_1, auc_2, auc_3]
-    fprs = [fpr_1, fpr_2, fpr_3]
-    accs = [acc_1, acc_2, acc_3]
-
-    np.savez(ind_savefile_name_full, ind_full)
-    np.savez(ood_savefile_name_full_1, ood_full_1)
-    np.savez(ood_savefile_name_full_2, ood_full_2)
-    np.savez(ood_savefile_name_full_3, ood_full_3)
-
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution ood scores to {ind_savefile_name_full} and out-distribution ood scores to {ood_savefile_name_full_1}, {ood_savefile_name_full_2} and {ood_savefile_name_full_3}')
-    print()
-    print('###############################################')
-    print()
-    print('###############################################')
-    print()
-    print(f"InD dataset: {ind_dataset}")
-    print(f"Validation dataset: {val_dataset}")
-    method = f"Self-Supervision "
-    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
+    return ind_full, ood_full_1, ood_full_2, ood_full_3
 
 
-def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_datasets):
+def _gen_odin_inference(model, loaders, device):
 
     model.eval()
-    ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     epsilons = [0, 0.0025, 0.005, 0.01, 0.02, 0.04, 0.08]
-
     best_auc, best_epsilon = 0, 0
+
     for epsilon in epsilons:
 
         val_ind_scores = _process_gen_odin_loader(model, val_ind_loader, device, epsilon)
@@ -380,70 +267,17 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
             best_val_ind_scores = val_ind_scores
             best_val_ood_scores = val_ood_scores
 
-    _, threshold = _find_threshold(best_val_ind_scores, best_val_ood_scores)
-
     test_ind_scores = _process_gen_odin_loader(model, test_ind_loader, device, best_epsilon)
     test_ood_scores_1 = _process_gen_odin_loader(model, test_ood_loader_1, device, best_epsilon)
     test_ood_scores_2 = _process_gen_odin_loader(model, test_ood_loader_2, device, best_epsilon)
     test_ood_scores_3 = _process_gen_odin_loader(model, test_ood_loader_3, device, best_epsilon)
 
-    max_h_ind_savefile_name = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
-    max_h_ood_savefile_name_1 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}.npz'
-    max_h_ood_savefile_name_2 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}.npz'
-    max_h_ood_savefile_name_3 = f'npzs/max_h_gen_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}.npz'
-
-    np.savez(max_h_ind_savefile_name, test_ind_scores)
-    np.savez(max_h_ood_savefile_name_1, test_ood_scores_1)
-    np.savez(max_h_ood_savefile_name_2, test_ood_scores_2)
-    np.savez(max_h_ood_savefile_name_3, test_ood_scores_3)
-
-    auc_1, fpr_1, acc_1 = _score_npzs(test_ind_scores, test_ood_scores_1, threshold)
-    auc_2, fpr_2, acc_2 = _score_npzs(test_ind_scores, test_ood_scores_2, threshold)
-    auc_3, fpr_3, acc_3 = _score_npzs(test_ind_scores, test_ood_scores_3, threshold)
-
-    aucs = [auc_1, auc_2, auc_3]
-    fprs = [fpr_1, fpr_2, fpr_3]
-    accs = [acc_1, acc_2, acc_3]
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution ood scores for maximum h to {max_h_ind_savefile_name} and out-distribution ood scores to {max_h_ood_savefile_name_1}, {max_h_ood_savefile_name_2} and {max_h_ood_savefile_name_3}')
-    print()
-    method = "Generalized-Odin results (Cosine Similarity) "
-    print('###############################################')
-    print()
-    print(f"InD dataset: {ind_dataset}")
-    print(f"Validation dataset: {val_dataset}")
-    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
+    return test_ind_scores, test_ood_scores_1, test_ood_scores_2, test_ood_scores_3
 
 
 def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dataset, val_dataset, T=1000, epsilon=0.002, scaling=True):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
-
-    index = 0
-    for model_checkpoint in tqdm(model_checkpoints):
-        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
-        model.eval()
-        if scaling:
-            if index == 0:
-                val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
-                val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
-            else:
-                val_ind += _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
-                val_ood += _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
-        else:
-            if index == 0:
-                val_ind = _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                val_ood = _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-            else:
-                val_ind += _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                val_ood += _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-        index += 1
-
-    val_ind = val_ind / index
-    val_ood = val_ood / index
-
-    _, threshold = _find_threshold(val_ind, val_ood)
 
     index = 0
     for model_checkpoint in tqdm(model_checkpoints):
@@ -478,33 +312,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dat
     test_ood_2 = test_ood_2 / index
     test_ood_3 = test_ood_3 / index
 
-    test_ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}.npz'
-    test_ood_savefile_name_1 = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_1}.npz'
-    test_ood_savefile_name_2 = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_2}.npz'
-    test_ood_savefile_name_3 = f'npzs/ensemble_odin_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset_3}.npz'
-
-    np.savez(test_ind_savefile_name, test_ind)
-    np.savez(test_ood_savefile_name_1, test_ood_1)
-    np.savez(test_ood_savefile_name_2, test_ood_2)
-    np.savez(test_ood_savefile_name_3, test_ood_3)
-
-    auc_1, fpr_1, acc_1 = _score_npzs(test_ind, test_ood_1, threshold)
-    auc_2, fpr_2, acc_2 = _score_npzs(test_ind, test_ood_2, threshold)
-    auc_3, fpr_3, acc_3 = _score_npzs(test_ind, test_ood_3, threshold)
-
-    aucs = [auc_1, auc_2, auc_3]
-    fprs = [fpr_1, fpr_2, fpr_3]
-    accs = [acc_1, acc_2, acc_3]
-    print('###############################################')
-    print()
-    print(f'Succesfully stored in-distribution ood scores for maximum h to {test_ind_savefile_name} and out-distribution ood scores to {test_ood_savefile_name_1}, {test_ood_savefile_name_2} and {test_ood_savefile_name_3}')
-    print()
-    method = "Self-Ensemble"
-    print('###############################################')
-    print()
-    print(f"InD dataset: {ind_dataset}")
-    print(f"Validation dataset: {val_dataset}")
-    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
+    return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 if __name__ == '__main__':
@@ -514,13 +322,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Out-of-Distribution Detection')
 
-    parser.add_argument('--ood_method', '--m', required=True)
-    parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--in_distribution_dataset', '--in', required=True)
     parser.add_argument('--val_dataset', '--val', required=True)
-    parser.add_argument('--model_checkpoint', '--mc', default=None, required=False)
+    parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--model_checkpoints_file', '--mcf', default=None, required=False)
-    parser.add_argument('--monte_carlo_steps', '--mcdo', type=int, default=1, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
     parser.add_argument('--scaling', '--sc', type=bool, default=True, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
@@ -533,22 +338,28 @@ if __name__ == '__main__':
 
     ood_method = args.ood_method.lower()
 
-    if args.model_checkpoint is None and args.model_checkpoints_file is None:
-        raise NotImplementedError('You need to specify either a single or multiple checkpoints')
-    elif args.model_checkpoint is not None:
-        if ood_method == 'self-supervision' or ood_method == 'selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
-            model = build_model_with_checkpoint('roteb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
-        elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-            model = build_model_with_checkpoint('geneb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
-        else:
-            model = build_model_with_checkpoint('eb0', args.model_checkpoint, device=device, out_classes=args.num_classes)
-    else:
-        model_checkpoints, num_classes = [], []
-        for line in open(args.model_checkpoints_file, 'r'):
-            model_checkpoint, nc = line.split('\n')[0].split(',')
-            nc = int(nc)
-            model_checkpoints.append(model_checkpoint)
-            num_classes.append(nc)
+    model_checkpoints, num_classes = [], []
+    for line in open(args.model_checkpoints_file, 'r'):
+        model_checkpoint = line.split('\n')[0]
+        model_checkpoints.append(model_checkpoint)
+
+    standard_checkpoint = model_checkpoints[0]
+    standard_model = build_model_with_checkpoint('eb0', standard_checkpoint, device=device, out_classes=args.num_classes)
+
+    rotation_checkpoint = model_checkpoints[1]
+    rotation_model = build_model_with_checkpoint('roteb0', rotation_checkpoint, device=device, out_classes=args.num_classes)
+
+    genodin_checkpoint = model_checkpoints[2]
+    genodin_model = build_model_with_checkpoint('geneb0', genodin_checkpoint, device=device, out_classes=args.num_classes)
+
+    ensemble_checkpoints_file = model_checkpoints[3]
+
+    ensemble_checkpoints, num_classes = [], []
+    for line in open(ensemble_checkpoints_file, 'r'):
+        model_checkpoint, nc = line.split('\n')[0].split(',')
+        nc = int(nc)
+        ensemble_checkpoints.append(model_checkpoint)
+        num_classes.append(nc)
 
     ind_dataset = args.in_distribution_dataset.lower()
     val_dataset = args.val_dataset.lower()
@@ -559,25 +370,28 @@ if __name__ == '__main__':
 
     loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
-    if ood_method == 'baseline':
-        method_loaders = loaders[1:]
-        _baseline(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, monte_carlo_steps=args.monte_carlo_steps)
-    elif ood_method == 'odin':
-        method_loaders = loaders[1:]
-        _odin(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
-    elif ood_method == 'mahalanobis':
-        _generate_Mahalanobis(model, loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, num_classes=args.num_classes)
-    elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
-        method_loaders = loaders[1:]
-        _rotation(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, num_classes=args.num_classes)
-    elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
-        method_loaders = loaders[1:]
-        _gen_odin_inference(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
-    elif ood_method == 'ensemble':
-        method_loaders = loaders[1:]
-        _ensemble_inference(model_checkpoints, num_classes, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, scaling=args.scaling)
-    else:
-        raise NotImplementedError('Requested unknown Out-of-Distribution Detection Method')
+    method_loaders = loaders[1:]
+    test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
+
+    temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, method_loaders, device, num_classes=args.num_classes)
+    test_ind = np.append(test_ind, temp_ind, axis=1)
+    test_ood_1 = np.append(test_ood_1, temp_ood_1, axis=1)
+    test_ood_2 = np.append(test_ood_2, temp_ood_2, axis=1)
+    test_ood_3 = np.append(test_ood_3, temp_ood_3, axis=1)
+
+    ipdb.set_trace()
+
+    # if ood_method == 'odin':
+    #     method_loaders = loaders[1:]
+    #     _odin(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
+    # elif ood_method == 'mahalanobis':
+    #     _generate_Mahalanobis(model, loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets, num_classes=args.num_classes)
+    # elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
+    #     method_loaders = loaders[1:]
+    #     _gen_odin_inference(model, method_loaders, device, ind_dataset=ind_dataset, val_dataset=val_dataset, ood_datasets=all_datasets)
+    # elif ood_method == 'ensemble':
+    #     method_loaders = loaders[1:]
+    #     _ensemble_inference(model_checkpoints, num_classes, method_loaders, device, ind_dataset=args.in_distribution_dataset, val_dataset=args.val_dataset, scaling=args.scaling)
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)
