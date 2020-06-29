@@ -343,6 +343,8 @@ if __name__ == '__main__':
         model_checkpoint = line.split('\n')[0]
         model_checkpoints.append(model_checkpoint)
 
+    ipdb.set_trace()
+
     standard_checkpoint = model_checkpoints[0]
     standard_model = build_model_with_checkpoint('eb0', standard_checkpoint, device=device, out_classes=args.num_classes)
 
@@ -379,7 +381,7 @@ if __name__ == '__main__':
     test_ood_2 = np.append(test_ood_2, temp_ood_2, axis=1)
     test_ood_3 = np.append(test_ood_3, temp_ood_3, axis=1)
 
-    ipdb.set_trace()
+
 
     # if ood_method == 'odin':
     #     method_loaders = loaders[1:]
