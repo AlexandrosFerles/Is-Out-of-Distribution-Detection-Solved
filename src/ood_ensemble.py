@@ -315,6 +315,16 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dat
     return test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
+def _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3):
+
+    test_ind = np.append(test_ind, temp_ind, axis=1)
+    test_ood_1 = np.append(test_ood_1, temp_ood_1, axis=1)
+    test_ood_2 = np.append(test_ood_2, temp_ood_2, axis=1)
+    test_ood_3 = np.append(test_ood_3, temp_ood_3, axis=1)
+
+    return test_ind, test_ood_1, test_ood_2, test_ood_3
+
+
 if __name__ == '__main__':
 
     import time
@@ -374,12 +384,7 @@ if __name__ == '__main__':
     test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
 
     temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, method_loaders, device, num_classes=args.num_classes)
-    test_ind = np.append(test_ind, temp_ind, axis=1)
-    test_ood_1 = np.append(test_ood_1, temp_ood_1, axis=1)
-    test_ood_2 = np.append(test_ood_2, temp_ood_2, axis=1)
-    test_ood_3 = np.append(test_ood_3, temp_ood_3, axis=1)
-
-
+    test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
 
     # if ood_method == 'odin':
     #     method_loaders = loaders[1:]
