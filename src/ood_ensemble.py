@@ -336,8 +336,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     device = torch.device(f'cuda:{args.device}')
 
-    ood_method = args.ood_method.lower()
-
     model_checkpoints, num_classes = [], []
     for line in open(args.model_checkpoints_file, 'r'):
         model_checkpoint = line.split('\n')[0]
