@@ -292,8 +292,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, ood_dataset, num_
             if i == 0:
                 Mahalanobis_ood = M_ood.reshape((M_ood.shape[0], -1))
             else:
-                pass
-            Mahalanobis_ood = np.concatenate((Mahalanobis_ood, M_ood.reshape((M_ood.shape[0], -1))), axis=1)
+                Mahalanobis_ood = np.concatenate((Mahalanobis_ood, M_ood.reshape((M_ood.shape[0], -1))), axis=1)
 
         Mahalanobis_test = np.asarray(Mahalanobis_test, dtype=np.float32)
         Mahalanobis_ood = np.asarray(Mahalanobis_test, dtype=np.float32)
