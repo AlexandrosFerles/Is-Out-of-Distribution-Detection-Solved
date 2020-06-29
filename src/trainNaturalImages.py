@@ -36,7 +36,6 @@ def train(args):
     model = build_model(args, dropout=0.5)
     # model = build_model(args)
     model = model.to(device)
-    ipdb.set_trace()
     optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
 
     resize = True
