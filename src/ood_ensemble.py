@@ -129,15 +129,15 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
             best_magnitudes = [magnitude]
             regressors = [regressor]
             thresholds = [threshold]
-            best_val_ind = Mahalanobis_val_ind
-            best_val_ood = Mahalanobis_val_ood
+            best_val_ind = regressor.predict_proba(Mahalanobis_val_ind)[:, 1]
+            best_val_ood = regressor.predict_proba(Mahalanobis_val_ood)[:, 1]
             cnt = 1
         elif auc == best_auc:
             best_magnitudes.append(magnitude)
             regressors.append(regressor)
             thresholds.append(threshold)
-            best_val_ind += Mahalanobis_val_ind
-            best_val_ood += Mahalanobis_val_ood
+            best_val_ind += regressor.predict_proba(Mahalanobis_val_ind)[:, 1]
+            best_val_ood += regressor.predict_proba(Mahalanobis_val_ood)[:, 1]
             cnt += 1
 
     best_val_ind /= cnt
@@ -186,13 +186,13 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
         if idx == 0:
             test_ind = regressor.predict_proba(Mahalanobis_test)[:, 1]
             test_ood_1 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-            test_ood_2 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-            test_ood_3 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
+            test_ood_2 = regressor.predict_proba(Mahalanobis_ood_2)[:, 1]
+            test_ood_3 = regressor.predict_proba(Mahalanobis_ood_3)[:, 1]
         else:
             test_ind += regressor.predict_proba(Mahalanobis_test)[:, 1]
             test_ood_1 += regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-            test_ood_2 += regressor.predict_proba(Mahalanobis_ood_1)[:, 2]
-            test_ood_3 += regressor.predict_proba(Mahalanobis_ood_1)[:, 3]
+            test_ood_2 += regressor.predict_proba(Mahalanobis_ood_2)[:, 2]
+            test_ood_3 += regressor.predict_proba(Mahalanobis_ood_3)[:, 3]
         idx += 1
 
     test_ind /= idx
