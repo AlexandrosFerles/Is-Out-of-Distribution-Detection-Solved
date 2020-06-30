@@ -411,7 +411,7 @@ if __name__ == '__main__':
     X = np.append(val_ind, val_ood, axis=0)
     y = np.append(np.ones(val_ind.shape[0]), np.zeros(val_ood.shape[0]))
 
-    indices = np.arange(y.shape)
+    indices = np.arange(y.shape[0])
     np.random.shuffle(indices)
 
     X = X[indices]
