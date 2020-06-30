@@ -1,7 +1,6 @@
 import torch
 import numpy as np
-from sklearn.linear_model import LogisticRegressionCV
-from sklearn.utils.tests.test_pprint import LogisticRegression
+from sklearn.linear_model import LogisticRegressionCV, LogisticRegression
 from torch.autograd import Variable
 from utils import build_model_with_checkpoint
 from dataLoaders import get_triplets_loaders
@@ -395,10 +394,10 @@ if __name__ == '__main__':
     # temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
     # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
     #
-    # # self-supervised
-    # rotation_loaders = rotation_loaders[1:]
-    # temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, rotation_loaders, device, num_classes=args.num_classes)
-    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    # self-supervised
+    rotation_loaders = rotation_loaders[1:]
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, rotation_loaders, device, num_classes=args.num_classes)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
     #
     # # generalized-odin
     # temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
@@ -417,7 +416,6 @@ if __name__ == '__main__':
     X = X[indices]
     y = y[indices]
 
-    ipdb.set_trace()
     ensemble_ood_lr = LogisticRegression(random_state=global_seed, n_jobs=2, max_iter=200).fit(X, y)
     pred_val_ind = ensemble_ood_lr.predict_proba(val_ind)[:, 1]
     pred_val_ood = ensemble_ood_lr.predict_proba(val_ood)[:, 1]
@@ -427,6 +425,7 @@ if __name__ == '__main__':
     pred_ood_1 = ensemble_ood_lr.predict_proba(test_ood_1)[:, 1]
     auc1, fpr1, acc1 = _score_npzs(pred_ind, pred_ood_1, threshold)
 
+    ipdb.set_trace()
     pred_ood_2 = ensemble_ood_lr.predict_proba(test_ood_2)[:, 1]
     auc2, fpr2, acc2 = _score_npzs(pred_ind, pred_ood_2, threshold)
 
