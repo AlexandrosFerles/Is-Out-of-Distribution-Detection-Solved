@@ -1,12 +1,6 @@
 import torch
-import torch.nn.functional as F
 import numpy as np
-from sklearn.linear_model import LogisticRegressionCV
-from sklearn.metrics import confusion_matrix
-from torch import nn
 from torch.autograd import Variable
-from torch.utils.data import DataLoader, TensorDataset
-from sklearn.metrics import roc_curve, auc
 from utils import build_model_with_checkpoint
 from dataLoaders import get_triplets_loaders
 from tqdm import tqdm
@@ -15,8 +9,8 @@ import argparse
 import os
 import random
 import pickle
-import ipdb
 from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _score_classification_accuracy, _process, _predict_rotations, _process_gen_odin_loader
+import ipdb
 
 abs_path = '/home/ferles/Dermatology/medusa/'
 global_seed = 1
@@ -61,7 +55,7 @@ def _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, ac
     print('###############################################')
 
 
-def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, monte_carlo_steps=1, exclude_class=None):
+def _baseline(model, loaders, device, ind_dataset, val_dataset, ood_datasets, monte_carlo_steps=1):
 
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = ood_datasets
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
@@ -357,7 +351,6 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, nu
 
     _, threshold = _find_threshold(val_ind_full, val_ood_full)
 
-    ipdb.set_trace()
     _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
     _, _, ood_full_1 = _predict_rotations(model, test_ood_loader_1, num_classes, device=device)
     _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, device=device)
