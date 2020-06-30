@@ -329,7 +329,7 @@ def _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_
 
 def _ood_detection_performance(method, val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3):
 
-    _, _, threshold = _find_threshold(val_ind, val_ood)
+    _, threshold = _find_threshold(val_ind, val_ood)
 
     auc1, fpr1, acc1 = _score_npzs(test_ind, test_ood_1, threshold)
     auc2, fpr2, acc2 = _score_npzs(test_ind, test_ood_2, threshold)
