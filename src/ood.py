@@ -31,7 +31,6 @@ def _find_threshold(train_scores, val_scores):
 
     probs = np.append(train_scores, val_scores, axis=0)
     y_true = np.append(np.ones(train_scores.shape[0]), np.zeros(val_scores.shape[0]), axis=0)
-    from sklearn.metrics import accuracy_score
     from sklearn.metrics import roc_curve
 
     fpr, tpr, thresholds = roc_curve(y_true, probs)
