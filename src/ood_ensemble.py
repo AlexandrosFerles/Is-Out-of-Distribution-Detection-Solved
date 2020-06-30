@@ -417,6 +417,7 @@ if __name__ == '__main__':
     X = X[indices]
     y = y[indices]
 
+    ipdb.set_trace()
     ensemble_ood_lr = LogisticRegression(random_state=global_seed, n_jobs=2, max_iter=200).fit(X, y)
     pred_val_ind = ensemble_ood_lr.predict_proba(val_ind)[:, 1]
     pred_val_ood = ensemble_ood_lr.predict_proba(val_ood)[:, 1]
