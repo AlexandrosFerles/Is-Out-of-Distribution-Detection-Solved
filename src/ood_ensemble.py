@@ -396,7 +396,7 @@ if __name__ == '__main__':
     #
     # self-supervised
     rotation_loaders = rotation_loaders[1:]
-    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, rotation_loaders, device, num_classes=args.num_classes)
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, rotation_loaders, device, num_classes=args.num_classes, expand=True)
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
     #
     # # generalized-odin
