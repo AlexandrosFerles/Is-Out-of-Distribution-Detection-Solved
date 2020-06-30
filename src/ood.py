@@ -128,7 +128,7 @@ def _score_mahalanobis(ind, ood):
     X = np.append(ind, ood, axis=0)
     y = np.append(y_known, y_novel)
 
-    lr = LogisticRegressionCV(n_jobs=-1, cv=5, max_iter=1000).fit(X, y)
+    lr = LogisticRegressionCV(n_jobs=-1, cv=5, max_iter=1000, random_state=global_seed).fit(X, y)
 
     known_preds = lr.predict_proba(ind)[:, 1]
     novel_preds = lr.predict_proba(ood)[:, 1]
