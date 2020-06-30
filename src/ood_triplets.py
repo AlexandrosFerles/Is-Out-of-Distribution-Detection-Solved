@@ -357,6 +357,7 @@ def _rotation(model, loaders, device, ind_dataset, val_dataset, ood_datasets, nu
 
     _, threshold = _find_threshold(val_ind_full, val_ood_full)
 
+    ipdb.set_trace()
     _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
     _, _, ood_full_1 = _predict_rotations(model, test_ood_loader_1, num_classes, device=device)
     _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, device=device)
