@@ -416,6 +416,7 @@ if __name__ == '__main__':
     X = X[indices]
     y = y[indices]
 
+    ipdb.set_trace()
     ensemble_ood_lr = LogisticRegression(random_state=global_seed, n_jobs=2, max_iter=200).fit(X, y)
     pred_val_ind = ensemble_ood_lr.predict_proba(val_ind)[:, 1]
     pred_val_ood = ensemble_ood_lr.predict_proba(val_ood)[:, 1]
@@ -425,7 +426,6 @@ if __name__ == '__main__':
     pred_ood_1 = ensemble_ood_lr.predict_proba(test_ood_1)[:, 1]
     auc1, fpr1, acc1 = _score_npzs(pred_ind, pred_ood_1, threshold)
 
-    ipdb.set_trace()
     pred_ood_2 = ensemble_ood_lr.predict_proba(test_ood_2)[:, 1]
     auc2, fpr2, acc2 = _score_npzs(pred_ind, pred_ood_2, threshold)
 
