@@ -206,14 +206,28 @@ def _rotation(model, loaders, device, num_classes):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
-    _, _, val_ind_full = _predict_rotations(model, val_ind_loader, num_classes, device=device)
-    _, _, val_ood_full = _predict_rotations(model, val_ood_loader, num_classes, device=device)
-    _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, device=device)
-    _, _, ood_full_1 = _predict_rotations(model, test_ood_loader_1, num_classes, device=device)
-    _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, device=device)
-    _, _, ood_full_3 = _predict_rotations(model, test_ood_loader_3, num_classes, device=device)
+    val_kl_div_ind, val_rot_score_ind, _ = _predict_rotations(model, val_ind_loader, num_classes, device=device)
+    val_kl_div_ood, val_rot_score_ood, _ = _predict_rotations(model, val_ood_loader, num_classes, device=device)
 
-    return val_ind_full, val_ood_full, ind_full, ood_full_1, ood_full_2, ood_full_3
+    best_val_auc, best_lamda = 0, 0.25
+    for lamda in [0.25, 0.5, 0.75, 1]:
+
+        anomaly_score_ind = val_kl_div_ind - lamda * val_rot_score_ind
+        anomaly_score_ood = val_kl_div_ood - lamda * val_rot_score_ood
+        auc, _, _ = _score_npzs(anomaly_score_ind, anomaly_score_ood)
+        if auc > best_val_auc:
+            best_val_auc = auc
+            best_anomaly_score_ind = anomaly_score_ind
+            best_anomaly_score_ood = anomaly_score_ood
+
+    _, threshold = _find_threshold(best_anomaly_score_ind, best_anomaly_score_ood)
+
+    _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, lamda=best_lamda, device=device)
+    _, _, ood_full_1 = _predict_rotations(model, test_ood_loader_1, num_classes, lamda=best_lamda, device=device)
+    _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, lamda=best_lamda, device=device)
+    _, _, ood_full_3 = _predict_rotations(model, test_ood_loader_3, num_classes, lamda=best_lamda, device=device)
+
+    return best_anomaly_score_ind, best_anomaly_score_ood, ind_full, ood_full_1, ood_full_2, ood_full_3
 
 
 def _gen_odin_inference(model, loaders, device):
@@ -244,67 +258,55 @@ def _gen_odin_inference(model, loaders, device):
     return best_val_ind_scores, best_val_ood_scores, test_ind_scores, test_ood_scores_1, test_ood_scores_2, test_ood_scores_3
 
 
-def _ensemble_inference(model_checkpoints, num_classes, loaders, device, T=1000, epsilon=0.002, scaling=True):
+def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
-    index = 0
-    for model_checkpoint in tqdm(model_checkpoints):
+    models = []
+    for index, model_checkpoint in enumerate(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
-        if scaling:
-            if index == 0:
-                val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
-                val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
-            else:
-                val_ind += _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
-                val_ood += _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
+        models.append(model)
+
+    best_auc = -1e30
+    for T in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
+        for epsilon in tqdm(np.arange(0, 0.004, 0.004/21, float).tolist()):
+            for index, model in enumerate(models):
+                if index == 0:
+                    val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
+                    val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
+                else:
+                    val_ind += _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
+                    val_ood += _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
+
+            val_ind = val_ind / len(models)
+            val_ood = val_ood / len(models)
+            auc, _, _ = _score_npzs(val_ind, val_ood)
+            if auc > best_auc:
+                best_auc = auc
+                best_T, best_epsilon = T, epsilon
+                best_val_ind, best_val_ood = val_ind, val_ood
+
+    _, threshold = _find_threshold(best_val_ind, best_val_ood)
+
+    for index, model in enumerate(models):
+        if index == 0:
+            test_ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_1 = _get_odin_scores(model, test_ood_loader_1, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_2 = _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_3 = _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device, score_entropy=True)
         else:
-            if index == 0:
-                val_ind = _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                val_ood = _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-            else:
-                val_ind += _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                val_ood += _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-        index += 1
+            test_ind += _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_1 += _get_odin_scores(model, test_ood_loader_1, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_2 += _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_3 += _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device, score_entropy=True)
 
-    val_ind = val_ind / index
-    val_ood = val_ood / index
+    test_ind = test_ind / len(models)
+    test_ood_1 = test_ood_1 / len(models)
+    test_ood_2 = test_ood_2 / len(models)
+    test_ood_3 = test_ood_3 / len(models)
 
-    index = 0
-    for model_checkpoint in tqdm(model_checkpoints):
-        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
-        model.eval()
-        if scaling:
-            if index == 0:
-                test_ind = _get_odin_scores(model, test_ind_loader, T, epsilon, device=device, score_entropy=True)
-                test_ood_1 = _get_odin_scores(model, test_ood_loader_1, T, epsilon, device=device, score_entropy=True)
-                test_ood_2 = _get_odin_scores(model, test_ood_loader_2, T, epsilon, device=device, score_entropy=True)
-                test_ood_3 = _get_odin_scores(model, test_ood_loader_3, T, epsilon, device=device, score_entropy=True)
-            else:
-                test_ind += _get_odin_scores(model, test_ind_loader, T, epsilon, device=device, score_entropy=True)
-                test_ood_1 += _get_odin_scores(model, test_ood_loader_1, T, epsilon, device=device, score_entropy=True)
-                test_ood_2 += _get_odin_scores(model, test_ood_loader_2, T, epsilon, device=device, score_entropy=True)
-                test_ood_3 += _get_odin_scores(model, test_ood_loader_3, T, epsilon, device=device, score_entropy=True)
-        else:
-            if index == 0:
-                test_ind = _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                test_ood_1 = _get_odin_scores(model, test_ood_loader_1, T=1, epsilon=0, device=device, score_entropy=True)
-                test_ood_2 = _get_odin_scores(model, test_ood_loader_2, T=1, epsilon=0, device=device, score_entropy=True)
-                test_ood_3 = _get_odin_scores(model, test_ood_loader_3, T=1, epsilon=0, device=device, score_entropy=True)
-            else:
-                test_ind += _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                test_ood_1 += _get_odin_scores(model, test_ood_loader_1, T=1, epsilon=0, device=device, score_entropy=True)
-                test_ood_2 += _get_odin_scores(model, test_ood_loader_2, T=1, epsilon=0, device=device, score_entropy=True)
-                test_ood_3 += _get_odin_scores(model, test_ood_loader_3, T=1, epsilon=0, device=device, score_entropy=True)
-        index += 1
-
-    test_ind = test_ind / index
-    test_ood_1 = test_ood_1 / index
-    test_ood_2 = test_ood_2 / index
-    test_ood_3 = test_ood_3 / index
-
-    return val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
+    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=False):
@@ -437,7 +439,6 @@ if __name__ == '__main__':
     X = X[indices]
     y = y[indices]
 
-    ipdb.set_trace()
     ensemble_ood_lr = LogisticRegression(random_state=global_seed, n_jobs=2, max_iter=200).fit(X, y)
     pred_val_ind = ensemble_ood_lr.predict_proba(val_ind)[:, 1]
     pred_val_ood = ensemble_ood_lr.predict_proba(val_ood)[:, 1]

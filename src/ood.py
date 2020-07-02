@@ -86,7 +86,7 @@ def _get_metrics(X, y):
     return fpr, acc
 
 
-def _score_npzs(ind, ood, threshold):
+def _score_npzs(ind, ood, threshold=0):
 
     y_known, y_novel = np.ones(ind.shape[0]), np.zeros(ood.shape[0])
     X, y = np.append(ind, ood, axis=0), np.append(y_known, y_novel, axis=0)
@@ -505,7 +505,7 @@ def _generate_Mahalanobis(model, loaders, device, ind_dataset, val_dataset, ood_
     print()
 
 
-def _predict_rotations(model, loader, num_classes, device):
+def _predict_rotations(model, loader, num_classes, device, lamda=0.25):
 
     model.eval()
     uniform = torch.zeros(num_classes)
@@ -547,8 +547,8 @@ def _predict_rotations(model, loader, num_classes, device):
             ce_rot = F.cross_entropy(rot_preds, rot_gt)
 
             numpy_array_kl_div[index] = kl_div.item()
-            numpy_array_rot_score[index] = - 0.25 * ce_rot.item()
-            anomaly_score = kl_div.item() - 0.25 * ce_rot.item()
+            numpy_array_rot_score[index] = ce_rot.item()
+            anomaly_score = kl_div.item() - lamda * ce_rot.item()
             numpy_array_full[index] = anomaly_score
             arr_len += images.size()[0]
 
@@ -711,64 +711,50 @@ def _gen_odin_inference(model, loaders, device, ind_dataset, val_dataset, ood_da
     print(f'Detection Accuracy: {acc}')
 
 
-def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dataset, val_dataset, ood_dataset, T=1000, epsilon=0.002, scaling=True):
+def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dataset, val_dataset, ood_dataset):
 
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
-    index = 0
 
-    for model_checkpoint in tqdm(model_checkpoints):
+    models = []
+    for index, model_checkpoint in enumerate(model_checkpoints):
         model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
         model.eval()
-        if scaling:
-            if index == 0:
-                val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
-                val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
-            else:
-                val_ind += _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
-                val_ood += _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
+        models.append(model)
+
+    best_auc = -1e30
+    for T in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
+        for epsilon in tqdm(np.arange(0, 0.004, 0.004/21, float).tolist()):
+            for index, model in enumerate(models):
+                if index == 0:
+                    val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
+                    val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
+                else:
+                    val_ind += _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
+                    val_ood += _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
+
+            val_ind = val_ind / len(models)
+            val_ood = val_ood / len(models)
+            auc, _, _ = _score_npzs(val_ind, val_ood)
+            if auc > best_auc:
+                best_auc = auc
+                best_T, best_epsilon = T, epsilon
+                best_val_ind, best_val_ood = val_ind, val_ood
+
+    _, threshold = _find_threshold(best_val_ind, best_val_ood)
+
+    for index, model in enumerate(models):
+        if index == 0:
+            ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device, score_entropy=True)
+            ood = _get_odin_scores(model, test_ood_loader, best_T, best_epsilon, device=device, score_entropy=True)
         else:
-            if index == 0:
-                val_ind = _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                val_ood = _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-            else:
-                val_ind += _get_odin_scores(model, val_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                val_ood += _get_odin_scores(model, val_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-        index += 1
+            ind += _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device, score_entropy=True)
+            ood += _get_odin_scores(model, test_ood_loader, best_T, best_epsilon, device=device, score_entropy=True)
 
-    val_ind = val_ind / index
-    val_ood = val_ood / index
+    ind = ind / len(models)
+    ood = ood / len(models)
 
-    _, threshold = _find_threshold(val_ind, val_ood)
-
-    index = 0
-    for model_checkpoint in tqdm(model_checkpoints):
-        model = build_model_with_checkpoint('eb0', model_checkpoint, device, out_classes=num_classes[index])
-        model.eval()
-        if scaling:
-            if index == 0:
-                ind = _get_odin_scores(model, test_ind_loader, T, epsilon, device=device, score_entropy=True)
-                ood = _get_odin_scores(model, test_ood_loader, T, epsilon, device=device, score_entropy=True)
-            else:
-                ind += _get_odin_scores(model, test_ind_loader, T, epsilon, device=device, score_entropy=True)
-                ood += _get_odin_scores(model, test_ood_loader, T, epsilon, device=device, score_entropy=True)
-        else:
-            if index == 0:
-                ind = _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                ood = _get_odin_scores(model, test_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-            else:
-                ind += _get_odin_scores(model, test_ind_loader, T=1, epsilon=0, device=device, score_entropy=True)
-                ood += _get_odin_scores(model, test_ood_loader, T=1, epsilon=0, device=device, score_entropy=True)
-        index += 1
-
-    ind = ind / index
-    ood = ood / index
-
-    if scaling:
-        ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_scaling.npz'
-        ood_savefile_name = f'npzs/ensemble_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_scaling.npz'
-    else:
-        ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
-        ood_savefile_name = f'npzs/ensemble_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}.npz'
+    ind_savefile_name = f'npzs/ensemble_{ind_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_T_{best_T}_epsilon_{best_epsilon}.npz'
+    ood_savefile_name = f'npzs/ensemble_{ood_dataset}_ind_{ind_dataset}_val_{val_dataset}_ood_{ood_dataset}_T_{best_T}_epsilon_{best_epsilon}.npz'
 
     auc, fpr, acc = _score_npzs(ind, ood, threshold)
 
