@@ -136,7 +136,7 @@ def train(args):
 
         wandb.log({'Test Set Accuracy': test_set_accuracy, 'epoch': epoch})
 
-        # scheduler.step(epoch=epoch)
+        scheduler.step(epoch=epoch)
 
 
 if __name__ == '__main__':
