@@ -563,16 +563,16 @@ def _get_dataset(dataset, transforms, test=False):
         testset = TinyImageNetDataset(train=False, transform=transform_test)
     elif dataset == 'tinyimagenet-cifar10':
         if not test:
-            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, transform=transform_train)
+            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, type='tiny', transform=transform_train)
         else:
-            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, transform=transform_test)
-        testset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, train=False, transform=transform_test)
+            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, type='tiny', transform=transform_test)
+        testset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, type='tiny', train=False, transform=transform_test)
     elif dataset == 'tinyimagenet-cifar100':
         if not test:
-            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, transform=transform_train)
+            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, type='tiny', transform=transform_train)
         else:
-            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, transform=transform_test)
-        testset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, train=False, transform=transform_test)
+            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, type='tiny', transform=transform_test)
+        testset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, type='tiny', train=False, transform=transform_test)
     elif dataset == 'stanforddogs':
         if not test:
             trainset = GenericImageFolderDataset(root=dogs_root, transform=transform_train)
