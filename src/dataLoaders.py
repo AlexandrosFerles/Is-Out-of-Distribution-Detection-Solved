@@ -776,6 +776,7 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
                 gts = trainset.labels
             else:
                 gts = trainset.targets
+            ipdb.set_trace()
             indexes = list(range(trainset.__len__()))
 
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
