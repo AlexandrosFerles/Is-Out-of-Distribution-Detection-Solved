@@ -547,7 +547,7 @@ class GenericImageFolderDataset(data.Dataset):
         num_images = 0
         for root, dirs, files in os.walk(dir):
             for f in files:
-                if f.endswith(".jpg"):
+                if f.endswith(".jpg") or f.endswith(".JPEG"):
                     num_images = num_images + 1
 
         self.len_dataset = num_images
