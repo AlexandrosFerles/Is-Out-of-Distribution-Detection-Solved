@@ -769,6 +769,7 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         trainloader = DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=3)
         return trainloader, testloader
     else:
+        ipdb.set_trace()
         if pickle_files is None:
             if dataset == 'tinyimagenet' or dataset == 'tinyimagenet-cifar10' or dataset == 'tinyimagenet-cifar100':
                 gts = trainset.get_targets()
