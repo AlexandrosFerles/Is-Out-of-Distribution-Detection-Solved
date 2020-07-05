@@ -761,7 +761,6 @@ def _get_image_transforms(dataset, resize):
 def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, resize=True):
 
     transforms = _get_image_transforms(dataset, resize)
-    ipdb.set_trace()
     trainset, testset = _get_dataset(dataset, transforms, test)
 
     testloader = DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=3)

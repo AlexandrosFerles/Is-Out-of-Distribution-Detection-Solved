@@ -553,6 +553,7 @@ class GenericImageFolderDataset(data.Dataset):
         self.len_dataset = num_images
 
         if self.subset_index is None:
+            ipdb.set_trace()
             if self.type == 'dogs':
                 if os.path.exists('/raid/ferles/'):
                     dic = {}
@@ -563,6 +564,7 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Train/", key)] = value
                             else:
                                 dic[os.path.join(self.root, "Test/", key)] = value
+
                 elif self.type == 'tiny':
                     if os.path.exists('/raid/ferles/'):
                         dic = {}
