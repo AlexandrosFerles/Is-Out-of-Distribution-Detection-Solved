@@ -22,8 +22,6 @@ torch.cuda.manual_seed(global_seed)
 
 def train(args):
 
-    ipdb.set_trace()
-
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
     wandb.init(name=f'rot_{training_configurations.checkpoint}')
