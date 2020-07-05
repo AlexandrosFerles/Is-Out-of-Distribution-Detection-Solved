@@ -7,7 +7,7 @@
     "resolutionIncrease": "False",
     "out_classes": 173,
     "checkpoint": "eb0tinyimagenet-cifar10",
-    "train_pickle": "None",
-    "test_pickle": "None"
+    "train_pickle": "train_indices_tinyimagenet-cifar10.pickle",
+    "test_pickle": "val_indices_tinyimagenet-cifar10.pickle"
   }
 }

@@ -8,7 +8,7 @@
     "out_classes": 173,
     "checkpoint": "genOdinTinyImageNet-cifar10",
     "gen_odin_mode": 2,
-    "train_pickle": "None",
-    "test_pickle": "None"
+    "train_pickle": "train_indices_tinyimagenet-cifar10.pickle",
+    "test_pickle": "val_indices_tinyimagenet-cifar10.pickle"
   }
 }
