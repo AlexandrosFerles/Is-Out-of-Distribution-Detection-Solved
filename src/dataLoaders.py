@@ -507,10 +507,14 @@ def _get_dataset(dataset, transforms, test=False):
 
     if os.path.exists('/raid/ferles/data'):
         root = '/raid/ferles/data'
+        tiny_imagenet_cifar10_root = '/raid/ferles/tiny-imagenet-200/Cifar10'
+        tiny_imagenet_cifar100_root = '/raid/ferles/tiny-imagenet-200/Cifar100'
         dogs_root = '/raid/ferles/Dogs/Stanford/'
         birds_root = '/raid/ferles/Birds/nabirds/'
     else:
         root = '/home/ferles/data'
+        tiny_imagenet_cifar10_root = '/home/ferles/tiny-imagenet-200/Cifar10'
+        tiny_imagenet_cifar100_root = '/home/ferles/tiny-imagenet-200/Cifar100'
         dogs_root = '/home/ferles/Dogs/Stanford/'
         birds_root = '/home/ferles/Birds/nabirds/'
 
@@ -557,6 +561,18 @@ def _get_dataset(dataset, transforms, test=False):
         else:
             trainset = TinyImageNetDataset(transform=transform_test)
         testset = TinyImageNetDataset(train=False, transform=transform_test)
+    elif dataset == 'tinyimagenet-cifar10':
+        if not test:
+            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, transform=transform_train)
+        else:
+            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, transform=transform_test)
+        testset = GenericImageFolderDataset(root=tiny_imagenet_cifar10_root, train=False, transform=transform_test)
+    elif dataset == 'tinyimagenet-cifar100':
+        if not test:
+            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, transform=transform_train)
+        else:
+            trainset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, transform=transform_test)
+        testset = GenericImageFolderDataset(root=tiny_imagenet_cifar100_root, train=False, transform=transform_test)
     elif dataset == 'stanforddogs':
         if not test:
             trainset = GenericImageFolderDataset(root=dogs_root, transform=transform_train)
@@ -666,7 +682,7 @@ def _get_image_transforms(dataset, resize):
     elif dataset != 'fashionmnist':
         if dataset == 'mnist':
             normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
-        elif dataset == 'tinyimagenet':
+        elif dataset == 'tinyimagenet' or dataset == 'tinyimagenet-cifar10' or dataset == 'tinyimagenet-cifar100':
             normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         elif dataset == 'svhn':
             normalize = transforms.Normalize((0.4377, 0.4438, 0.4728), (0.1980, 0.2010, 0.1970))
@@ -754,7 +770,7 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         return trainloader, testloader
     else:
         if pickle_files is None:
-            if dataset == 'tinyimagenet':
+            if dataset == 'tinyimagenet' or dataset == 'tinyimagenet-cifar10' or dataset == 'tinyimagenet-cifar100':
                 gts = trainset.get_targets()
             elif dataset == 'svhn' or dataset == 'stl':
                 gts = trainset.labels
