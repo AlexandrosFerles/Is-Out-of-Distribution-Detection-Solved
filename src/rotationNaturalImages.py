@@ -47,8 +47,8 @@ def train(args):
         scheduler = MultiStepLR(optimizer, milestones=[60, 120, 160], gamma=0.2)
     else:
         resize = True
-        epochs = 10
-        optimizer = optim.SGD(model.parameters(), lr=1.25e-2*0.1*0.1*0.1, momentum=0.9, nesterov=True, weight_decay=1e-4)
+        epochs = 40
+        optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
     if not flag:
