@@ -640,7 +640,6 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Train/", key)] = value
                             else:
                                 dic[os.path.join(self.root, "Test/", key)] = value
-        ipdb.set_trace()
         self.tgt_idx_to_class = {v: k for k, v in dic.items()}
         self.class_to_tgt_idx = dic
 

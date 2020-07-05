@@ -772,7 +772,6 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
         if pickle_files is None:
             if dataset == 'tinyimagenet' or dataset == 'tinyimagenet-cifar10' or dataset == 'tinyimagenet-cifar100':
                 gts = trainset.get_targets()
-                ipdb.set_trace()
             elif dataset == 'svhn' or dataset == 'stl':
                 gts = trainset.labels
             else:
@@ -781,7 +780,8 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
 
             splitter = StratifiedShuffleSplit(n_splits=1, test_size=validation_test_split, random_state=global_seed)
             trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
-
+            if dataset == 'tinyimagenet' or dataset == 'tinyimagenet-cifar10' or dataset == 'tinyimagenet-cifar100':
+                random.shuffle(trainset_indices)
             if save_to_pickle:
                 with open(f'train_indices_{dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}.pickle', 'wb') as val_pickle:
                     pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -791,7 +791,6 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
             with open(trainpickle, 'rb') as train_pickle, open(valpickle, 'rb') as val_pickle:
                 trainset_indices = pickle.load(train_pickle)
                 valset_indices = pickle.load(val_pickle)
-
         train_sampler = SubsetRandomSampler(trainset_indices)
         test_sampler = SubsetRandomSampler(valset_indices)
         if dataset=='svhn':
