@@ -677,8 +677,10 @@ class GenericImageFolderDataset(data.Dataset):
             sample = Image.open(img_path)
             sample = sample.convert('RGB')
         if self.transform is not None:
-            sample = self.transform[0](sample)
-
+            if self.type != 'tiny':
+                sample = self.transform[0](sample)
+            else:
+                sample = self.transform(sample)
         return sample, tgt
 
 
