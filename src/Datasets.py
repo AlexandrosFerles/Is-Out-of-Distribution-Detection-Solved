@@ -471,7 +471,7 @@ class TinyImageNetDataset(data.Dataset):
         val_annotations_file = os.path.join(self.val_dir, "val_annotations.txt")
         self.val_img_to_class = {}
         set_of_classes = set()
-        with open(val_annotations_file,'r') as fo:
+        with open(val_annotations_file, 'r') as fo:
             entry = fo.readlines()
             for data in entry:
                 words = data.split("\t")
@@ -563,6 +563,16 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Train/", key)] = value
                             else:
                                 dic[os.path.join(self.root, "Test/", key)] = value
+                elif self.type == 'tiny':
+                    if os.path.exists('/raid/ferles/'):
+                        dic = {}
+                        with open(os.path.join(self.root, 'classes_dict.pickle'), 'rb') as dic_pickle:
+                            temp_dic = pickle.load(dic_pickle)
+                            for key, value in temp_dic.items():
+                                if self.train:
+                                    dic[os.path.join(self.root, "Train/", key)] = value
+                                else:
+                                    dic[os.path.join(self.root, "Test/", key)] = value
                 else:
                     dic = {}
                     with open('/home/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
