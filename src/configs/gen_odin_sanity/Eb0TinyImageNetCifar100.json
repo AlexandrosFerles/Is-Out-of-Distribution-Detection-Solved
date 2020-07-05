@@ -5,10 +5,10 @@
     "pretrained": "True",
     "freeze": "False",
     "resolutionIncrease": "False",
-    "out_classes": 10,
-    "checkpoint": "genOdinFashionMnist",
+    "out_classes": 173,
+    "checkpoint": "genOdinTinyImageNet-cifar100",
     "gen_odin_mode": 2,
-    "train_pickle": "train_indices_fashionmnist.pickle",
-    "test_pickle": "val_indices_fashionmnist.pickle"
+    "train_pickle": "train_indices_tinyimagenet.pickle",
+    "test_pickle": "val_indices_tinyimagenet.pickle"
   }
 }

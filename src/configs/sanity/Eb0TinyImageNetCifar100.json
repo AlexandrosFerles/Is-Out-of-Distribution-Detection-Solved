@@ -1,0 +1,13 @@
+{
+  "training":{
+    "model": "EfficientNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 173,
+    "checkpoint": "eb0tinyimagenet-cifar100",
+    "train_pickle": "None",
+    "test_pickle": "None"
+  }
+}
