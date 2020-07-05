@@ -64,7 +64,7 @@ def train(args):
 
         model.train()
         correct, total = 0, 0
-        for index, data in enumerate(trainloader):
+        for data in tqdm(trainloader):
             inputs, labels = data
             labels = labels.to(device)
 
