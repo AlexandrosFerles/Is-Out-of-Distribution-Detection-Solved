@@ -658,7 +658,7 @@ class GenericImageFolderDataset(data.Dataset):
 
             for root, _, files in sorted(os.walk(dirs)):
                 for fname in sorted(files):
-                    if fname.endswith(".jpg"):
+                    if fname.endswith(".jpg") or fname.endswith(".JPEG"):
                         path = os.path.join(root, fname)
                         item = (path, self.class_to_tgt_idx[tgt])
                         self.images.append(item)
