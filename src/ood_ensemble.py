@@ -288,6 +288,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
                 best_T, best_epsilon = T, epsilon
                 best_val_ind, best_val_ood = val_ind, val_ood
 
+    print(f"Chosen T: {best_T}, epsilon: {best_epsilon}")
     _, threshold = _find_threshold(best_val_ind, best_val_ood)
 
     for index, model in enumerate(models):
