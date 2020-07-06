@@ -318,6 +318,7 @@ def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
     arr = np.zeros(loader.batch_size*loader.__len__())
     for index, data in enumerate(loader):
         images, _ = data
+        ipdb.set_trace()
         nnOutputs = _process(model, images, T, epsilon, device=device)
         top_class_probability = np.max(nnOutputs, axis=1)
         if not score_entropy:
