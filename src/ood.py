@@ -278,35 +278,30 @@ def _create_fgsm_loader(model, val_loader, device):
 def _process(model, images, T, epsilon, device, criterion=nn.CrossEntropyLoss()):
 
     model.eval()
-    if T == 1 and epsilon == 0:
-        outputs = model(images.to(device))
-        nnOutputs = outputs.detach().cpu().numpy()
-        nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
-    else:
-        inputs = Variable(images.to(device), requires_grad=True)
-        outputs = model(inputs)
-        nnOutputs = outputs.data.cpu()
-        nnOutputs = nnOutputs.numpy()
-        nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
-        nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
-        outputs = outputs / T
+    inputs = Variable(images.to(device), requires_grad=True)
+    outputs = model(inputs)
+    nnOutputs = outputs.data.cpu()
+    nnOutputs = nnOutputs.numpy()
+    nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
+    nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
+    outputs = outputs / T
 
-        maxIndexTemp = np.argmax(nnOutputs, axis=1)
-        labels = Variable(torch.LongTensor([maxIndexTemp]).to(device))
-        loss = criterion(outputs, labels[0])
-        loss.backward()
+    maxIndexTemp = np.argmax(nnOutputs, axis=1)
+    labels = Variable(torch.LongTensor([maxIndexTemp]).to(device))
+    loss = criterion(outputs, labels[0])
+    loss.backward()
 
-        gradient = torch.ge(inputs.grad.data, 0)
-        gradient = (gradient.float() - 0.5) * 2
+    gradient = torch.ge(inputs.grad.data, 0)
+    gradient = (gradient.float() - 0.5) * 2
 
-        tempInputs = torch.add(inputs.data,  -epsilon, gradient)
-        outputs = model(Variable(tempInputs))
-        outputs = outputs / T
+    tempInputs = torch.add(inputs.data,  -epsilon, gradient)
+    outputs = model(Variable(tempInputs))
+    outputs = outputs / T
 
-        nnOutputs = outputs.data.cpu()
-        nnOutputs = nnOutputs.numpy()
-        nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
-        nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
+    nnOutputs = outputs.data.cpu()
+    nnOutputs = nnOutputs.numpy()
+    nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
+    nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
 
     return nnOutputs
 
