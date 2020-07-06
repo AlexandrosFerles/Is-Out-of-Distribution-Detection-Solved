@@ -281,6 +281,7 @@ def _process(model, images, T, epsilon, device, criterion=nn.CrossEntropyLoss())
     if T == 1 and epsilon == 0:
         outputs = model(images.to(device))
         nnOutputs = outputs.detach().cpu().numpy()
+        nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
     else:
         inputs = Variable(images.to(device), requires_grad=True)
         outputs = model(inputs)
@@ -305,7 +306,6 @@ def _process(model, images, T, epsilon, device, criterion=nn.CrossEntropyLoss())
         nnOutputs = outputs.data.cpu()
         nnOutputs = nnOutputs.numpy()
         nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
-        ipdb.set_trace()
         nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
 
     return nnOutputs
