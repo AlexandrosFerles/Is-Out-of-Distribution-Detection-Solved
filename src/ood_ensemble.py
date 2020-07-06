@@ -220,6 +220,7 @@ def _rotation(model, loaders, device, num_classes):
             best_anomaly_score_ind = anomaly_score_ind
             best_anomaly_score_ood = anomaly_score_ood
 
+    print(f"Chosen lambda: {best_lamda}")
     _, threshold = _find_threshold(best_anomaly_score_ind, best_anomaly_score_ood)
 
     _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, lamda=best_lamda, device=device)
