@@ -274,6 +274,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
         for epsilon in tqdm(np.arange(0, 0.004, 0.004/21, float).tolist()):
             for index, model in enumerate(models):
                 if index == 0:
+                    ipdb.set_trace()
                     val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device, score_entropy=True)
                     val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device, score_entropy=True)
                 else:
