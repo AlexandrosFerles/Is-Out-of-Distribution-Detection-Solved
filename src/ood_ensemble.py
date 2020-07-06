@@ -357,7 +357,6 @@ if __name__ == '__main__':
     parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--model_checkpoints_file', '--mcf', default=None, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
-    parser.add_argument('--scaling', '--sc', type=bool, default=True, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -427,7 +426,7 @@ if __name__ == '__main__':
     # _ood_detection_performance('Generalized-Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
     # self-ensemble
-    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device, scaling=args.scaling)
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device)
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
     _ood_detection_performance('Self-Ensemble', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
