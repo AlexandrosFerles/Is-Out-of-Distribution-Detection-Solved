@@ -305,6 +305,7 @@ def _process(model, images, T, epsilon, device, criterion=nn.CrossEntropyLoss())
         nnOutputs = outputs.data.cpu()
         nnOutputs = nnOutputs.numpy()
         nnOutputs = nnOutputs - np.max(nnOutputs, axis=1).reshape(nnOutputs.shape[0], 1)
+        ipdb.set_trace()
         nnOutputs = np.exp(nnOutputs)/np.sum(np.exp(nnOutputs), axis=1).reshape(nnOutputs.shape[0], 1)
 
     return nnOutputs
@@ -318,7 +319,6 @@ def _get_odin_scores(model, loader, T, epsilon, device, score_entropy=False):
     arr = np.zeros(loader.batch_size*loader.__len__())
     for index, data in enumerate(loader):
         images, _ = data
-        ipdb.set_trace()
         nnOutputs = _process(model, images, T, epsilon, device=device)
         top_class_probability = np.max(nnOutputs, axis=1)
         if not score_entropy:
