@@ -204,8 +204,6 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
 
 def _rotation(model, loaders, device, num_classes):
 
-    ipdb.set_trace()
-
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     val_kl_div_ind, val_rot_score_ind, _ = _predict_rotations(model, val_ind_loader, num_classes, device=device)
@@ -410,14 +408,14 @@ if __name__ == '__main__':
     _ood_detection_performance('Baseline', val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
     # odin
-    # temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
-    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
-    # _ood_detection_performance('Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
+    _ood_detection_performance('Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
     # mahalanobis
-    # temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
-    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-    # _ood_detection_performance('Mahalanobis', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    _ood_detection_performance('Mahalanobis', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
     # self-supervised
     rotation_loaders = rotation_loaders[1:]
