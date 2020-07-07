@@ -204,6 +204,8 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
 
 def _rotation(model, loaders, device, num_classes):
 
+    ipdb.set_trace()
+
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
     val_kl_div_ind, val_rot_score_ind, _ = _predict_rotations(model, val_ind_loader, num_classes, device=device)
