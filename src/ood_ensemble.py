@@ -217,6 +217,7 @@ def _rotation(model, loaders, device, num_classes):
         auc, _, _ = _score_npzs(anomaly_score_ind, anomaly_score_ood)
         if auc > best_val_auc:
             best_val_auc = auc
+            best_lamda = lamda
             best_anomaly_score_ind = anomaly_score_ind
             best_anomaly_score_ood = anomaly_score_ood
 
