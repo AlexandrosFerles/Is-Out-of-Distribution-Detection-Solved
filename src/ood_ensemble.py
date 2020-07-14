@@ -341,20 +341,19 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         logits = model._fc(x)
         argmaxs = torch.argmax(logits, dim=1)
 
-        ipdb.set_trace()
         for c in range(num_classes):
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]
-                for selected_feature in selected_features:
-                    for p in (range(power)):
-                        g_p = _get_gram_power(selected_feature, p)
-                        if class_mins[c][layer][p] is None:
-                            class_mins[c][layer][p] = g_p
-                            class_maxs[c][layer][p] = g_p
-                        else:
-                            class_mins[c][layer][p] = np.min(class_mins[c][layer][p], g_p)
-                            class_maxs[c][layer][p] = np.max(class_maxs[c][layer][p], g_p)
+                ipdb.set_trace()
+                for p in (range(power)):
+                    g_p = _get_gram_power(selected_features, p)
+                    if class_mins[c][layer][p] is None:
+                        class_mins[c][layer][p] = g_p
+                        class_maxs[c][layer][p] = g_p
+                    else:
+                        class_mins[c][layer][p] = np.min(class_mins[c][layer][p], g_p)
+                        class_maxs[c][layer][p] = np.max(class_maxs[c][layer][p], g_p)
 
     val_deviations = _get_gram_matrix_deviations(model, val_ind_loader, device, batch_size, power, class_mins, class_maxs)
     expectation = np.mean(val_deviations, axis=1)
