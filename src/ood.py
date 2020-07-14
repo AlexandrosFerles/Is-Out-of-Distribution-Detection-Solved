@@ -769,6 +769,55 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device, ind_dat
     print(f'Detection Accuracy: {acc}')
 
 
+def _get_gram_power(feature_map, power):
+
+    temp = feature_map.detach()
+    temp = temp**power
+    temp = temp.reshape(temp.shape[0],temp.shape[1], -1)
+    temp = (torch.matmul(temp, temp.transpose(dim0=2, dim1=1))).sum(dim=2)
+    temp = (temp.sign()*torch.abs(temp)**(1/power)).reshape(temp.shape[0], -1)
+
+    return temp
+
+
+def _get_gram_matrix_deviations(model, loader, device, batch_size, power, mins, maxs, model_type='eb0'):
+
+    model.eval()
+
+    if model_type == 'eb0':
+        idxs = [0, 2, 4, 7, 10, 14, 15]
+        num_features = len(idxs) + 1
+
+
+    deviations = np.zeros((loader.__len_(), num_features))
+    index = 0
+    for data in tqdm(loader):
+
+        images, _ = data
+        images = images.to(device)
+        x, features = model.extract_features(images, mode='all')
+        features = [features[idx] for idx in idxs] + [x]
+        x = model._avg_pooling(x)
+        x = x.view(batch_size, -1)
+        x = model._dropout(x)
+        logits = model._fc(x)
+        argmaxs = torch.argmax(logits, dim=1)
+        class_pred = argmaxs[0]
+
+        for layer, feature_map in enumerate(features):
+            dev = 0
+            for p in (range(power)):
+                g_p = _get_gram_power(feature_map)
+                if g_p < mins[class_pred][layer][p]:
+                    dev += F.relu(mins[class_pred][layer][p]-g_p)/torch.abs(mins[class_pred][layer][p]+10**-6)
+                elif g_p > maxs[class_pred][layer][p]:
+                    dev += F.relu(g_p-maxs[class_pred][layer][p])/torch.abs(maxs[class_pred][layer][p]+10**-6)
+            deviations[index, layer] = dev
+        index += 1
+
+    return deviations
+
+
 if __name__ == '__main__':
 
     import time

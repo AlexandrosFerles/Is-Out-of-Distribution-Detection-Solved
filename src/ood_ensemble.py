@@ -11,7 +11,8 @@ import os
 import random
 import pickle
 from ood_triplets import _verbose
-from ood import _find_threshold, _score_npzs, _score_mahalanobis, _predict_mahalanobis, _get_baseline_scores, _get_odin_scores, _process, _predict_rotations, _process_gen_odin_loader
+from ood import _find_threshold, _score_npzs, _score_mahalanobis, _get_baseline_scores, _get_odin_scores, _process, \
+    _predict_rotations, _process_gen_odin_loader, _get_gram_power, _get_gram_matrix_deviations
 import ipdb
 
 abs_path = '/home/ferles/Dermatology/medusa/'
@@ -290,7 +291,6 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
                 best_val_ind, best_val_ood = val_ind, val_ood
 
     print(f"Chosen T: {best_T}, epsilon: {best_epsilon}")
-    _, threshold = _find_threshold(best_val_ind, best_val_ood)
 
     for index, model in enumerate(models):
         if index == 0:
@@ -310,6 +310,70 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
     test_ood_3 = test_ood_3 / len(models)
 
     return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
+
+
+def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, model_type='eb0'):
+
+    model.eval()
+    train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
+
+    temp_x = torch.rand(2, 3, 224, 224).to(device)
+    temp_x = Variable(temp_x)
+    temp_x = temp_x.to(device)
+    if model_type == 'eb0':
+        idxs = [0, 2, 4, 7, 10, 14, 15]
+        x, features = model.extract_features(temp_x, mode='all')
+    features = [features[idx] for idx in idxs] + [x]
+
+    ipdb.set_trace()
+    class_mins = [[[None for _ in range(power)] for _ in range(len(features))] for _ in range(num_classes)]
+    class_maxs = [[[None for _ in range(power)] for _ in range(len(features))] for _ in range(num_classes)]
+
+    for data in tqdm(train_ind_loader):
+
+        images, _ = data
+        images = images.to(device)
+        x, features = model.extract_features(images, mode='all')
+        features = [features[idx] for idx in idxs] + [x]
+        # avoids going over forward pas twice
+        x = model._avg_pooling(x)
+        x = x.view(batch_size, -1)
+        x = model._dropout(x)
+        logits = model._fc(x)
+        argmaxs = torch.argmax(logits, dim=1)
+
+        for c in range(num_classes):
+            indices = np.where(argmaxs.detach().cpu().numpy() == c)
+            for layer, feature_map in enumerate(features):
+                selected_features = feature_map[indices]
+                for selected_feature in selected_features:
+                    for p in (range(power)):
+                        g_p = _get_gram_power(selected_feature, p)
+                        if class_mins[c][layer][p] is None:
+                            class_mins[c][layer][p] = g_p
+                            class_maxs[c][layer][p] = g_p
+                        else:
+                            class_mins[c][layer][p] = np.min(class_mins[c][layer][p], g_p)
+                            class_maxs[c][layer][p] = np.max(class_maxs[c][layer][p], g_p)
+
+    val_deviations = _get_gram_matrix_deviations(model, val_ind_loader, device, batch_size, power, class_mins, class_maxs)
+    expectation = np.mean(val_deviations, axis=1)
+    val_deviations = np.divide(val_deviations, expectation)
+
+    val_ood_deviations = _get_gram_matrix_deviations(model, val_ood_loader, device, power, batch_size, class_mins, class_maxs)
+    val_ood_deviations = np.divide(val_ood_deviations, expectation)
+
+    test_ind_deviations = _get_gram_matrix_deviations(model, test_ind_loader, device, power, class_mins, class_maxs)
+    test_ind_deviations = np.divide(test_ind_deviations, expectation)
+
+    test_ood_deviations_1 = _get_gram_matrix_deviations(model, test_ood_loader_1, device, power, class_mins, class_maxs)
+    test_ood_deviations_1 = np.divide(test_ood_deviations_1, expectation)
+    test_ood_deviations_2 = _get_gram_matrix_deviations(model, test_ood_loader_2, device, power, class_mins, class_maxs)
+    test_ood_deviations_2 = np.divide(test_ood_deviations_2, expectation)
+    test_ood_deviations_3 = _get_gram_matrix_deviations(model, test_ood_loader_3, device, power, class_mins, class_maxs)
+    test_ood_deviations_3 = np.divide(test_ood_deviations_3, expectation)
+
+    return val_deviations, val_ood_deviations, test_ind_deviations, test_ood_deviations_1, test_ood_deviations_2, test_ood_deviations_3
 
 
 def _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=False):
@@ -403,34 +467,40 @@ if __name__ == '__main__':
     rotation_loaders = get_triplets_loaders(batch_size=1, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
     # baseline
-    method_loaders = loaders[1:]
-    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
-    _ood_detection_performance('Baseline', val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    # method_loaders = loaders[1:]
+    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
+    # _ood_detection_performance('Baseline', val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    #
+    # # odin
+    # temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
+    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
+    # _ood_detection_performance('Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    #
+    # # mahalanobis
+    # temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
+    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    # _ood_detection_performance('Mahalanobis', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    #
+    # # self-supervised
+    # rotation_loaders = rotation_loaders[1:]
+    # temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, rotation_loaders, device, num_classes=args.num_classes)
+    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    # _ood_detection_performance('Self-Supervised', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    #
+    # # generalized-odin
+    # temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
+    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    # _ood_detection_performance('Generalized-Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    #
+    # # self-ensemble
+    # temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device)
+    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    # _ood_detection_performance('Self-Ensemble', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
-    # odin
-    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
-    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
-    _ood_detection_performance('Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-
-    # mahalanobis
-    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
-    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-    _ood_detection_performance('Mahalanobis', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-
-    # self-supervised
-    rotation_loaders = rotation_loaders[1:]
-    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, rotation_loaders, device, num_classes=args.num_classes)
-    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-    _ood_detection_performance('Self-Supervised', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-
-    # generalized-odin
-    temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
-    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-    _ood_detection_performance('Generalized-Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-
-    # self-ensemble
-    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device)
-    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    # gram-matrices
+    gram_matrices_loaders = [loaders[0]] + rotation_loaders[1:]
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gram_matrices(model_checkpoint, gram_matrices_loaders, device, args.num_classes, args.batch_size)
+    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
     _ood_detection_performance('Self-Ensemble', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
     X = np.append(val_ind, val_ood, axis=0)
