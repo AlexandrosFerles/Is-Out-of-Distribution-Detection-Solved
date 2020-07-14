@@ -325,7 +325,6 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         x, features = model.extract_features(temp_x, mode='all')
     features = [features[idx] for idx in idxs] + [x]
 
-    ipdb.set_trace()
     class_mins = [[[None for _ in range(power)] for _ in range(len(features))] for _ in range(num_classes)]
     class_maxs = [[[None for _ in range(power)] for _ in range(len(features))] for _ in range(num_classes)]
 
@@ -342,6 +341,7 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         logits = model._fc(x)
         argmaxs = torch.argmax(logits, dim=1)
 
+        ipdb.set_trace()
         for c in range(num_classes):
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
             for layer, feature_map in enumerate(features):
