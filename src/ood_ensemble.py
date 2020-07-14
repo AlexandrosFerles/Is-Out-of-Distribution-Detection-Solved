@@ -498,7 +498,6 @@ if __name__ == '__main__':
     # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
 
     # gram-matrices
-    ipdb.set_trace()
     gram_matrices_loaders = [loaders[0]] + list(rotation_loaders)[1:]
     temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gram_matrices(standard_model, gram_matrices_loaders, device, args.num_classes, args.batch_size)
     _ood_detection_performance('Self-Ensemble', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
