@@ -500,9 +500,9 @@ if __name__ == '__main__':
     # gram-matrices
     ipdb.set_trace()
     gram_matrices_loaders = [loaders[0]] + list(rotation_loaders)[1:]
-    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gram_matrices(model_checkpoint, gram_matrices_loaders, device, args.num_classes, args.batch_size)
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gram_matrices(standard_model, gram_matrices_loaders, device, args.num_classes, args.batch_size)
     _ood_detection_performance('Self-Ensemble', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
 
     X = np.append(val_ind, val_ood, axis=0)
     y = np.append(np.ones(val_ind.shape[0]), np.zeros(val_ood.shape[0]))
