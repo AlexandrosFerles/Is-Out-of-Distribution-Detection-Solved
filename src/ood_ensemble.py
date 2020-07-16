@@ -341,7 +341,7 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         features = [features[idx] for idx in idxs] + [x]
         # avoids going over forward pass twice
         x = model._avg_pooling(x)
-        x = x.view(batch_size, -1)
+        x = x.view(x.size()[0], -1)
         x = model._dropout(x)
         logits = model._fc(x)
         argmaxs = torch.argmax(logits, dim=1)
