@@ -152,6 +152,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--config', help='Training Configurations', required=True)
     parser.add_argument('--dataset', '--ds', default='cifar10', required=False)
+    parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     args = parser.parse_args()
     train(args)
