@@ -350,7 +350,6 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]
-                ipdb.set_trace()
                 for p in (range(1, power)):
                     g_p = _get_gram_power(selected_features, p).detach().cpu().numpy()
                     channel_mins = np.min(g_p, axis=0)
@@ -359,6 +358,7 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
                         mins[c][layer][p-1] = channel_mins
                         maxs[c][layer][p-1] = channel_maxs
                     else:
+                        ipdb.set_trace()
                         mins[c][layer][p-1] = np.min(mins[c][layer][p-1], channel_mins)
                         maxs[c][layer][p-1] = np.max(maxs[c][layer][p-1], channel_mins)
 
