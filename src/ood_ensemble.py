@@ -351,16 +351,18 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]
                 for p in (range(1, power)):
-                    g_p = _get_gram_power(selected_features, p).detach().cpu().numpy()
-                    channel_mins = np.min(g_p, axis=0)
-                    channel_maxs = np.max(g_p, axis=0)
-                    if mins[c][layer][p-1] is None:
-                        mins[c][layer][p-1] = channel_mins
-                        maxs[c][layer][p-1] = channel_maxs
-                    else:
-                        ipdb.set_trace()
-                        mins[c][layer][p-1] = np.min(mins[c][layer][p-1], channel_mins)
-                        maxs[c][layer][p-1] = np.max(maxs[c][layer][p-1], channel_mins)
+                    g_p = _get_gram_power(selected_features, p)
+                    if g_p is not None:
+                        g_p = g_p.detach().cpu().numpy()
+                        channel_mins = np.min(g_p, axis=0)
+                        channel_maxs = np.max(g_p, axis=0)
+                        if mins[c][layer][p-1] is None:
+                            mins[c][layer][p-1] = channel_mins
+                            maxs[c][layer][p-1] = channel_maxs
+                        else:
+                            ipdb.set_trace()
+                            mins[c][layer][p-1] = np.min(mins[c][layer][p-1], channel_mins)
+                            maxs[c][layer][p-1] = np.max(maxs[c][layer][p-1], channel_mins)
 
     val_deviations = _get_gram_matrix_deviations(model, val_ind_loader, device, batch_size, power, mins, maxs)
     expectation = np.mean(val_deviations, axis=1)
