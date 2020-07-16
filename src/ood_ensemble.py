@@ -349,7 +349,7 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
                 selected_features = feature_map[indices]
                 ipdb.set_trace()
                 for p in (range(1, power)):
-                    g_p = _get_gram_power(selected_features, p)
+                    g_p = _get_gram_power(selected_features, p).detach().cpu().numpy()
                     if mins[c][layer][p] is None:
                         mins[c][layer][p] = g_p
                         maxs[c][layer][p] = g_p
