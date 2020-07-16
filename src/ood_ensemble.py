@@ -360,10 +360,9 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
                             mins[c][layer][p-1] = channel_mins
                             maxs[c][layer][p-1] = channel_maxs
                         else:
-                            ipdb.set_trace()
                             mins[c][layer][p-1] = np.minimum(mins[c][layer][p-1], channel_mins)
                             maxs[c][layer][p-1] = np.maximum(maxs[c][layer][p-1], channel_mins)
-
+    ipdb.set_trace()
     val_deviations = _get_gram_matrix_deviations(model, val_ind_loader, device, batch_size, power, mins, maxs)
     expectation = np.mean(val_deviations, axis=1)
     val_deviations = np.divide(val_deviations, expectation)
