@@ -13,7 +13,6 @@ from tqdm import tqdm
 import wandb
 import ipdb
 
-abs_path = '/home/ferles/medusa/src/'
 global_seed = 1
 torch.backends.cudnn.deterministic = True
 random.seed(global_seed)
@@ -27,30 +26,34 @@ def train(args):
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
     wandb.init(name=training_configurations.checkpoint+'Ensemble')
-    device = torch.device(f'cuda:{args.device}')
+    device = torch.device(f'cuda')
 
     dataset = args.dataset.lower()
     pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
-    train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loaders, test_ind_loaders, test_ood_loaders = create_ensemble_loaders(dataset, num_classes=training_configurations.out_classes, pickle_files=pickle_files)
+    train_ind_loaders, train_ood_loaders, val_ind_loaders, test_ind_loaders, num_classes, dicts = create_ensemble_loaders(dataset, num_classes=training_configurations.out_classes, pickle_files=pickle_files)
 
     criterion = nn.CrossEntropyLoss()
     b = 0.2
     m = 0.4
 
-    epochs = 40
-    model = build_model(args).to(device)
-    optimizer = optim.SGD(model.parameters(), lr=1.25e-02, momentum=0.9, nesterov=True, weight_decay=1e-4)
-    scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
-
-    best_val_acc = 0
-
     for index in range(len(train_ind_loaders)):
 
+        epochs = 40
+        model = build_model(args)
+        model._fc = nn.Linear(model._fc.in_features, num_classes[index])
+        model = model.to(device)
+        optimizer = optim.SGD(model.parameters(), lr=1.25e-02, momentum=0.9, nesterov=True, weight_decay=1e-4)
+        scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
+
         train_ind_loader, train_ood_loader = train_ind_loaders[index], train_ood_loaders[index]
-        val_ind_loader, _ = train_ind_loaders[index], train_ood_loaders[index]
-        test_ind_loader, _ = test_ind_loaders[index], test_ood_loaders[index]
+        val_ind_loader = val_ind_loaders[index]
+        test_ind_loader = test_ind_loaders[index]
+        dic = dicts[index]
 
         ood_loader_iter = iter(train_ood_loader)
+
+        best_val_acc = 0
+        test_epoch_accuracy = 0
 
         for epoch in tqdm(range(epochs)):
 
@@ -60,6 +63,8 @@ def train(args):
             for data in tqdm(train_ind_loader):
                 inputs, labels = data
                 inputs = inputs.to(device)
+                _labels = torch.LongTensor([dic[int(l)] for l in labels])
+                labels = _labels.to(device)
                 labels = labels.to(device)
 
                 optimizer.zero_grad()
@@ -97,40 +102,41 @@ def train(args):
             with torch.no_grad():
 
                 model.eval()
-                correct, total = 0, 0
+                v_correct, v_total = 0, 0
 
                 for data in val_ind_loader:
                     images, labels = data
                     images = images.to(device)
+                    _labels = torch.LongTensor([dic[int(l)] for l in labels])
+                    labels = _labels.to(device)
                     labels = labels.to(device)
 
                     outputs = model(images)
                     _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
+                    v_total += labels.size(0)
+                    v_correct += (predicted == labels).sum().item()
 
-                val_epoch_accuracy = correct / total
+                val_epoch_accuracy = v_correct / v_total
                 wandb.log({f'Validation Set Accuracy {index}': val_epoch_accuracy, 'epoch': epoch})
 
-            if val_epoch_accuracy > best_val_acc:
-                best_val_acc = val_epoch_accuracy
-                if os.path.exists('/raid/ferles/'):
+                if val_epoch_accuracy > best_val_acc:
+                    best_val_acc = val_epoch_accuracy
                     torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_best_accuracy_ensemble_{index}.pth')
-                else:
-                    torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_best_accuracy_ensemble_{index}.pth')
 
-                correct, total = 0, 0
-                for data in test_ind_loader:
-                    images, labels = data
-                    images = images.to(device)
-                    labels = labels.to(device)
+                    correct, total = 0, 0
+                    for data in test_ind_loader:
+                        images, labels = data
+                        images = images.to(device)
+                        _labels = torch.LongTensor([dic[int(l)] for l in labels])
+                        labels = _labels.to(device)
+                        labels = labels.to(device)
 
-                    outputs = model(images)
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
+                        outputs = model(images)
+                        _, predicted = torch.max(outputs.data, 1)
+                        total += labels.size(0)
+                        correct += (predicted == labels).sum().item()
 
-                test_epoch_accuracy = correct / total
+                    test_epoch_accuracy = correct / total
 
             wandb.log({f'Test Set Accuracy {index}': test_epoch_accuracy, 'epoch': epoch})
 
@@ -146,7 +152,6 @@ if __name__ == '__main__':
 
     parser.add_argument('--config', help='Training Configurations', required=True)
     parser.add_argument('--dataset', '--ds', default='cifar10', required=False)
-    parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     args = parser.parse_args()
     train(args)

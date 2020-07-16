@@ -791,7 +791,6 @@ def _get_gram_matrix_deviations(model, loader, device, batch_size, power, mins, 
         idxs = [0, 2, 4, 7, 10, 14, 15]
         num_features = len(idxs) + 1
 
-
     deviations = np.zeros((loader.__len_(), num_features))
     index = 0
     for data in tqdm(loader):
