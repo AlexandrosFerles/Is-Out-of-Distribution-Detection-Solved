@@ -343,11 +343,11 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         logits = model._fc(x)
         argmaxs = torch.argmax(logits, dim=1)
 
-        ipdb.set_trace()
         for c in range(num_classes):
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]
+                ipdb.set_trace()
                 for p in (range(power)):
                     g_p = _get_gram_power(selected_features, p)
                     if mins[c][layer][p] is None:
