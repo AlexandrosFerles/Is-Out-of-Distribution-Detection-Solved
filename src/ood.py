@@ -777,7 +777,6 @@ def _get_gram_power(feature_map, power):
         temp = temp.reshape(temp.shape[0], temp.shape[1], -1)
         temp = (torch.matmul(temp, temp.transpose(dim0=2, dim1=1))).sum(dim=2)
         temp = (temp.sign()*torch.abs(temp)**(1/power)).reshape(temp.shape[0], -1)
-
         return temp
     else:
         return None
