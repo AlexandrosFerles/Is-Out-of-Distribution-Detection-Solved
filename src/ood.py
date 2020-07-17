@@ -792,7 +792,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
         num_feature_maps = len(idxs) + 1
     power = len(mins[0][0])
 
-    deviations = np.zeros((loader.__len__(), num_feature_maps))
+    deviations = np.zeros((loader.__len__() * loader.batch_size, num_feature_maps))
     index = 0
     for data in tqdm(loader):
 
