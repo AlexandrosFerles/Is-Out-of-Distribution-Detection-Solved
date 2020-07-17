@@ -790,7 +790,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
     if model_type == 'eb0':
         idxs = [0, 2, 4, 7, 10, 14, 15]
         num_feature_maps = len(idxs) + 1
-    power = mins.shape[2]
+    power = len(mins[0][0])
 
     deviations = np.zeros((loader.__len__(), num_feature_maps))
     index = 0
