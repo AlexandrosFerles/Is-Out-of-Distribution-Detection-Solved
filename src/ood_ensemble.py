@@ -348,8 +348,6 @@ def _gram_matrices(model, loaders, device, num_classes, power=10, model_type='eb
                 selected_features = feature_map[indices]
                 for p in (range(power)):
                     g_p = _get_gram_power(selected_features, p+1)
-                    print(g_p)
-                    break
                     if g_p is not None:
                         # g_p = g_p.detach().cpu().numpy()
                         channel_mins = g_p.min(dim=0)[0]
