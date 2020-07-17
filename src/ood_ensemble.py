@@ -349,18 +349,18 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=3, mod
                 classes.append(c)
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]
-                for p in (range(1, power+1)):
-                    g_p = _get_gram_power(selected_features, p)
+                for p in (range(power)):
+                    g_p = _get_gram_power(selected_features, p+1)
                     if g_p is not None:
                         g_p = g_p.detach().cpu().numpy()
                         channel_mins = np.min(g_p, axis=0)
                         channel_maxs = np.max(g_p, axis=0)
-                        if mins[c][layer][p-1] is None:
-                            mins[c][layer][p-1] = channel_mins
-                            maxs[c][layer][p-1] = channel_maxs
+                        if mins[c][layer][p] is None:
+                            mins[c][layer][p] = channel_mins
+                            maxs[c][layer][p] = channel_maxs
                         else:
-                            mins[c][layer][p-1] = np.minimum(mins[c][layer][p-1], channel_mins)
-                            maxs[c][layer][p-1] = np.maximum(maxs[c][layer][p-1], channel_mins)
+                            mins[c][layer][p] = np.minimum(mins[c][layer][p], channel_mins)
+                            maxs[c][layer][p] = np.maximum(maxs[c][layer][p], channel_mins)
         if len(classes) == num_classes:
             break
 
