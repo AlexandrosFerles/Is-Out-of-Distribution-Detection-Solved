@@ -364,8 +364,8 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         if len(classes) == num_classes:
             break
 
-    ipdb.set_trace()
     val_deviations = _get_layer_deviations(model, val_ind_loader, device, mins, maxs)
+    ipdb.set_trace()
     expectation = np.mean(val_deviations, axis=1)
     val_deviations = np.divide(val_deviations, expectation)
 
