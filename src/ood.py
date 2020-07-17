@@ -806,6 +806,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
         logits = model._fc(x)
         class_preds = torch.argmax(logits, dim=1).detach().cpu()
 
+        arr_len = 0
         for layer, feature_map in enumerate(features):
             dev = 0
             for p in (range(power)):
@@ -814,7 +815,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
                 corresponding_maxs = torch.Tensor([maxs[c][layer][p] for c in class_preds]).to(device)
                 dev += F.relu(corresponding_mins-g_p)/torch.abs(corresponding_mins+10**-6)
                 dev += F.relu(g_p-corresponding_maxs)/torch.abs(corresponding_maxs+10**-6)
-            ipdb.set_trace()
+            deviations[arr_len: arr_len+dev.size()[0]] = dev.detach.cpu().numpy()
 
     return deviations
 
