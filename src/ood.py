@@ -783,14 +783,14 @@ def _get_gram_power(feature_map, power):
         return None
 
 
-def _get_gram_matrix_deviations(model, loader, device, batch_size, power, mins, maxs, model_type='eb0'):
+def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
 
     model.eval()
 
     if model_type == 'eb0':
         idxs = [0, 2, 4, 7, 10, 14, 15]
-        num_features = len(idxs) + 1
-
+        num_feature_maps = len(idxs) + 1
+        
     deviations = np.zeros((loader.__len_(), num_features))
     index = 0
     for data in tqdm(loader):

@@ -324,7 +324,6 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         idxs = [0, 2, 4, 7, 10, 14, 15]
         x, features = model.extract_features(temp_x, mode='all')
         features = [features[idx] for idx in idxs] + [x]
-        max_num_channels = max([x.size()[1] for x in features])
         num_feature_maps = len(features)
 
     mins = [[[None for _ in range(power)] for _ in range(num_feature_maps)] for _ in range(num_classes)]
@@ -346,6 +345,7 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
 
         for c in range(num_classes):
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
+            ipdb.set_trace()
             if indices.shape[0] > 0 and c not in classes:
                 classes.append(c)
             for layer, feature_map in enumerate(features):
@@ -364,7 +364,7 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
                             maxs[c][layer][p-1] = np.maximum(maxs[c][layer][p-1], channel_mins)
         if len(classes) == num_classes:
             break
-            
+
     ipdb.set_trace()
     val_deviations = _get_gram_matrix_deviations(model, val_ind_loader, device, batch_size, power, mins, maxs)
     expectation = np.mean(val_deviations, axis=1)
