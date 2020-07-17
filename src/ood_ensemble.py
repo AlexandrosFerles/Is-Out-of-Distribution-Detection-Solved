@@ -326,6 +326,7 @@ def _gram_matrices(model, loaders, device, num_classes, power=10, model_type='eb
         features = [features[idx] for idx in idxs] + [x]
         num_feature_maps = len(features)
 
+    ipdb.set_trace()
     mins = [[[None for _ in range(power)] for _ in range(num_feature_maps)] for _ in range(num_classes)]
     maxs = [[[None for _ in range(power)] for _ in range(num_feature_maps)] for _ in range(num_classes)]
 
