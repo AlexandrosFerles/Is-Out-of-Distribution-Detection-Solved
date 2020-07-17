@@ -312,7 +312,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
     return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
-def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, model_type='eb0'):
+def _gram_matrices(model, loaders, device, num_classes, batch_size, power=2, model_type='eb0'):
 
     model.eval()
     train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
@@ -364,8 +364,8 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         if len(classes) == num_classes:
             break
 
-    val_deviations = _get_layer_deviations(model, val_ind_loader, device, mins, maxs)
     ipdb.set_trace()
+    val_deviations = _get_layer_deviations(model, val_ind_loader, device, mins, maxs)
     expectation = np.mean(val_deviations, axis=1)
     val_deviations = np.divide(val_deviations, expectation)
 
