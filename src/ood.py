@@ -790,6 +790,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
     if model_type == 'eb0':
         idxs = [0, 2, 4, 7, 10, 14, 15]
         num_feature_maps = len(idxs) + 1
+    power = mins.shape[2]
 
     deviations = np.zeros((loader.__len__(), num_feature_maps))
     index = 0
@@ -811,7 +812,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
 
         for layer, feature_map in enumerate(features):
             dev = 0
-            for p in (range(power)):
+            for p in (range(1, power)):
                 g_p = _get_gram_power(feature_map)
                 if g_p < mins[class_pred][layer][p]:
                     dev += F.relu(mins[class_pred][layer][p]-g_p)/torch.abs(mins[class_pred][layer][p]+10**-6)
