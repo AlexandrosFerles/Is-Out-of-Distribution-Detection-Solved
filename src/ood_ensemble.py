@@ -327,12 +327,10 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
         max_num_channels = max([x.size()[1] for x in features])
         num_feature_maps = len(features)
 
-    mins = np.ones((num_classes, num_feature_maps, power, max_num_channels))*1e50
-    maxs = np.ones((num_classes, num_feature_maps, power, max_num_channels))*1e-50
-
     mins = [[[None for _ in range(power)] for _ in range(num_feature_maps)] for _ in range(num_classes)]
     maxs = [[[None for _ in range(power)] for _ in range(num_feature_maps)] for _ in range(num_classes)]
 
+    classes = []
     for data in tqdm(train_ind_loader):
 
         images, _ = data
@@ -348,6 +346,8 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
 
         for c in range(num_classes):
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
+            if indices.shape[0] > 0 and c not in classes:
+                classes.append(c)
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]
                 for p in (range(1, power+1)):
@@ -362,6 +362,9 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
                         else:
                             mins[c][layer][p-1] = np.minimum(mins[c][layer][p-1], channel_mins)
                             maxs[c][layer][p-1] = np.maximum(maxs[c][layer][p-1], channel_mins)
+        if len(classes) == num_classes:
+            break
+            
     ipdb.set_trace()
     val_deviations = _get_gram_matrix_deviations(model, val_ind_loader, device, batch_size, power, mins, maxs)
     expectation = np.mean(val_deviations, axis=1)
