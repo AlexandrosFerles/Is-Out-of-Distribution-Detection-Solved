@@ -12,7 +12,7 @@ import random
 import pickle
 from ood_triplets import _verbose
 from ood import _find_threshold, _score_npzs, _score_mahalanobis, _get_baseline_scores, _get_odin_scores, _process, \
-    _predict_rotations, _process_gen_odin_loader, _get_gram_power, _get_gram_matrix_deviations
+    _predict_rotations, _process_gen_odin_loader, _get_gram_power, _get_layer_deviations
 import ipdb
 
 abs_path = '/home/ferles/Dermatology/medusa/'
