@@ -812,7 +812,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
         for layer, feature_map in enumerate(features):
             dev = 0
             for p in (range(1, power+1)):
-                g_p = _get_gram_power(feature_map)
+                g_p = _get_gram_power(feature_map, powe)
                 if g_p < mins[class_pred][layer][p]:
                     dev += F.relu(mins[class_pred][layer][p]-g_p)/torch.abs(mins[class_pred][layer][p]+10**-6)
                 elif g_p > maxs[class_pred][layer][p]:
