@@ -26,7 +26,7 @@ def train(args):
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
     wandb.init(name=training_configurations.checkpoint+'Ensemble')
-    device = torch.device(f'cuda')
+    device = torch.device(f'cuda:{args.device}')
 
     dataset = args.dataset.lower()
     pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
