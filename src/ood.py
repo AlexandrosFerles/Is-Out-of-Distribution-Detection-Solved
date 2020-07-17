@@ -800,7 +800,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
         x, features = model.extract_features(images, mode='all')
         features = [features[idx] for idx in idxs] + [x]
         x = model._avg_pooling(x)
-        x = x.view(batch_size, -1)
+        x = x.view(x.size()[0], -1)
         x = model._dropout(x)
         logits = model._fc(x)
         argmaxs = torch.argmax(logits, dim=1)
