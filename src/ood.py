@@ -815,7 +815,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
                 corresponding_maxs = torch.Tensor([maxs[c][layer][p] for c in class_preds]).to(device)
                 dev += F.relu(corresponding_mins-g_p)/torch.abs(corresponding_mins+10**-6)
                 dev += F.relu(g_p-corresponding_maxs)/torch.abs(corresponding_maxs+10**-6)
-            deviations[arr_len: arr_len+dev.size()[0], layer] = dev.detach.cpu().numpy()
+            deviations[arr_len: arr_len+dev.size()[0], layer] = deviations[arr_len: arr_len+dev.size()[0], layer] = dev.sum(axis=1).detach().cpu().numpy()
 
     return deviations
 
