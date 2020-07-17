@@ -312,7 +312,7 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
     return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
-def _gram_matrices(model, loaders, device, num_classes, batch_size, power=1, model_type='eb0'):
+def _gram_matrices(model, loaders, device, num_classes, power=10, model_type='eb0'):
 
     model.eval()
     train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
@@ -329,7 +329,6 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=1, mod
     mins = [[[None for _ in range(power)] for _ in range(num_feature_maps)] for _ in range(num_classes)]
     maxs = [[[None for _ in range(power)] for _ in range(num_feature_maps)] for _ in range(num_classes)]
 
-    classes = []
     for data in tqdm(train_ind_loader):
 
         images, _ = data
@@ -345,8 +344,6 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=1, mod
 
         for c in range(num_classes):
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
-            if indices[0].shape[0] > 0 and c not in classes:
-                classes.append(c)
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]
                 for p in (range(power)):
@@ -361,28 +358,33 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=1, mod
                         else:
                             mins[c][layer][p] = np.minimum(mins[c][layer][p], channel_mins)
                             maxs[c][layer][p] = np.maximum(maxs[c][layer][p], channel_mins)
-        if len(classes) == num_classes:
-            break
 
-    ipdb.set_trace()
-    val_deviations = _get_layer_deviations(model, val_ind_loader, device, mins, maxs)
-    expectation = np.mean(val_deviations, axis=1)
-    val_deviations = np.divide(val_deviations, expectation)
+    val_ind_deviations = _get_layer_deviations(model, val_ind_loader, device, mins, maxs)
+    expectations = np.mean(val_ind_deviations, axis=0)
+    val_ind_deviations = np.divide(val_ind_deviations, expectations)
+    val_ind_deviations = np.sum(val_ind_deviations, axis=1)
 
-    val_ood_deviations = _get_gram_matrix_deviations(model, val_ood_loader, device, power, batch_size, mins, maxs)
-    val_ood_deviations = np.divide(val_ood_deviations, expectation)
+    val_ood_deviations = _get_layer_deviations(model, val_ood_loader, device, mins, maxs)
+    val_ood_deviations = np.divide(val_ood_deviations, expectations)
+    val_ood_deviations = np.sum(val_ood_deviations, axis=1)
 
-    test_ind_deviations = _get_gram_matrix_deviations(model, test_ind_loader, batch_size, device, power, mins, maxs)
-    test_ind_deviations = np.divide(test_ind_deviations, expectation)
+    test_ind_deviations = _get_layer_deviations(model, test_ind_loader, device, mins, maxs)
+    test_ind_deviations = np.divide(test_ind_deviations, expectations)
+    test_ind_deviations = np.sum(test_ind_deviations, axis=1)
 
-    test_ood_deviations_1 = _get_gram_matrix_deviations(model, test_ind_loader, batch_size, device, power, mins, maxs)
-    test_ood_deviations_1 = np.divide(test_ood_deviations_1, expectation)
-    test_ood_deviations_2 = _get_gram_matrix_deviations(model, test_ind_loader, batch_size, device, power, mins, maxs)
-    test_ood_deviations_2 = np.divide(test_ood_deviations_2, expectation)
-    test_ood_deviations_3 = _get_gram_matrix_deviations(model, test_ind_loader, batch_size, device, power, mins, maxs)
-    test_ood_deviations_3 = np.divide(test_ood_deviations_3, expectation)
+    test_ood_deviations_1 = _get_layer_deviations(model, test_ood_loader_1, device, mins, maxs)
+    test_ood_deviations_1 = np.divide(test_ood_deviations_1, expectations)
+    test_ood_deviations_1 = np.sum(test_ood_deviations_1, axis=1)
 
-    return val_deviations, val_ood_deviations, test_ind_deviations, test_ood_deviations_1, test_ood_deviations_2, test_ood_deviations_3
+    test_ood_deviations_2 = _get_layer_deviations(model, test_ood_loader_2, device, mins, maxs)
+    test_ood_deviations_2 = np.divide(test_ood_deviations_2, expectations)
+    test_ood_deviations_2 = np.sum(test_ood_deviations_2, axis=1)
+
+    test_ood_deviations_3 = _get_layer_deviations(model, test_ood_loader_3, device, mins, maxs)
+    test_ood_deviations_3 = np.divide(test_ood_deviations_3, expectations)
+    test_ood_deviations_3 = np.sum(test_ood_deviations_3, axis=1)
+
+    return val_ind_deviations, val_ood_deviations, test_ind_deviations, test_ood_deviations_1, test_ood_deviations_2, test_ood_deviations_3
 
 
 def _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=False):
@@ -509,9 +511,10 @@ if __name__ == '__main__':
     # gram-matrices
     gram_matrices_loaders = [loaders[0]] + list(rotation_loaders)[1:]
     temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gram_matrices(standard_model, loaders, device, args.num_classes, args.batch_size)
-    _ood_detection_performance('Self-Ensemble', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-    val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
+    _ood_detection_performance('Gram-Matrices', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
 
+    ipdb.set_trace()
     X = np.append(val_ind, val_ood, axis=0)
     y = np.append(np.ones(val_ind.shape[0]), np.zeros(val_ood.shape[0]))
 
