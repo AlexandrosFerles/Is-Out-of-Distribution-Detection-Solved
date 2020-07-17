@@ -818,6 +818,8 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
             deviations[arr_len: arr_len+dev.size()[0], layer] = deviations[arr_len: arr_len+dev.size()[0], layer] = dev.sum(axis=1).detach().cpu().numpy()
         arr_len += dev.size()[0]
 
+    deviations = deviations[:arr_len]
+
     return deviations
 
 
