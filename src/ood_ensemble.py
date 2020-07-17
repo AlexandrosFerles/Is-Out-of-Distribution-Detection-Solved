@@ -359,7 +359,6 @@ def _gram_matrices(model, loaders, device, num_classes, power=6, model_type='eb0
                             mins[c][layer][p] = torch.min(mins[c][layer][p], channel_mins)
                             maxs[c][layer][p] = torch.min(maxs[c][layer][p], channel_maxs)
 
-    ipdb.set_trace()
     val_ind_deviations = _get_layer_deviations(model, val_ind_loader, device, mins, maxs)
     expectations = np.mean(val_ind_deviations, axis=0)
     val_ind_deviations = np.divide(val_ind_deviations, expectations)
