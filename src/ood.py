@@ -819,7 +819,6 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
         arr_len += dev.size()[0]
 
     deviations = deviations[:arr_len]
-
     return deviations
 
 
