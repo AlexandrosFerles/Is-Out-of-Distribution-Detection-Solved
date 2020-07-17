@@ -810,8 +810,8 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
             dev = 0
             for p in (range(power)):
                 g_p = _get_gram_power(feature_map, p+1)
-                corresponding_mins = torch.Tensor([mins[c][layer][p] for c in class_preds]).to(device)
-                corresponding_maxs = torch.Tensor([maxs[c][layer][p] for c in class_preds]).to(device)
+                corresponding_mins = [mins[c][layer][p] for c in class_preds]
+                corresponding_maxs = [maxs[c][layer][p] for c in class_preds]
                 dev += F.relu(corresponding_mins-g_p)/torch.abs(corresponding_mins+10**-6)
                 dev += F.relu(g_p-corresponding_maxs)/torch.abs(corresponding_maxs+10**-6)
             deviations[arr_len: arr_len+dev.size()[0], layer] = deviations[arr_len: arr_len+dev.size()[0], layer] = dev.sum(axis=1).detach().cpu().numpy()
