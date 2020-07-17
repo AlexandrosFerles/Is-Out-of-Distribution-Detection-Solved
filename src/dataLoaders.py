@@ -879,8 +879,10 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
     train_ind_loaders, train_ood_loaders = [], []
     val_ind_loaders, val_ood_loaders = [], []
     test_ind_loaders, test_ood_loaders = [], []
+    num_classes = []
+    dicts = []
 
-    if dataset == 'tinyimagenet':
+    if 'tinyimagenet' in dataset:
         gts = trainset.get_targets()
         test_gts = testset.get_targets()
     elif dataset == 'svhn' or dataset == 'stl':
@@ -893,47 +895,41 @@ def create_ensemble_loaders(dataset, num_classes, pickle_files, k=5, train_batch
     while point < len(unique_labels):
 
         temp_labels = unique_labels[point: min(len(unique_labels), point+step)]
+        in_labels = list(set(unique_labels) - set(temp_labels))
+        in_gts_indexes = [index for index in list(range(len(gts))) if gts[index] not in temp_labels]
+        out_gts_indexes = [index for index in list(range(len(gts))) if gts[index] in temp_labels]
 
-        custom_trainset_ind = CustomEnsembleDatasetIn(trainset, gts=gts, remove_labels=temp_labels, keep_indices=trainset_indices)
-        custom_trainset_out = CustomEnsembleDatasetOut(trainset, gts=gts, remove_labels=temp_labels, keep_indices=trainset_indices)
+        train_in_indices = list(set(trainset_indices).intersection(set(in_gts_indexes)))
+        train_out_indices = list(set(trainset_indices).intersection(set(out_gts_indexes)))
 
-        train_ind_sampler = SubsetRandomSampler(custom_trainset_ind.keep_indices)
-        train_ood_sampler = SubsetRandomSampler(custom_trainset_out.keep_indices)
+        val_in_indices = list(set(valset_indices).intersection(set(in_gts_indexes)))
 
-        train_ind_loader = DataLoader(custom_trainset_ind, batch_size=train_batch_size, sampler=train_ind_sampler)
-        train_ood_loader = DataLoader(custom_trainset_out, batch_size=train_batch_size, sampler=train_ood_sampler)
+        num_classes.append(len(set(gts) - set(temp_labels)))
+        temp = zip(in_labels, list(range(len(in_labels))))
+        dicts.append(dict(temp))
+
+        train_ind_sampler = SubsetRandomSampler(train_in_indices)
+        train_ood_sampler = SubsetRandomSampler(train_out_indices)
+
+        train_ind_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=train_ind_sampler, num_workers=8)
+        train_ood_loader = DataLoader(trainset, batch_size=train_batch_size, sampler=train_ood_sampler, num_workers=8)
 
         train_ind_loaders.append(train_ind_loader)
         train_ood_loaders.append(train_ood_loader)
 
-        custom_valset_ind = CustomEnsembleDatasetIn(valset, gts=gts, remove_labels=temp_labels, keep_indices=valset_indices)
-        custom_valset_out = CustomEnsembleDatasetOut(valset, gts=gts, remove_labels=temp_labels, keep_indices=valset_indices)
-
-        val_ind_sampler = SubsetRandomSampler(custom_valset_ind.keep_indices)
-        val_ood_sampler = SubsetRandomSampler(custom_valset_out.keep_indices)
-
-        val_ind_loader = DataLoader(custom_valset_ind, batch_size=test_batch_size, sampler=val_ind_sampler)
-        val_ood_loader = DataLoader(custom_valset_out, batch_size=test_batch_size, sampler=val_ood_sampler)
+        val_ind_sampler = SubsetRandomSampler(val_in_indices)
+        val_ind_loader = DataLoader(trainset, batch_size=test_batch_size, sampler=val_ind_sampler, num_workers=8)
 
         val_ind_loaders.append(val_ind_loader)
-        val_ood_loaders.append(val_ood_loader)
 
-        testset_indices = list(range(testset.__len__()))
-        custom_testset_ind = CustomEnsembleDatasetIn(testset, gts=test_gts, remove_labels=temp_labels, keep_indices=testset_indices)
-        custom_testset_out = CustomEnsembleDatasetOut(testset, gts=test_gts, remove_labels=temp_labels, keep_indices=testset_indices)
-
-        test_ind_sampler = SubsetRandomSampler(custom_testset_ind.keep_indices)
-        test_ood_sampler = SubsetRandomSampler(custom_testset_out.keep_indices)
-
-        test_ind_loader = DataLoader(custom_testset_ind, batch_size=test_batch_size, sampler=test_ind_sampler)
-        test_ood_loader = DataLoader(custom_testset_out, batch_size=test_batch_size, sampler=test_ood_sampler)
+        test_in_gts_indexes = [index for index in list(range(len(test_gts))) if test_gts[index] not in temp_labels]
+        test_ind_sampler = SubsetRandomSampler(test_in_gts_indexes)
+        test_ind_loader = DataLoader(testset, batch_size=test_batch_size, sampler=test_ind_sampler, num_workers=8)
 
         test_ind_loaders.append(test_ind_loader)
-        test_ood_loaders.append(test_ood_loader)
-
         point += step
 
-    return train_ind_loaders, train_ood_loaders, val_ind_loaders, val_ood_loaders, test_ind_loaders, test_ood_loaders
+    return train_ind_loaders, train_ood_loaders, val_ind_loaders, test_ind_loaders, num_classes, dicts
 
 
 def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train_batch_size=32, test_batch_size=32, test=False, validation_test_split=0, save_to_pickle=False, pickle_files=None, ret_num_classes=False):
