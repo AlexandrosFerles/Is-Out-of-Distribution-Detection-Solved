@@ -806,7 +806,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
         logits = model._fc(x)
         class_preds = torch.argmax(logits, dim=1).detach().cpu()
 
-        temp_mins = torch.FloatTensor([mins[c] for c in class_preds]).to(device)
+        # temp_mins = torch.FloatTensor([mins[c.item()] for c in class_preds]).to(device)
         # temp_maxs = [maxs[c] for c in class_preds]
 
         for layer, feature_map in enumerate(features):
