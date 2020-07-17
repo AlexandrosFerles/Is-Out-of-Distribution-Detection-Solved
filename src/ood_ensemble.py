@@ -345,8 +345,7 @@ def _gram_matrices(model, loaders, device, num_classes, batch_size, power=10, mo
 
         for c in range(num_classes):
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
-            ipdb.set_trace()
-            if indices.shape[0] > 0 and c not in classes:
+            if indices[0].shape[0] > 0 and c not in classes:
                 classes.append(c)
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]

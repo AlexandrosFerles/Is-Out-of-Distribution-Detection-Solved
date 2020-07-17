@@ -790,8 +790,8 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
     if model_type == 'eb0':
         idxs = [0, 2, 4, 7, 10, 14, 15]
         num_feature_maps = len(idxs) + 1
-        
-    deviations = np.zeros((loader.__len_(), num_features))
+
+    deviations = np.zeros((loader.__len_(), num_feature_maps))
     index = 0
     for data in tqdm(loader):
 
@@ -804,7 +804,10 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
         x = model._dropout(x)
         logits = model._fc(x)
         argmaxs = torch.argmax(logits, dim=1)
-        class_pred = argmaxs[0]
+        class_preds = argmaxs[0].detach().cpu().numpy()
+
+        temp_mins = torch.FloatTensor([mins[c] for c in class_preds]).to(device)
+        # temp_maxs = [maxs[c] for c in class_preds]
 
         for layer, feature_map in enumerate(features):
             dev = 0
