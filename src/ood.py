@@ -813,7 +813,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
                 corresponding_mins = torch.Tensor([mins[c][layer][p] for c in class_preds]).to(device)
                 corresponding_maxs = torch.Tensor([maxs[c][layer][p] for c in class_preds]).to(device)
                 dev += F.relu(corresponding_mins-g_p)/torch.abs(corresponding_mins+10**-6)
-                dev += F.relu(g_p-corresponding_maxs)/torch.abs(corresponding_mins+10**-6)
+                dev += F.relu(g_p-corresponding_maxs)/torch.abs(corresponding_maxs+10**-6)
             ipdb.set_trace()
 
     return deviations
