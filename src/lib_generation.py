@@ -62,7 +62,8 @@ def sample_estimator(model, num_classes, feature_list, train_loader, device, fea
             if features_mode == 'all':
                 output, out_features = model.extract_features(data, mode=features_mode)
                 idxs = [0, 2, 4, 7, 10, 14, 15]
-                out_features = [out_features[idx] for idx in idxs] + [output]
+                out_features = out_features + [output]
+                # out_features = [out_features[idx] for idx in idxs] + [output]
             else:
                 output = model.extract_features(data, mode=features_mode)
                 out_features = [output]
@@ -135,7 +136,8 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
             # EB-0
             idxs = [0, 2, 4, 7, 10, 14, 15]
             x, features = model.extract_features(data, mode=features_mode)
-            features = [features[idx].to(device) for idx in idxs] + [x.to(device)]
+            # features = [features[idx].to(device) for idx in idxs] + [x.to(device)]
+            features = [features[idx].to(device) for idx in range(len(features))] + [x.to(device)]
         else:
             x = model.extract_features(data, mode=features_mode)
             features = [x]
@@ -166,7 +168,8 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
 
         if features_mode == 'all':
             x_noise, noise_out_features = model.extract_features(Variable(tempInputs), mode=features_mode)
-            noise_out_features = [noise_out_features[idx].to(device) for idx in idxs] + [x_noise.to(device)]
+            noise_out_features = [noise_out_features[idx].to(device) for idx in range(len(noise_out_features))] + [x_noise.to(device)]
+            # noise_out_features = [noise_out_features[idx].to(device) for idx in idxs] + [x_noise.to(device)]
             noise_out_features = noise_out_features[layer_index]
             noise_out_features = noise_out_features.view(noise_out_features.size(0), noise_out_features.size(1), -1)
             noise_out_features = torch.mean(noise_out_features, 2)
