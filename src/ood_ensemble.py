@@ -323,7 +323,8 @@ def _gram_matrices(model, loaders, device, num_classes, power=6, model_type='eb0
     if model_type == 'eb0':
         idxs = [0, 2, 4, 7, 10, 14, 15]
         x, features = model.extract_features(temp_x, mode='all')
-        features = [features[idx] for idx in idxs] + [x]
+        # features = [features[idx] for idx in idxs] + [x]
+        features = features + [x]
         num_feature_maps = len(features)
 
     mins = [[[None for _ in range(power)] for _ in range(num_feature_maps)] for _ in range(num_classes)]
