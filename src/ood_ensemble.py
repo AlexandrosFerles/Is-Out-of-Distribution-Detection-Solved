@@ -86,7 +86,8 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
     else:
         # TODO: In case you wish to evaluate other models, you need to define a proper way to get middle level features
         pass
-    features = [features[idx] for idx in idxs] + [x]
+    features = features + [x]
+    # features = [features[idx] for idx in idxs] + [x]
     num_output = len(features)
     feature_list = np.empty(num_output)
     count = 0
@@ -488,8 +489,8 @@ if __name__ == '__main__':
     # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
     #
     # # mahalanobis
-    # temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
-    # _ood_detection_performance('Mahalanobis', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
+    _ood_detection_performance('Mahalanobis', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
     #
     # # self-supervised
