@@ -786,9 +786,15 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
 
     model.eval()
 
+    temp_x = torch.rand(2, 3, 224, 224).to(device)
+    temp_x = Variable(temp_x)
+    temp_x = temp_x.to(device)
     if model_type == 'eb0':
         idxs = [0, 2, 4, 7, 10, 14, 15]
-        num_feature_maps = len(idxs) + 1
+        x, features = model.extract_features(temp_x, mode='all')
+        # features = [features[idx] for idx in idxs] + [x]
+        features = features + [x]
+        num_feature_maps = len(features)
     power = len(mins[0][0])
 
     deviations = np.zeros((loader.__len__() * loader.batch_size, num_feature_maps))
