@@ -516,37 +516,37 @@ if __name__ == '__main__':
     _ood_detection_performance('Gram-Matrices', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
 
-    ipdb.set_trace()
-    X = np.append(val_ind, val_ood, axis=0)
-    y = np.append(np.ones(val_ind.shape[0]), np.zeros(val_ood.shape[0]))
-
-    indices = np.arange(y.shape[0])
-    np.random.shuffle(indices)
-
-    X = X[indices]
-    y = y[indices]
-
-    ensemble_ood_lr = LogisticRegression(random_state=global_seed, n_jobs=2, max_iter=200).fit(X, y)
-    pred_val_ind = ensemble_ood_lr.predict_proba(val_ind)[:, 1]
-    pred_val_ood = ensemble_ood_lr.predict_proba(val_ood)[:, 1]
-    _, threshold = _find_threshold(pred_val_ind, pred_val_ood)
-
-    pred_ind = ensemble_ood_lr.predict_proba(test_ind)[:, 1]
-    pred_ood_1 = ensemble_ood_lr.predict_proba(test_ood_1)[:, 1]
-    auc1, fpr1, acc1 = _score_npzs(pred_ind, pred_ood_1, threshold)
-
-    pred_ood_2 = ensemble_ood_lr.predict_proba(test_ood_2)[:, 1]
-    auc2, fpr2, acc2 = _score_npzs(pred_ind, pred_ood_2, threshold)
-
-    pred_ood_3 = ensemble_ood_lr.predict_proba(test_ood_3)[:, 1]
-    auc3, fpr3, acc3 = _score_npzs(pred_ind, pred_ood_3, threshold)
-
-    aucs = [auc1, auc2, auc3]
-    fprs = [fpr1, fpr2, fpr3]
-    accs = [acc1, acc2, acc3]
-
-    method = "Ensemble of OOD detectors"
-    _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
+    # ipdb.set_trace()
+    # X = np.append(val_ind, val_ood, axis=0)
+    # y = np.append(np.ones(val_ind.shape[0]), np.zeros(val_ood.shape[0]))
+    #
+    # indices = np.arange(y.shape[0])
+    # np.random.shuffle(indices)
+    #
+    # X = X[indices]
+    # y = y[indices]
+    #
+    # ensemble_ood_lr = LogisticRegression(random_state=global_seed, n_jobs=2, max_iter=200).fit(X, y)
+    # pred_val_ind = ensemble_ood_lr.predict_proba(val_ind)[:, 1]
+    # pred_val_ood = ensemble_ood_lr.predict_proba(val_ood)[:, 1]
+    # _, threshold = _find_threshold(pred_val_ind, pred_val_ood)
+    #
+    # pred_ind = ensemble_ood_lr.predict_proba(test_ind)[:, 1]
+    # pred_ood_1 = ensemble_ood_lr.predict_proba(test_ood_1)[:, 1]
+    # auc1, fpr1, acc1 = _score_npzs(pred_ind, pred_ood_1, threshold)
+    #
+    # pred_ood_2 = ensemble_ood_lr.predict_proba(test_ood_2)[:, 1]
+    # auc2, fpr2, acc2 = _score_npzs(pred_ind, pred_ood_2, threshold)
+    #
+    # pred_ood_3 = ensemble_ood_lr.predict_proba(test_ood_3)[:, 1]
+    # auc3, fpr3, acc3 = _score_npzs(pred_ind, pred_ood_3, threshold)
+    #
+    # aucs = [auc1, auc2, auc3]
+    # fprs = [fpr1, fpr2, fpr3]
+    # accs = [acc1, acc2, acc3]
+    #
+    # method = "Ensemble of OOD detectors"
+    # _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
     end = time.time()
     hours, rem = divmod(end-start, 3600)
