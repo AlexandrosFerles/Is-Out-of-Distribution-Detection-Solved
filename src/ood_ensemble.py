@@ -434,6 +434,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--in_distribution_dataset', '--in', required=True)
     parser.add_argument('--val_dataset', '--val', required=True)
+    parser.add_argument('--test_dataset', '--test', default='tinyimagenet', required=False)
     parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--model_checkpoints_file', '--mcf', default=None, required=False)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
@@ -470,7 +471,7 @@ if __name__ == '__main__':
 
     ind_dataset = args.in_distribution_dataset.lower()
     val_dataset = args.val_dataset.lower()
-    all_datasets = ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']
+    all_datasets = ['cifar10', 'cifar100', 'svhn', 'stl', args.test_dataset]
     all_datasets.remove(ind_dataset)
     all_datasets.remove(val_dataset)
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = all_datasets
