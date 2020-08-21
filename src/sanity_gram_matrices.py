@@ -97,7 +97,7 @@ if __name__ == '__main__':
     device = torch.device(f'cuda:{args.device}')
 
     model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=10)
-    state_dict = torch.load(args.model_checkpoint, map_location=device)
+    state_dict = torch.load(args.model_checkpoint)
     model.load_state_dict(state_dict, map_location=device)
     model = model.to(device)
 
