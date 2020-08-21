@@ -20,7 +20,6 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
     temp_x = torch.rand(2, 3, 32, 32).to(device)
     temp_x = Variable(temp_x)
     temp_x = temp_x.to(device)
-    ipdb.set_trace()
     x, features = model(temp_x)
     num_feature_maps = len(features)
 
@@ -31,7 +30,9 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
 
         images, _ = data
         images = images.to(device)
+        ipdb.set_trace()
         x, features = model(images)
+        continue
         argmaxs = torch.argmax(x, dim=1)
 
         for c in range(num_classes):
