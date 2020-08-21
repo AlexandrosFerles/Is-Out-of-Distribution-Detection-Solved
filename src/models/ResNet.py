@@ -47,7 +47,7 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.in_planes = 64
 
-        self.conv1 = conv3x3(3,64)
+        self.conv1 = conv3x3(3, 64)
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
@@ -69,13 +69,21 @@ class ResNet(nn.Module):
         gram_feats = []
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.layer1(out)
-        gram_feats.extend(self.layer1.gram_feats)
-        out, temp_feats = self.layer2(out)
-        gram_feats.extend(self.layer2.gram_feats)
-        out, temp_feats = self.layer3(out)
-        gram_feats.extend(self.layer3.gram_feats)
+        for block in self.layer1:
+            gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
+        out = self.layer2(out)
+        for block in self.layer2:
+            gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
+        out = self.layer3(out)
+        for block in self.layer3:
+            gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
         out = self.layer4(out)
-        gram_feats.extend(self.layer4.gram_feats)
+        for block in self.layer4:
+            gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
         out = F.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
         y = self.linear(out)
