@@ -15,6 +15,7 @@ class BasicBlock(nn.Module):
         self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = conv3x3(planes, planes)
         self.bn2 = nn.BatchNorm2d(planes)
+        self.gram_feats = []
 
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != self.expansion*planes:
@@ -24,22 +25,21 @@ class BasicBlock(nn.Module):
             )
 
     def forward(self, x):
-        gram_feats = []
         t = self.conv1(x)
         out = F.relu(self.bn1(t))
-        gram_feats.append(t)
-        gram_feats.append(out)
+        self.gram_feats.append(t)
+        self.gram_feats.append(out)
         t = self.conv2(out)
         out = self.bn2(self.conv2(out))
-        gram_feats.append(t)
-        gram_feats.append(out)
+        self.gram_feats.append(t)
+        self.gram_feats.append(out)
         t = self.shortcut(x)
         out += t
-        gram_feats.append(t)
+        self.gram_feats.append(t)
         out = F.relu(out)
-        gram_feats.append(out)
+        self.gram_feats.append(out)
 
-        return out, gram_feats
+        return out
 
 
 class ResNet(nn.Module):
@@ -68,14 +68,14 @@ class ResNet(nn.Module):
     def forward(self, x):
         gram_feats = []
         out = F.relu(self.bn1(self.conv1(x)))
-        out, temp_feats = self.layer1(out)
-        gram_feats.extend(temp_feats)
+        out = self.layer1(out)
+        gram_feats.extend(self.layer1.gram_feats)
         out, temp_feats = self.layer2(out)
-        gram_feats.extend(temp_feats)
+        gram_feats.extend(self.layer2.gram_feats)
         out, temp_feats = self.layer3(out)
-        gram_feats.extend(temp_feats)
-        out, temp_feats = self.layer4(out)
-        gram_feats.extend(temp_feats)
+        gram_feats.extend(self.layer3.gram_feats)
+        out = self.layer4(out)
+        gram_feats.extend(self.layer4.gram_feats)
         out = F.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
         y = self.linear(out)
