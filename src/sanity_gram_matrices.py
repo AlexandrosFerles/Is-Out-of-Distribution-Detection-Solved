@@ -17,7 +17,7 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
     model.eval()
     train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
 
-    temp_x = torch.rand(2, 3, 224, 224).to(device)
+    temp_x = torch.rand(2, 3, 32, 32).to(device)
     temp_x = Variable(temp_x)
     temp_x = temp_x.to(device)
     ipdb.set_trace()
@@ -108,8 +108,8 @@ if __name__ == '__main__':
     all_datasets.remove(val_dataset)
     ood_dataset_1, ood_dataset_2, ood_dataset_3 = all_datasets
 
-    loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
-    rotation_loaders = get_triplets_loaders(batch_size=1, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
+    loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets, resize=False)
+    rotation_loaders = get_triplets_loaders(batch_size=1, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets, resize=False)
 
     gram_matrices_loaders = [loaders[0]] + list(rotation_loaders)[1:]
     temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gram_matrices(model, loaders, device, args.num_classes, power=7)
