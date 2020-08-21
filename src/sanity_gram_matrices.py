@@ -32,7 +32,7 @@ def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
 
         images, _ = data
         images = images.to(device)
-        x, features = model.extract_features(images)
+        x, features = model(images)
         class_preds = torch.argmax(x, dim=1).detach().cpu()
 
         for layer, feature_map in enumerate(features):
