@@ -1,15 +1,53 @@
 import torch
 from torch.autograd import Variable
+import torch.nn.functional as F
 from dataLoaders import get_triplets_loaders
 import numpy as np
 from models.ResNet import ResNet, BasicBlock
-from ood import _get_gram_power, _get_layer_deviations
+from ood import _get_gram_power
 from ood_ensemble import _ood_detection_performance
 import argparse
 import time
 from tqdm import tqdm
 import ipdb
 
+
+def _get_layer_deviations(model, loader, device, mins, maxs, model_type='eb0'):
+
+    model.eval()
+
+    temp_x = torch.rand(2, 3, 32, 32).to(device)
+    temp_x = Variable(temp_x)
+    temp_x = temp_x.to(device)
+    if model_type == 'eb0':
+        x, features = model(temp_x)
+        num_feature_maps = len(features)
+
+    power = len(mins[0][0])
+
+    deviations = np.zeros((loader.__len__() * loader.batch_size, num_feature_maps))
+
+    arr_len = 0
+    for data in tqdm(loader):
+
+        images, _ = data
+        images = images.to(device)
+        x, features = model.extract_features(images)
+        class_preds = torch.argmax(x, dim=1).detach().cpu()
+
+        for layer, feature_map in enumerate(features):
+            dev = 0
+            for p in (range(power)):
+                g_p = _get_gram_power(feature_map, p+1)
+                corresponding_mins = torch.stack([mins[c][layer][p] for c in class_preds])
+                corresponding_maxs = torch.stack([maxs[c][layer][p] for c in class_preds])
+                dev += F.relu(corresponding_mins-g_p)/torch.abs(corresponding_mins+10**-6)
+                dev += F.relu(g_p-corresponding_maxs)/torch.abs(corresponding_maxs+10**-6)
+            deviations[arr_len: arr_len+dev.size()[0], layer] = deviations[arr_len: arr_len+dev.size()[0], layer] = dev.sum(axis=1).detach().cpu().numpy()
+        arr_len += dev.size()[0]
+
+    deviations = deviations[:arr_len]
+    return deviations
 
 
 def _gram_matrices(model, loaders, device, num_classes, power=10):
