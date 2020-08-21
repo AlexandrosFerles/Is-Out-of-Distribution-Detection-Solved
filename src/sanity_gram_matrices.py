@@ -1,16 +1,15 @@
 import torch
 from torch.autograd import Variable
-
 from dataLoaders import get_triplets_loaders
-from models.ResNet import ResNet, BasicBlock
 import numpy as np
+from models.ResNet import ResNet, BasicBlock
+from ood import _get_gram_power, _get_layer_deviations
+from ood_ensemble import _ood_detection_performance
 import argparse
 import time
 from tqdm import tqdm
-from ood import _get_gram_power, _get_layer_deviations
 import ipdb
 
-from ood_ensemble import _ood_detection_performance
 
 
 def _gram_matrices(model, loaders, device, num_classes, power=10):
@@ -21,6 +20,7 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
     temp_x = torch.rand(2, 3, 224, 224).to(device)
     temp_x = Variable(temp_x)
     temp_x = temp_x.to(device)
+    ipdb.set_trace()
     x, features = model(temp_x)
     num_feature_maps = len(features)
 
