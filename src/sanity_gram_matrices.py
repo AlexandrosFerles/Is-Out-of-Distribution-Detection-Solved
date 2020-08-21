@@ -1,5 +1,7 @@
 import torch
 from torch.autograd import Variable
+
+from dataLoaders import get_triplets_loaders
 from models.ResNet import ResNet, BasicBlock
 import numpy as np
 import argparse
@@ -7,6 +9,8 @@ import time
 from tqdm import tqdm
 from ood import _get_gram_power, _get_layer_deviations
 import ipdb
+
+from ood_ensemble import _ood_detection_performance
 
 
 def _gram_matrices(model, loaders, device, num_classes, power=10):
@@ -97,3 +101,16 @@ if __name__ == '__main__':
     model.load_state_dict(state_dict, map_location=device)
     model = model.to(device)
 
+    ind_dataset = args.in_distribution_dataset.lower()
+    val_dataset = args.val_dataset.lower()
+    all_datasets = ['cifar10', 'cifar100', 'svhn', 'stl', args.test_dataset]
+    all_datasets.remove(ind_dataset)
+    all_datasets.remove(val_dataset)
+    ood_dataset_1, ood_dataset_2, ood_dataset_3 = all_datasets
+
+    loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
+    rotation_loaders = get_triplets_loaders(batch_size=1, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
+
+    gram_matrices_loaders = [loaders[0]] + list(rotation_loaders)[1:]
+    temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gram_matrices(model, loaders, device, args.num_classes, power=7)
+    _ood_detection_performance('Gram-Matrices', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
