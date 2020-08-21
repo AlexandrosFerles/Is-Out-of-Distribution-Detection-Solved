@@ -88,6 +88,7 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
                             mins[c][layer][p] = torch.min(mins[c][layer][p], channel_mins)
                             maxs[c][layer][p] = torch.min(maxs[c][layer][p], channel_maxs)
 
+    ipdb.set_trace()
     import pickle
     pickle.dump(mins, open('mins.pickle', 'wb'), protocol=-1)
     pickle.dump(mins, open('maxs.pickle', 'wb'), protocol=-1)
@@ -113,7 +114,6 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
     test_ood_deviations_1 = np.sum(test_ood_deviations_1, axis=1)
     np.savez('test_ood_deviations_1.npz', test_ood_deviations_1)
 
-    ipdb.set_trace()
     test_ood_deviations_2 = _get_layer_deviations(model, test_ood_loader_2, device, mins, maxs)
     test_ood_deviations_2 = np.divide(test_ood_deviations_2, expectations)
     test_ood_deviations_2 = np.sum(test_ood_deviations_2, axis=1)
