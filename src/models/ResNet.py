@@ -79,4 +79,4 @@ class ResNet(nn.Module):
         out = F.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
         y = self.linear(out)
-        return y
+        return y, gram_feats
