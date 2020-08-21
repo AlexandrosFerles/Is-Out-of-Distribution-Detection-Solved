@@ -679,10 +679,8 @@ def _get_image_transforms(dataset, resize):
                 transforms.ToTensor(),
                 normalize_cifar])
 
-    elif dataset != 'fashionmnist':
-        if dataset == 'mnist':
-            normalize = torchvision.transforms.Normalize((0.1307,), (0.3081,))
-        elif dataset == 'tinyimagenet' or dataset == 'tinyimagenet-cifar10' or dataset == 'tinyimagenet-cifar100':
+    else:
+        if dataset == 'tinyimagenet' or dataset == 'tinyimagenet-cifar10' or dataset == 'tinyimagenet-cifar100':
             normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         elif dataset == 'svhn':
             normalize = transforms.Normalize((0.4377, 0.4438, 0.4728), (0.1980, 0.2010, 0.1970))
@@ -722,37 +720,6 @@ def _get_image_transforms(dataset, resize):
                 transforms.Resize(32),
                 transforms.ToTensor(),
                 normalize,
-            ])
-
-    elif dataset == 'fashionmnist':
-
-        if resize:
-
-            image_size = 224
-            transform_train = transforms.Compose([
-                transforms.Resize(256),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(image_size),
-                transforms.ToTensor(),
-            ])
-
-            transform_test = transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(image_size),
-                transforms.ToTensor(),
-            ])
-
-        else:
-
-            transform_train = transforms.Compose([
-                transforms.Resize(32),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-            ])
-
-            transform_test = transforms.Compose([
-                transforms.Resize(32),
-                transforms.ToTensor(),
             ])
 
     return transform_train, transform_test

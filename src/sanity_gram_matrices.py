@@ -88,23 +88,32 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
                             mins[c][layer][p] = torch.min(mins[c][layer][p], channel_mins)
                             maxs[c][layer][p] = torch.min(maxs[c][layer][p], channel_maxs)
 
+    import pickle
+    pickle.dump(mins, open('mins.pickle', 'wb'), protocol=-1)
+    pickle.dump(mins, open('maxs.pickle', 'wb'), protocol=-1)
+
     val_ind_deviations = _get_layer_deviations(model, val_ind_loader, device, mins, maxs)
     expectations = np.mean(val_ind_deviations, axis=0)
     val_ind_deviations = np.divide(val_ind_deviations, expectations)
     val_ind_deviations = np.sum(val_ind_deviations, axis=1)
+    np.savez('val_ind_deviations.npz', val_ind_deviations)
 
     val_ood_deviations = _get_layer_deviations(model, val_ood_loader, device, mins, maxs)
     val_ood_deviations = np.divide(val_ood_deviations, expectations)
     val_ood_deviations = np.sum(val_ood_deviations, axis=1)
+    np.savez('val_ood_deviations.npz', val_ood_deviations)
 
     test_ind_deviations = _get_layer_deviations(model, test_ind_loader, device, mins, maxs)
     test_ind_deviations = np.divide(test_ind_deviations, expectations)
     test_ind_deviations = np.sum(test_ind_deviations, axis=1)
+    np.savez('test_ind_deviations.npz', test_ind_deviations)
 
     test_ood_deviations_1 = _get_layer_deviations(model, test_ood_loader_1, device, mins, maxs)
     test_ood_deviations_1 = np.divide(test_ood_deviations_1, expectations)
     test_ood_deviations_1 = np.sum(test_ood_deviations_1, axis=1)
+    np.savez('test_ood_deviations_1.npz', test_ood_deviations_1)
 
+    ipdb.set_trace()
     test_ood_deviations_2 = _get_layer_deviations(model, test_ood_loader_2, device, mins, maxs)
     test_ood_deviations_2 = np.divide(test_ood_deviations_2, expectations)
     test_ood_deviations_2 = np.sum(test_ood_deviations_2, axis=1)
