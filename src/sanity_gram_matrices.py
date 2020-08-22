@@ -120,10 +120,12 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
     test_ood_deviations_2 = _get_layer_deviations(model, test_ood_loader_2, device, mins, maxs)
     test_ood_deviations_2 = np.divide(test_ood_deviations_2, expectations)
     test_ood_deviations_2 = np.sum(test_ood_deviations_2, axis=1)
+    np.savez('test_ood_deviations_2.npz', test_ood_deviations_2)
 
     test_ood_deviations_3 = _get_layer_deviations(model, test_ood_loader_3, device, mins, maxs)
     test_ood_deviations_3 = np.divide(test_ood_deviations_3, expectations)
     test_ood_deviations_3 = np.sum(test_ood_deviations_3, axis=1)
+    np.savez('test_ood_deviations_3.npz', test_ood_deviations_3)
 
     return val_ind_deviations, val_ood_deviations, test_ind_deviations, test_ood_deviations_1, test_ood_deviations_2, test_ood_deviations_3
 
