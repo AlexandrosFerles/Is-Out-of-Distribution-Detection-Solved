@@ -676,6 +676,7 @@ def _get_image_transforms(dataset, resize):
                 normalize_cifar])
 
             transform_test = transforms.Compose([
+                transforms.Resize(32),
                 transforms.ToTensor(),
                 normalize_cifar])
 
@@ -1221,7 +1222,6 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
 def get_triplets_loaders(ind_dataset, val_ood_dataset, ood_datasets, batch_size=32, resize=True):
 
     _, transform_test = _get_image_transforms(ind_dataset, resize=resize)
-    print(resize)
     print(transform_test)
     ind_trainset, ind_testset = _get_dataset(ind_dataset, transforms=[transform_test, transform_test], test=True)
     with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
