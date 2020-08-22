@@ -91,7 +91,10 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
     ipdb.set_trace()
     import pickle
     pickle.dump(mins, open('mins.pickle', 'wb'), protocol=-1)
-    pickle.dump(mins, open('maxs.pickle', 'wb'), protocol=-1)
+    pickle.dump(maxs, open('maxs.pickle', 'wb'), protocol=-1)
+
+    # mins = pickle.load(open('mins.pickle', 'rb'))
+    # maxs = pickle.load(open('mins.pickle', 'rb'))
 
     val_ind_deviations = _get_layer_deviations(model, val_ind_loader, device, mins, maxs)
     expectations = np.mean(val_ind_deviations, axis=0)
