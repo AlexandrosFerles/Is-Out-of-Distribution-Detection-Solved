@@ -1,5 +1,5 @@
 from __future__ import division,print_function
-
+from copy import deepcopy
 import argparse
 import sys
 import time
@@ -36,12 +36,15 @@ class Bottleneck(nn.Module):
         self.bn2 = nn.BatchNorm2d(interChannels)
         self.conv2 = nn.Conv2d(interChannels, growthRate, kernel_size=3,
                                padding=1, bias=False)
+        self.gram_feats = []
 
     def forward(self, x):
         out = self.conv1(F.relu(self.bn1(x)))
         # torch_model.record(out)
+        self.gram_feats.append(out)
         out = self.conv2(F.relu(self.bn2(out)))
         # torch_model.record(out)
+        self.gram_feats.append(out)
         out = torch.cat((x, out), 1)
         return out
 
@@ -52,9 +55,11 @@ class SingleLayer(nn.Module):
         self.bn1 = nn.BatchNorm2d(nChannels)
         self.conv1 = nn.Conv2d(nChannels, growthRate, kernel_size=3,
                                padding=1, bias=False)
+        self.gram_feats = []
 
     def forward(self, x):
         out = self.conv1(F.relu(self.bn1(x)))
+        self.gram_feats.append(out)
         # torch_model.record(out)
         out = torch.cat((x, out), 1)
         return out
@@ -67,9 +72,12 @@ class Transition(nn.Module):
         self.conv1 = nn.Conv2d(nChannels, nOutChannels, kernel_size=1,
                                bias=False)
 
+        self.gram_feats = []
+
     def forward(self, x):
         out = self.conv1(F.relu(self.bn1(x)))
         # torch_model.record(out)
+        self.gram_feats.append(out)
         out = F.avg_pool2d(out, 2)
         return out
 
@@ -79,6 +87,7 @@ class DenseNet(nn.Module):
         super(DenseNet, self).__init__()
 
         self.collecting = False
+        self.gram_feats = []
 
         nDenseBlocks = (depth-4) // 3
         if bottleneck:
@@ -123,6 +132,7 @@ class DenseNet(nn.Module):
                 m.bias.data.zero_()
 
         # self.h = nn.Linear(nChannels, nClasses)
+        self.gram_feats = []
 
     def _make_dense(self, nChannels, growthRate, nDenseBlocks, bottleneck):
         layers = []
@@ -136,19 +146,42 @@ class DenseNet(nn.Module):
 
     def forward(self, x):
         out = self.conv1(x)
+        self.gram_feats.append(out)
         # torch_model.record(out)
-        out = self.trans1(self.dense1(out))
-        import ipdb
-        ipdb.set_trace()
+        out = self.trans1(out)
+        for block in self.trans1.gram_feats:
+            self.gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
+        self.gram_feats.append(out)
+        out = self.dense1(out)
+        for block in self.dense1.gram_feats:
+            self.gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
+        self.gram_feats.append(out)
         # torch_model.record(out)
-        out = self.trans2(self.dense2(out))
+        out = self.trans1(out)
+        for block in self.trans2.gram_feats:
+            self.gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
+        self.gram_feats.append(out)
+        out = self.dense2(out)
+        for block in self.dense2.gram_feats:
+            self.gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
+        self.gram_feats.append(out)
         # torch_model.record(out)
         out = self.dense3(out)
+        for block in self.dense3.gram_feats:
+            self.gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
+        self.gram_feats.append(out)
         # torch_model.record(out)
         out = torch.squeeze(F.avg_pool2d(F.relu(self.bn1(out)), 8))
-
+        self.gram_feats.append(out)
         # torch_model.record(out)
-        return F.log_softmax(self.fc(out))
+        features = deepcopy(self.gram_feats)
+        self.gram_feats.clear()
+        return F.log_softmax(self.fc(out)), features
 
 #     def record(self, t):
 #         if self.collecting:
