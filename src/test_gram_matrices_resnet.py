@@ -145,6 +145,7 @@ class DenseNet(nn.Module):
         torch_model.record(out)
         out = torch.squeeze(F.avg_pool2d(F.relu(self.bn1(out)), 8))
 
+        torch_model.record(out)
         return F.log_softmax(self.fc(out))
 
     def record(self, t):
