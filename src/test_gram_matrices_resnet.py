@@ -138,8 +138,8 @@ class DenseNet(nn.Module):
         out = self.conv1(x)
         # torch_model.record(out)
         out = self.trans1(self.dense1(out))
-        for block in self.trans1:
-            print(block)
+        import ipdb
+        ipdb.set_trace()
         # torch_model.record(out)
         out = self.trans2(self.dense2(out))
         # torch_model.record(out)
