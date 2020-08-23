@@ -221,7 +221,6 @@ parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 args = parser.parse_args()
 device = torch.device(f'cuda:{args.device}')
 
-from models.DenseNet import DenseNet
 torch_model = DenseNet()
 torch_model.load()
 torch_model.cuda()
