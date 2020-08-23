@@ -215,16 +215,16 @@ class DenseNet(nn.Module):
 
 start = time.time()
 parser = argparse.ArgumentParser(description='Out-of-Distribution Detection')
-# parser.add_argument('--model_checkpoint', '--mc', required=True)
+parser.add_argument('--model_checkpoint', '--mc', required=True)
 parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
 args = parser.parse_args()
 device = torch.device(f'cuda:{args.device}')
 
 torch_model = DenseNet()
-torch_model.load()
-torch_model.cuda()
-torch_model.params = list(torch_model.parameters())
+state_dict = torch.load(args.model_checkpoint, map_location=device)
+torch_model.load_state_dict(state_dict)
+model = torch_model.to(device)
 torch_model.eval()
 print("Loaded DenseNet")
 
