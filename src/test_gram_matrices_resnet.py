@@ -328,7 +328,7 @@ torch_model = torch_model.to(device)
 torch_model.eval()
 print("Loaded EBNet")
 
-batch_size = 15
+batch_size = 1
 normalize = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 
 image_size = 224
@@ -418,7 +418,7 @@ print("Test Preds")
 import calculate_log as callog
 def detect(all_test_deviations,all_ood_deviations, verbose=True, normalize=True):
     average_results = {}
-    for i in range(1,11):
+    for i in range(1,7):
         random.seed(i)
 
         validation_indices = random.sample(range(len(all_test_deviations)),int(0.1*len(all_test_deviations)))
@@ -463,7 +463,7 @@ class Detector:
         self.maxs = {}
         self.classes = range(10)
 
-    def compute_minmaxs(self,data_train,POWERS=[10]):
+    def compute_minmaxs(self,data_train,POWERS=[6]):
         for PRED in tqdm(self.classes):
             train_indices = np.where(np.array(train_preds)==PRED)[0]
             train_PRED = torch.squeeze(torch.stack([data_train[i][0] for i in train_indices]),dim=1)
@@ -472,7 +472,7 @@ class Detector:
             self.maxs[PRED] = cpu(maxs)
             torch.cuda.empty_cache()
 
-    def compute_test_deviations(self,POWERS=[10]):
+    def compute_test_deviations(self,POWERS=[6]):
         all_test_deviations = None
         for PRED in tqdm(self.classes):
             test_indices = np.where(np.array(test_preds)==PRED)[0]
@@ -490,7 +490,7 @@ class Detector:
             torch.cuda.empty_cache()
         self.all_test_deviations = all_test_deviations
 
-    def compute_ood_deviations(self,ood,POWERS=[10]):
+    def compute_ood_deviations(self,ood,POWERS=[6]):
         ood_preds = []
         ood_confs = []
 
@@ -536,11 +536,11 @@ def G_p(ob, p):
     return temp
 
 detector = Detector()
-detector.compute_minmaxs(data_train,POWERS=range(1,11))
+detector.compute_minmaxs(data_train,POWERS=range(1,6))
 
-detector.compute_test_deviations(POWERS=range(1,11))
+detector.compute_test_deviations(POWERS=range(1,6))
 
 print("SVHN")
-svhn_results = detector.compute_ood_deviations(svhn,POWERS=range(1,11))
+svhn_results = detector.compute_ood_deviations(svhn,POWERS=range(1,6))
 print("CIFAR-10")
-c100_results = detector.compute_ood_deviations(cifar100,POWERS=range(1,11))
+c100_results = detector.compute_ood_deviations(cifar100,POWERS=range(1,6))
