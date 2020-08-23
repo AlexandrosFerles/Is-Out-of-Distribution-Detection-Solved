@@ -334,17 +334,21 @@ mean = np.array([[125.3/255, 123.0/255, 113.9/255]]).T
 std = np.array([[63.0/255, 62.1/255.0, 66.7/255.0]]).T
 normalize = transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0))
 
-transform_train = transforms.Compose([
-    transforms.RandomCrop(224, padding=4),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    normalize
+image_size = 224
 
-])
-transform_test = transforms.Compose([
-    transforms.CenterCrop(size=(224, 224)),
+transform_train = transforms.Compose([
+    transforms.Resize(256),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomCrop(image_size),
     transforms.ToTensor(),
-    normalize
+    normalize,
+])
+
+transform_test = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(image_size),
+    transforms.ToTensor(),
+    normalize,
 ])
 
 train_loader = torch.utils.data.DataLoader(
