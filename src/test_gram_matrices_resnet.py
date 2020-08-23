@@ -151,29 +151,29 @@ class DenseNet(nn.Module):
         out = self.dense1(out)
         import ipdb
         ipdb.set_trace()
-        for block in self.dense1.gram_feats:
+        for block in self.dense1:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
         self.gram_feats.append(out)
         out = self.trans1(out)
-        for block in self.trans1.gram_feats:
+        for block in self.trans1:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
         self.gram_feats.append(out)
         # torch_model.record(out)
         out = self.dense2(out)
-        for block in self.dense2.gram_feats:
+        for block in self.dense2:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
         self.gram_feats.append(out)
         out = self.trans2(out)
-        for block in self.trans2.gram_feats:
+        for block in self.trans2:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
         self.gram_feats.append(out)
         # torch_model.record(out)
         out = self.dense3(out)
-        for block in self.dense3.gram_feats:
+        for block in self.dense3:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
         self.gram_feats.append(out)
