@@ -348,22 +348,22 @@ transform_test = transforms.Compose([
 ])
 
 train_loader = torch.utils.data.DataLoader(
-    datasets.CIFAR10('data', train=True, download=True,
+    datasets.CIFAR100('data', train=True, download=True,
                      transform=transform_train),
     batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(
-    datasets.CIFAR10('data', train=False, transform=transform_test),
+    datasets.CIFAR100('data', train=False, transform=transform_test),
     batch_size=batch_size)
 
 
 data_train = list(torch.utils.data.DataLoader(
-    datasets.CIFAR10('data', train=True, download=True,
+    datasets.CIFAR100('data', train=True, download=True,
                      transform=transform_test),
     batch_size=1, shuffle=False))
 
 
 data = list(torch.utils.data.DataLoader(
-    datasets.CIFAR10('data', train=False, download=True,
+    datasets.CIFAR100('data', train=False, download=True,
                      transform=transform_test),
     batch_size=1, shuffle=False))
 
@@ -378,7 +378,7 @@ for x,y in test_loader:
 print("Accuracy: ",correct/total)
 
 cifar100 = list(torch.utils.data.DataLoader(
-    datasets.CIFAR100('data', train=False, download=True,
+    datasets.CIFAR10('data', train=False, download=True,
                       transform=transform_test),
     batch_size=1, shuffle=False))
 
@@ -547,5 +547,5 @@ detector.compute_test_deviations(POWERS=range(1,11))
 
 print("SVHN")
 svhn_results = detector.compute_ood_deviations(svhn,POWERS=range(1,11))
-print("CIFAR-100")
+print("CIFAR-10")
 c100_results = detector.compute_ood_deviations(cifar100,POWERS=range(1,11))
