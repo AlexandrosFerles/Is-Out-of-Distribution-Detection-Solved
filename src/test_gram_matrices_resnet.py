@@ -360,7 +360,7 @@ if __name__ == '__main__':
             ood_preds = []
             ood_confs = []
 
-            for idx in range(0,len(ood),128):
+            for idx in tqdm(range(0,len(ood),128)):
                 batch = torch.squeeze(torch.stack([x[0] for x in ood[idx:idx+128]]),dim=1).cuda()
                 logits = torch_model(batch)
                 confs = F.softmax(logits,dim=1).cpu().detach().numpy()
