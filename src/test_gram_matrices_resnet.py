@@ -329,10 +329,7 @@ torch_model.eval()
 print("Loaded EBNet")
 
 batch_size = 32
-mean = np.array([[125.3/255, 123.0/255, 113.9/255]]).T
-
-std = np.array([[63.0/255, 62.1/255.0, 66.7/255.0]]).T
-normalize = transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0))
+normalize = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 
 image_size = 224
 
