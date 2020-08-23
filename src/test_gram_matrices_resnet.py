@@ -106,7 +106,7 @@ class DenseNet(nn.Module):
 
         self.mode = mode
         if self.mode == -1:
-            self.fc = nn.Linear(nChannels, nClasses)
+            self.h = nn.Linear(nChannels, nClasses)
         else:
             self.g = nn.Linear(nChannels, 1)
             self.gbn = nn.BatchNorm1d(1)
