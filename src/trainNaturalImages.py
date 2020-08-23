@@ -69,10 +69,10 @@ def train(args):
 
     for epoch in tqdm(range(4)):
 
-        model.train()
         correct, total = 0, 0
         train_loss = 0
         for data in tqdm(trainloader):
+            model.train()
             inputs, labels = data
             inputs = inputs.to(device)
             labels = labels.to(device)
