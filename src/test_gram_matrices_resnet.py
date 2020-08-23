@@ -211,7 +211,7 @@ class DenseNet3(nn.Module):
 
 start = time.time()
 parser = argparse.ArgumentParser(description='Out-of-Distribution Detection')
-parser.add_argument('--model_checkpoint', '--mc', required=True)
+# parser.add_argument('--model_checkpoint', '--mc', required=True)
 parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
 args = parser.parse_args()
