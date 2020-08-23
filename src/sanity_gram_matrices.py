@@ -3,7 +3,7 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 from dataLoaders import get_triplets_loaders
 import numpy as np
-from models.ResNet import ResNet, BasicBlock
+from test_gram_matrices_resnet import DenseNet
 from ood import _get_gram_power
 from ood_ensemble import _ood_detection_performance
 import argparse
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     device = torch.device(f'cuda:{args.device}')
 
-    model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=10)
+    model = DenseNet()
     state_dict = torch.load(args.model_checkpoint, map_location=device)
     model.load_state_dict(state_dict)
     model = model.to(device)

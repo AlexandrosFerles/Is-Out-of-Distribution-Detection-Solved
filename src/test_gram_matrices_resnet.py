@@ -39,9 +39,9 @@ class Bottleneck(nn.Module):
 
     def forward(self, x):
         out = self.conv1(F.relu(self.bn1(x)))
-        torch_model.record(out)
+        # torch_model.record(out)
         out = self.conv2(F.relu(self.bn2(out)))
-        torch_model.record(out)
+        # torch_model.record(out)
         out = torch.cat((x, out), 1)
         return out
 
@@ -55,7 +55,7 @@ class SingleLayer(nn.Module):
 
     def forward(self, x):
         out = self.conv1(F.relu(self.bn1(x)))
-        torch_model.record(out)
+        # torch_model.record(out)
         out = torch.cat((x, out), 1)
         return out
 
@@ -69,7 +69,7 @@ class Transition(nn.Module):
 
     def forward(self, x):
         out = self.conv1(F.relu(self.bn1(x)))
-        torch_model.record(out)
+        # torch_model.record(out)
         out = F.avg_pool2d(out, 2)
         return out
 
@@ -136,16 +136,16 @@ class DenseNet(nn.Module):
 
     def forward(self, x):
         out = self.conv1(x)
-        torch_model.record(out)
+        # torch_model.record(out)
         out = self.trans1(self.dense1(out))
-        torch_model.record(out)
+        # torch_model.record(out)
         out = self.trans2(self.dense2(out))
-        torch_model.record(out)
+        # torch_model.record(out)
         out = self.dense3(out)
-        torch_model.record(out)
+        # torch_model.record(out)
         out = torch.squeeze(F.avg_pool2d(F.relu(self.bn1(out)), 8))
 
-        torch_model.record(out)
+        # torch_model.record(out)
         return F.log_softmax(self.fc(out))
 
     def record(self, t):
