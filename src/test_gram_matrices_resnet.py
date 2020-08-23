@@ -148,24 +148,24 @@ class DenseNet(nn.Module):
         out = self.conv1(x)
         self.gram_feats.append(out)
         # torch_model.record(out)
-        out = self.trans1(out)
-        for block in self.trans1.gram_feats:
-            self.gram_feats.extend(block.gram_feats)
-            block.gram_feats.clear()
-        self.gram_feats.append(out)
         out = self.dense1(out)
         for block in self.dense1.gram_feats:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
         self.gram_feats.append(out)
-        # torch_model.record(out)
-        out = self.trans2(out)
-        for block in self.trans2.gram_feats:
+        out = self.trans1(out)
+        for block in self.trans1.gram_feats:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
         self.gram_feats.append(out)
+        # torch_model.record(out)
         out = self.dense2(out)
         for block in self.dense2.gram_feats:
+            self.gram_feats.extend(block.gram_feats)
+            block.gram_feats.clear()
+        self.gram_feats.append(out)
+        out = self.trans2(out)
+        for block in self.trans2.gram_feats:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
         self.gram_feats.append(out)
