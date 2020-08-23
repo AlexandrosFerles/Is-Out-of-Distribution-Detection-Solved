@@ -335,14 +335,14 @@ std = np.array([[63.0/255, 62.1/255.0, 66.7/255.0]]).T
 normalize = transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0))
 
 transform_train = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),
+    transforms.RandomCrop(224, padding=4),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     normalize
 
 ])
 transform_test = transforms.Compose([
-    transforms.CenterCrop(size=(32, 32)),
+    transforms.CenterCrop(size=(224, 224)),
     transforms.ToTensor(),
     normalize
 ])
