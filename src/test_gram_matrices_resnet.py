@@ -286,8 +286,8 @@ svhn = list(torch.utils.data.DataLoader(
 train_preds = []
 train_confs = []
 train_logits = []
-for idx in range(0,len(data_train),128):
-    batch = torch.squeeze(torch.stack([x[0] for x in data_train[idx:idx+128]]),dim=1).cuda()
+for idx in range(0,len(data_train),batch_size):
+    batch = torch.squeeze(torch.stack([x[0] for x in data_train[idx:idx+batch_size]]),dim=1).cuda()
 
     logits = torch_model(batch)
     confs = F.softmax(logits,dim=1).cpu().detach().numpy()
@@ -303,8 +303,8 @@ test_preds = []
 test_confs = []
 test_logits = []
 
-for idx in range(0,len(data),128):
-    batch = torch.squeeze(torch.stack([x[0] for x in data[idx:idx+128]]),dim=1).cuda()
+for idx in range(0,len(data),batch_size):
+    batch = torch.squeeze(torch.stack([x[0] for x in data[idx:idx+batch_size]]),dim=1).cuda()
 
     logits = torch_model(batch)
     confs = F.softmax(logits,dim=1).cpu().detach().numpy()
@@ -395,8 +395,8 @@ class Detector:
         ood_preds = []
         ood_confs = []
 
-        for idx in range(0,len(ood),128):
-            batch = torch.squeeze(torch.stack([x[0] for x in ood[idx:idx+128]]),dim=1).cuda()
+        for idx in range(0,len(ood),batch_size):
+            batch = torch.squeeze(torch.stack([x[0] for x in ood[idx:idx+batch_size]]),dim=1).cuda()
             logits = torch_model(batch)
             confs = F.softmax(logits,dim=1).cpu().detach().numpy()
             preds = np.argmax(confs,axis=1)
