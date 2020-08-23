@@ -73,6 +73,7 @@ def _gram_matrices(model, loaders, device, num_classes, power=10):
 
         for c in range(num_classes):
             indices = np.where(argmaxs.detach().cpu().numpy() == c)
+            ipdb.set_trace()
             for layer, feature_map in enumerate(features):
                 selected_features = feature_map[indices]
                 for p in (range(power)):
