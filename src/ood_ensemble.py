@@ -316,7 +316,9 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
 def _gram_matrices(model, loaders, device, num_classes, power=6, model_type='eb0'):
 
     model.eval()
+    from ood import _score_classification_accuracy
     train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
+    _score_classification_accuracy(model, test_ind_loader, device, 'cifar10')
 
     temp_x = torch.rand(2, 3, 224, 224).to(device)
     temp_x = Variable(temp_x)
