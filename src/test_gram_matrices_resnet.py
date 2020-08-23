@@ -4,7 +4,7 @@ import argparse
 import sys
 import time
 
-from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 import random
 import matplotlib.pyplot as plt
 import math
