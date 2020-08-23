@@ -23,7 +23,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    wandb.init(name=training_configurations.checkpoint)
+    # wandb.init(name=training_configurations.checkpoint)
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -65,6 +65,7 @@ def train(args):
 
     criterion = nn.CrossEntropyLoss()
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
+    prev_accuracy = 0
 
     for epoch in tqdm(range(epochs)):
 
@@ -90,60 +91,82 @@ def train(args):
             loss.backward()
             optimizer.step()
 
-        scheduler.step()
-        train_accuracy = correct / total
-        wandb.log({'epoch': epoch}, commit=False)
-        wandb.log({'Train Set Loss': train_loss / trainloader.__len__(), 'epoch': epoch})
-        wandb.log({'Train Set Accuracy': train_accuracy, 'epoch': epoch})
-
-        model.eval()
-        correct, total = 0, 0
-
-        with torch.no_grad():
-
-            for data in val_loader:
-                images, labels = data
-                images = images.to(device)
-                labels = labels.to(device)
-
-                if 'genOdin' in training_configurations.checkpoint:
-                    outputs, _, _ = model(images)
-                else:
-                    outputs = model(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-
-            epoch_val_accuracy = correct / total
-            wandb.log({'Validation Set Accuracy': epoch_val_accuracy, 'epoch': epoch})
-
-        if epoch_val_accuracy > best_val_acc:
-            best_val_acc = epoch_val_accuracy
-            if os.path.exists('/raid/ferles/'):
-                torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
-                # torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/extended_{training_configurations.checkpoint}.pth')
-            else:
-                torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
-                # torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/low_dropout_extended_{training_configurations.checkpoint}.pth')
-
+            model.eval()
             correct, total = 0, 0
 
-            for data in testloader:
-                images, labels = data
-                images = images.to(device)
-                labels = labels.to(device)
+            with torch.no_grad():
 
-                if 'genOdin' in training_configurations.checkpoint:
-                    outputs, _, _ = model(images)
-                else:
-                    outputs = model(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+                for data in testloader:
+                    images, labels = data
+                    images = images.to(device)
+                    labels = labels.to(device)
+    
+                    if 'genOdin' in training_configurations.checkpoint:
+                        outputs, _, _ = model(images)
+                    else:
+                        outputs = model(images)
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item()
 
-            test_set_accuracy = correct / total
+                test_set_accuracy = correct / total
 
-        wandb.log({'Test Set Accuracy': test_set_accuracy, 'epoch': epoch})
+                if test_set_accuracy - prev_accuracy > 0.05:
+                    prev_accuracy = test_set_accuracy
+                    torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_accuracy_{prev_accuracy}.pth')
+
+        scheduler.step()
+        train_accuracy = correct / total
+        # wandb.log({'epoch': epoch}, commit=False)
+        # wandb.log({'Train Set Loss': train_loss / trainloader.__len__(), 'epoch': epoch})
+        # wandb.log({'Train Set Accuracy': train_accuracy, 'epoch': epoch})
+
+        # model.eval()
+        # correct, total = 0, 0
+        #
+        # with torch.no_grad():
+        #
+        #     for data in val_loader:
+        #         images, labels = data
+        #         images = images.to(device)
+        #         labels = labels.to(device)
+        #
+        #         if 'genOdin' in training_configurations.checkpoint:
+        #             outputs, _, _ = model(images)
+        #         else:
+        #             outputs = model(images)
+        #         _, predicted = torch.max(outputs.data, 1)
+        #         total += labels.size(0)
+        #         correct += (predicted == labels).sum().item()
+        #
+        #     epoch_val_accuracy = correct / total
+        #     wandb.log({'Validation Set Accuracy': epoch_val_accuracy, 'epoch': epoch})
+        #
+        # if epoch_val_accuracy > best_val_acc:
+        #     best_val_acc = epoch_val_accuracy
+        #     if os.path.exists('/raid/ferles/'):
+        #         torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+        #     else:
+        #         torch.save(model.state_dict(), f'/home/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}.pth')
+        #
+        #     correct, total = 0, 0
+        #
+        #     for data in testloader:
+        #         images, labels = data
+        #         images = images.to(device)
+        #         labels = labels.to(device)
+        #
+        #         if 'genOdin' in training_configurations.checkpoint:
+        #             outputs, _, _ = model(images)
+        #         else:
+        #             outputs = model(images)
+        #         _, predicted = torch.max(outputs.data, 1)
+        #         total += labels.size(0)
+        #         correct += (predicted == labels).sum().item()
+        #
+        #     test_set_accuracy = correct / total
+        #
+        # wandb.log({'Test Set Accuracy': test_set_accuracy, 'epoch': epoch})
 
 
 if __name__ == '__main__':
