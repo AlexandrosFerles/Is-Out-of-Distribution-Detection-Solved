@@ -25,104 +25,92 @@ torch.cuda.set_device(5)
 def conv3x3(in_planes, out_planes, stride=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
-class BottleneckBlock(nn.Module):
-    def __init__(self, in_planes, out_planes, dropRate=0.0):
-        super(BottleneckBlock, self).__init__()
-        inter_planes = out_planes * 4
-        self.bn1 = nn.BatchNorm2d(in_planes)
-        self.relu = nn.ReLU(inplace=True)
-        self.conv1 = nn.Conv2d(in_planes, inter_planes, kernel_size=1, stride=1,
-                               padding=0, bias=False)
-        self.bn2 = nn.BatchNorm2d(inter_planes)
-        self.conv2 = nn.Conv2d(inter_planes, out_planes, kernel_size=3, stride=1,
+
+class Bottleneck(nn.Module):
+    def __init__(self, nChannels, growthRate):
+        super(Bottleneck, self).__init__()
+        interChannels = 4*growthRate
+        self.bn1 = nn.BatchNorm2d(nChannels)
+        self.conv1 = nn.Conv2d(nChannels, interChannels, kernel_size=1,
+                               bias=False)
+        self.bn2 = nn.BatchNorm2d(interChannels)
+        self.conv2 = nn.Conv2d(interChannels, growthRate, kernel_size=3,
                                padding=1, bias=False)
-        self.droprate = dropRate
 
     def forward(self, x):
-
-        out = self.conv1(self.relu(self.bn1(x)))
-
+        out = self.conv1(F.relu(self.bn1(x)))
         torch_model.record(out)
-
-        if self.droprate > 0:
-            out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
-
-        out = self.conv2(self.relu(self.bn2(out)))
+        out = self.conv2(F.relu(self.bn2(out)))
         torch_model.record(out)
+        out = torch.cat((x, out), 1)
+        return out
 
-        if self.droprate > 0:
-            out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
-        return torch.cat([x, out], 1)
 
-class TransitionBlock(nn.Module):
-    def __init__(self, in_planes, out_planes, dropRate=0.0):
-        super(TransitionBlock, self).__init__()
-        self.bn1 = nn.BatchNorm2d(in_planes)
-        self.relu = nn.ReLU(inplace=True)
-        self.conv1 = nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=1,
-                               padding=0, bias=False)
-        self.droprate = dropRate
+class SingleLayer(nn.Module):
+    def __init__(self, nChannels, growthRate):
+        super(SingleLayer, self).__init__()
+        self.bn1 = nn.BatchNorm2d(nChannels)
+        self.conv1 = nn.Conv2d(nChannels, growthRate, kernel_size=3,
+                               padding=1, bias=False)
 
     def forward(self, x):
-        out = self.conv1(self.relu(self.bn1(x)))
+        out = self.conv1(F.relu(self.bn1(x)))
         torch_model.record(out)
+        out = torch.cat((x, out), 1)
+        return out
 
-        if self.droprate > 0:
-            out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
-        return F.avg_pool2d(out, 2)
 
-class DenseBlock(nn.Module):
-    def __init__(self, nb_layers, in_planes, growth_rate, block, dropRate=0.0):
-        super(DenseBlock, self).__init__()
-        self.layer = self._make_layer(block, in_planes, growth_rate, nb_layers, dropRate)
-
-    def _make_layer(self, block, in_planes, growth_rate, nb_layers, dropRate):
-        layers = []
-        for i in range(int(nb_layers)):
-            layers.append(block(in_planes+i*growth_rate, growth_rate, dropRate))
-        return nn.Sequential(*layers)
+class Transition(nn.Module):
+    def __init__(self, nChannels, nOutChannels):
+        super(Transition, self).__init__()
+        self.bn1 = nn.BatchNorm2d(nChannels)
+        self.conv1 = nn.Conv2d(nChannels, nOutChannels, kernel_size=1,
+                               bias=False)
 
     def forward(self, x):
-        t = self.layer(x)
-        torch_model.record(t)
-        return t
+        out = self.conv1(F.relu(self.bn1(x)))
+        torch_model.record(out)
+        out = F.avg_pool2d(out, 2)
+        return out
 
 
-class DenseNet3(nn.Module):
-    def __init__(self, depth, num_classes, growth_rate=12,
-                 reduction=0.5, bottleneck=True, dropRate=0.0):
-        super(DenseNet3, self).__init__()
+class DenseNet(nn.Module):
+    def __init__(self, growthRate=12, depth=100, reduction=0.5, nClasses=10, bottleneck=True, mode=-1):
+        super(DenseNet, self).__init__()
 
         self.collecting = False
 
-        in_planes = 2 * growth_rate
-        n = (depth - 4) / 3
-        if bottleneck == True:
-            n = n/2
-            block = BottleneckBlock
+        nDenseBlocks = (depth-4) // 3
+        if bottleneck:
+            nDenseBlocks //= 2
+
+        nChannels = 2*growthRate
+        self.conv1 = nn.Conv2d(3, nChannels, kernel_size=3, padding=1,
+                               bias=False)
+        self.dense1 = self._make_dense(nChannels, growthRate, nDenseBlocks, bottleneck)
+        nChannels += nDenseBlocks*growthRate
+        nOutChannels = int(math.floor(nChannels*reduction))
+        self.trans1 = Transition(nChannels, nOutChannels)
+
+        nChannels = nOutChannels
+        self.dense2 = self._make_dense(nChannels, growthRate, nDenseBlocks, bottleneck)
+        nChannels += nDenseBlocks*growthRate
+        nOutChannels = int(math.floor(nChannels*reduction))
+        self.trans2 = Transition(nChannels, nOutChannels)
+
+        nChannels = nOutChannels
+        self.dense3 = self._make_dense(nChannels, growthRate, nDenseBlocks, bottleneck)
+        nChannels += nDenseBlocks*growthRate
+
+        self.bn1 = nn.BatchNorm2d(nChannels)
+
+        self.mode = mode
+        if self.mode == -1:
+            self.fc = nn.Linear(nChannels, nClasses)
         else:
-            block = BasicBlock
-        # 1st conv before any dense block
-        self.conv1 = nn.Conv2d(3, in_planes, kernel_size=3, stride=1,
-                               padding=1, bias=False)
-        # 1st block
-        self.block1 = DenseBlock(n, in_planes, growth_rate, block, dropRate)
-        in_planes = int(in_planes+n*growth_rate)
-        self.trans1 = TransitionBlock(in_planes, int(math.floor(in_planes*reduction)), dropRate=dropRate)
-        in_planes = int(math.floor(in_planes*reduction))
-        # 2nd block
-        self.block2 = DenseBlock(n, in_planes, growth_rate, block, dropRate)
-        in_planes = int(in_planes+n*growth_rate)
-        self.trans2 = TransitionBlock(in_planes, int(math.floor(in_planes*reduction)), dropRate=dropRate)
-        in_planes = int(math.floor(in_planes*reduction))
-        # 3rd block
-        self.block3 = DenseBlock(n, in_planes, growth_rate, block, dropRate)
-        in_planes = int(in_planes+n*growth_rate)
-        # global average pooling and classifier
-        self.bn1 = nn.BatchNorm2d(in_planes)
-        self.relu = nn.ReLU(inplace=True)
-        self.fc = nn.Linear(in_planes, num_classes)
-        self.in_planes = in_planes
+            self.g = nn.Linear(nChannels, 1)
+            self.gbn = nn.BatchNorm1d(1)
+            self.gsigmoid = torch.nn.Sigmoid()
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -134,17 +122,32 @@ class DenseNet3(nn.Module):
             elif isinstance(m, nn.Linear):
                 m.bias.data.zero_()
 
+        self.h = nn.Linear(nChannels, nClasses)
+
+    def _make_dense(self, nChannels, growthRate, nDenseBlocks, bottleneck):
+        layers = []
+        for i in range(int(nDenseBlocks)):
+            if bottleneck:
+                layers.append(Bottleneck(nChannels, growthRate))
+            else:
+                layers.append(SingleLayer(nChannels, growthRate))
+            nChannels += growthRate
+        return nn.Sequential(*layers)
+
     def forward(self, x):
         out = self.conv1(x)
-        out = self.trans1(self.block1(out))
-        out = self.trans2(self.block2(out))
-        out = self.block3(out)
-        out = self.relu(self.bn1(out))
-        out = F.avg_pool2d(out, 8)
-        out = out.view(-1, self.in_planes)
-        return self.fc(out)
+        torch_model.record(out)
+        out = self.trans1(self.dense1(out))
+        torch_model.record(out)
+        out = self.trans2(self.dense2(out))
+        torch_model.record(out)
+        out = self.dense3(out)
+        torch_model.record(out)
+        out = torch.squeeze(F.avg_pool2d(F.relu(self.bn1(out)), 8))
 
-    def load(self, path="densenet_cifar10.pth"):
+        return F.log_softmax(self.fc(out))
+
+    def load(self, path="/raid/ferles/checkpoints/dense_net_gen_odin/dense_net_godin_-1.pth"):
         tm = torch.load(path,map_location="cpu")
         self.load_state_dict(tm.state_dict(),strict=False)
 
@@ -208,6 +211,7 @@ class DenseNet3(nn.Module):
         deviations = np.concatenate(deviations,axis=0)
 
         return deviations
+
 
 start = time.time()
 parser = argparse.ArgumentParser(description='Out-of-Distribution Detection')

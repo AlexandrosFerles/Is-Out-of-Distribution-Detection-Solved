@@ -68,6 +68,7 @@ class SingleLayer(nn.Module):
         out = torch.cat((x, out), 1)
         return out
 
+
 class Transition(nn.Module):
     def __init__(self, nChannels, nOutChannels):
         super(Transition, self).__init__()
