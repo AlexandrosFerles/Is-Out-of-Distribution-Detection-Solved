@@ -321,7 +321,7 @@ torch.cuda.set_device(int(args.device))
 device = torch.device(f'cuda:{args.device}')
 
 torch_model = EfficientNet.from_name('efficientnet-b0')
-torch_model._fc = nn.Linear(torch_model._fc.in_features, 10)
+torch_model._fc = nn.Linear(torch_model._fc.in_features, 100)
 state_dict = torch.load(args.model_checkpoint, map_location=device)
 torch_model.load_state_dict(state_dict, strict=False)
 torch_model = torch_model.to(device)
