@@ -43,6 +43,7 @@ if __name__ == '__main__':
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
     args = parser.parse_args()
+    torch.cuda.set_device(args.device) #Select the GPU
 
     device = torch.device(f'cuda:{args.device}')
 
