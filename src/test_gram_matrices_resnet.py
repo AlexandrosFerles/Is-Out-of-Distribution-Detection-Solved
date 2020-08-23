@@ -149,8 +149,6 @@ class DenseNet(nn.Module):
         self.gram_feats.append(out)
         # torch_model.record(out)
         out = self.dense1(out)
-        import ipdb
-        ipdb.set_trace()
         for block in self.dense1:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
