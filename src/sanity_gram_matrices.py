@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     model = DenseNet()
     state_dict = torch.load(args.model_checkpoint, map_location=device)
-    model.load_state_dict(state_dict)
+    model.load_state_dict(state_dict, strict=False)
     model = model.to(device)
 
     ind_dataset = args.in_distribution_dataset.lower()
