@@ -110,12 +110,12 @@ def train(args):
                     correct += (predicted == labels).sum().item()
 
                 test_set_accuracy = correct / total
-
+                wandb.log({'Test Set Accuracy': test_set_accuracy})
                 if test_set_accuracy - prev_accuracy > 0.05:
                     prev_accuracy = test_set_accuracy
                     torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_accuracy_{prev_accuracy}.pth')
-                    print(f'Daving to /raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_accuracy_{prev_accuracy}.pth')
-                    wandb.log({'Test Set Accuracy': test_set_accuracy})
+                    print(f'Saving to /raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_accuracy_{prev_accuracy}.pth')
+
 
         scheduler.step()
         train_accuracy = correct / total
