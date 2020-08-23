@@ -216,7 +216,7 @@ parser.add_argument('--model_checkpoint', '--mc', required=True)
 parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
 args = parser.parse_args()
-torch.cuda.set_device(f'{args.device}')
+torch.cuda.set_device(int(args.device))
 device = torch.device(f'cuda:{args.device}')
 
 torch_model = DenseNet()
