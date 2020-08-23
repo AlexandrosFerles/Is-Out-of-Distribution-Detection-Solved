@@ -147,10 +147,6 @@ class DenseNet(nn.Module):
 
         return F.log_softmax(self.fc(out))
 
-    def load(self, path="/raid/ferles/checkpoints/dense_net_gen_odin/dense_net_godin_-1.pth"):
-        tm = torch.load(path,map_location="cpu")
-        self.load_state_dict(tm.state_dict(),strict=False)
-
     def record(self, t):
         if self.collecting:
             self.gram_feats.append(t)
@@ -223,7 +219,7 @@ device = torch.device(f'cuda:{args.device}')
 
 torch_model = DenseNet()
 state_dict = torch.load(args.model_checkpoint, map_location=device)
-torch_model.load_state_dict(state_dict)
+torch_model.load_state_dict(state_dict, strict=False)
 model = torch_model.to(device)
 torch_model.eval()
 print("Loaded DenseNet")
