@@ -19,7 +19,7 @@ from torchvision import datasets, transforms
 from torch.nn.parameter import Parameter
 import calculate_log as callog
 import warnings
-torch.cuda.set_device(6)
+
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -215,6 +215,7 @@ parser.add_argument('--model_checkpoint', '--mc', required=True)
 parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
 args = parser.parse_args()
+torch.cuda.set_device(f'{args.device}')
 device = torch.device(f'cuda:{args.device}')
 
 torch_model = DenseNet()
