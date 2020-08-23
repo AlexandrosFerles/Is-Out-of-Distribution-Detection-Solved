@@ -19,6 +19,7 @@ from torchvision import datasets, transforms
 from torch.nn.parameter import Parameter
 import calculate_log as callog
 import warnings
+import ipdb
 
 
 
@@ -154,6 +155,7 @@ class DenseNet(nn.Module):
             block.gram_feats.clear()
         self.gram_feats.append(out)
         out = self.trans1(out)
+        ipdb.set_trace()
         for block in self.trans1:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
