@@ -19,7 +19,7 @@ from torchvision import datasets, transforms
 from torch.nn.parameter import Parameter
 import calculate_log as callog
 import warnings
-torch.cuda.set_device(5)
+torch.cuda.set_device(6)
 
 
 def conv3x3(in_planes, out_planes, stride=1):
