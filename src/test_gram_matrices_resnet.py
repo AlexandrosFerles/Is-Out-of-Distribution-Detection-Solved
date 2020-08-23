@@ -146,40 +146,39 @@ class DenseNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        features = []
         out = self.conv1(x)
-        self.gram_feats.append(out)
+        features.append(out)
         # torch_model.record(out)
         out = self.dense1(out)
         for block in self.dense1:
-            self.gram_feats.extend(block.gram_feats)
+            features.extend(block.gram_feats)
             block.gram_feats.clear()
-        self.gram_feats.append(out)
+        features.append(out)
         out = self.trans1(out)
-        self.gram_feats.append(self.trans1.gram_feats)
+        features.append(self.trans1.gram_feats)
         self.trans1.gram_feats.clear()
-        self.gram_feats.append(out)
+        features.append(out)
         # torch_model.record(out)
         out = self.dense2(out)
         for block in self.dense2:
-            self.gram_feats.extend(block.gram_feats)
+            features.extend(block.gram_feats)
             block.gram_feats.clear()
-        self.gram_feats.append(out)
+        features.append(out)
         out = self.trans2(out)
-        self.gram_feats.append(self.trans2.gram_feats)
+        features.append(self.trans2.gram_feats)
         self.trans2.gram_feats.clear()
-        self.gram_feats.append(out)
+        features.append(out)
         # torch_model.record(out)
         out = self.dense3(out)
         for block in self.dense3:
-            self.gram_feats.extend(block.gram_feats)
+            features.extend(block.gram_feats)
             block.gram_feats.clear()
-        self.gram_feats.append(out)
+        features.append(out)
         # torch_model.record(out)
         out = torch.squeeze(F.avg_pool2d(F.relu(self.bn1(out)), 8))
-        self.gram_feats.append(out)
+        features.append(out)
         # torch_model.record(out)
-        features = deepcopy(self.gram_feats)
-        self.gram_feats.clear()
         return F.log_softmax(self.fc(out)), features
 
 #     def record(self, t):
