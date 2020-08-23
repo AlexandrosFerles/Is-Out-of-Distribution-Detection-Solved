@@ -23,7 +23,7 @@ def train(args):
 
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
-    # wandb.init(name=training_configurations.checkpoint)
+    wandb.init(name=training_configurations.checkpoint)
     device = torch.device(f'cuda:{args.device}')
 
     flag = False
@@ -114,6 +114,8 @@ def train(args):
                 if test_set_accuracy - prev_accuracy > 0.05:
                     prev_accuracy = test_set_accuracy
                     torch.save(model.state_dict(), f'/raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_accuracy_{prev_accuracy}.pth')
+                    print(f'Daving to /raid/ferles/checkpoints/eb0/{dataset}/{training_configurations.checkpoint}_accuracy_{prev_accuracy}.pth')
+                    wandb.log({'Test Set Accuracy': test_set_accuracy})
 
         scheduler.step()
         train_accuracy = correct / total
