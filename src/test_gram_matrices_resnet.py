@@ -145,7 +145,21 @@ class DenseNet(nn.Module):
         torch_model.record(out)
         out = torch.squeeze(F.avg_pool2d(F.relu(self.bn1(out)), 8))
 
-        return F.log_softmax(self.fc(out))
+        if self.mode == -1:
+            return F.log_softmax(self.fc(out))
+
+        else:
+            h = self.h(out)
+            g = self.g(out)
+            g = self.gbn(g)
+            g = self.gsigmoid(g)
+
+            if self.mode == 1:
+                out = - h / g
+            else:
+                out = h / g
+
+            return F.log_softmax(out), h, g
 
     def load(self, path="/raid/ferles/checkpoints/dense_net_gen_odin/dense_net_godin_-1.pth"):
         tm = torch.load(path,map_location="cpu")
