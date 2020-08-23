@@ -321,7 +321,7 @@ torch.cuda.set_device(int(args.device))
 device = torch.device(f'cuda:{args.device}')
 
 torch_model = EfficientNet.from_name('efficientnet-b0')
-torch_model._fc = nn.Linear(torch_model._fc.in_features, 100)
+torch_model._fc = nn.Linear(torch_model._fc.in_features, 10)
 state_dict = torch.load(args.model_checkpoint, map_location=device)
 torch_model.load_state_dict(state_dict, strict=False)
 torch_model = torch_model.to(device)
@@ -348,37 +348,31 @@ transform_test = transforms.Compose([
 ])
 
 train_loader = torch.utils.data.DataLoader(
-    datasets.CIFAR100('data', train=True, download=True,
+    datasets.CIFAR10('data', train=True, download=True,
                      transform=transform_train),
     batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(
-    datasets.CIFAR100('data', train=False, transform=transform_test),
+    datasets.CIFAR10('data', train=False, transform=transform_test),
     batch_size=batch_size)
 
 
 data_train = list(torch.utils.data.DataLoader(
-    datasets.CIFAR100('data', train=True, download=True,
+    datasets.CIFAR10('data', train=True, download=True,
                      transform=transform_test),
     batch_size=1, shuffle=False))
 
 
 data = list(torch.utils.data.DataLoader(
-    datasets.CIFAR100('data', train=False, download=True,
+    datasets.CIFAR10('data', train=False, download=True,
                      transform=transform_test),
     batch_size=1, shuffle=False))
 
 torch_model.eval()
-correct = 0
-total = 0
-for x,y in test_loader:
-    x = x.cuda()
-    y = y.numpy()
-    correct += (y==np.argmax(torch_model(x).detach().cpu().numpy(),axis=1)).sum()
-    total += y.shape[0]
-print("Accuracy: ",correct/total)
+from ood import _score_classification_accuracy
+_score_classification_accuracy(torch_model, test_loader, args.device, 'cifar10')
 
 cifar100 = list(torch.utils.data.DataLoader(
-    datasets.CIFAR10('data', train=False, download=True,
+    datasets.CIFAR100('data', train=False, download=True,
                       transform=transform_test),
     batch_size=1, shuffle=False))
 
