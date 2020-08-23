@@ -212,10 +212,10 @@ class DenseNet3(nn.Module):
 start = time.time()
 parser = argparse.ArgumentParser(description='Out-of-Distribution Detection')
 parser.add_argument('--model_checkpoint', '--mc', required=True)
+parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
 args = parser.parse_args()
 device = torch.device(f'cuda:{args.device}')
-parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
 torch_model = DenseNet3(100, num_classes=10)
 state_dict = torch.load(args.model_checkpoint, map_location=device)
