@@ -67,7 +67,7 @@ def train(args):
     checkpoint_val_accuracy, best_val_acc, test_set_accuracy = 0, 0, 0
     prev_accuracy = 0
 
-    for epoch in tqdm(range(epochs)):
+    for epoch in tqdm(range(4)):
 
         model.train()
         correct, total = 0, 0
@@ -100,7 +100,7 @@ def train(args):
                     images, labels = data
                     images = images.to(device)
                     labels = labels.to(device)
-    
+
                     if 'genOdin' in training_configurations.checkpoint:
                         outputs, _, _ = model(images)
                     else:
