@@ -214,12 +214,13 @@ parser = argparse.ArgumentParser(description='Out-of-Distribution Detection')
 parser.add_argument('--model_checkpoint', '--mc', required=True)
 parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
+import ipdb
+ipdb.set_trace()
+
 args = parser.parse_args()
 device = torch.device(f'cuda:{args.device}')
 
 torch_model = DenseNet3(100, num_classes=10)
-import ipdb
-ipdb.set_trace()
 state_dict = torch.load(args.model_checkpoint, map_location=device)
 torch_model.load_state_dict(state_dict)
 torch_model = torch_model.to(device)
