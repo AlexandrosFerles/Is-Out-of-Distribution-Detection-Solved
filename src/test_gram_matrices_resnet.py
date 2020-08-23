@@ -159,7 +159,7 @@ class DenseNet(nn.Module):
             block.gram_feats.clear()
         self.gram_feats.append(out)
         # torch_model.record(out)
-        out = self.trans1(out)
+        out = self.trans2(out)
         for block in self.trans2.gram_feats:
             self.gram_feats.extend(block.gram_feats)
             block.gram_feats.clear()
