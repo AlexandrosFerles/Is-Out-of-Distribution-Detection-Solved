@@ -44,7 +44,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     torch.cuda.set_device(args.device) #Select the GPU
-
     device = torch.device(f'cuda:{args.device}')
 
     def conv3x3(in_planes, out_planes, stride=1):
