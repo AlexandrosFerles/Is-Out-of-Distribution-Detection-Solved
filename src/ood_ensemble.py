@@ -448,28 +448,29 @@ if __name__ == '__main__':
     args = parser.parse_args()
     device = torch.device(f'cuda:{args.device}')
 
-    model_checkpoints, num_classes = [], []
-    for line in open(args.model_checkpoints_file, 'r'):
-        model_checkpoint = line.split('\n')[0]
-        model_checkpoints.append(model_checkpoint)
+    # model_checkpoints, num_classes = [], []
+    # for line in open(args.model_checkpoints_file, 'r'):
+    #     model_checkpoint = line.split('\n')[0]
+    #     model_checkpoints.append(model_checkpoint)
 
-    standard_checkpoint = model_checkpoints[0]
+    # standard_checkpoint = model_checkpoints[0]
+    standard_checkpoint = args.model_checkpoints_file
     standard_model = build_model_with_checkpoint('eb0', standard_checkpoint, device=device, out_classes=args.num_classes)
 
-    rotation_checkpoint = model_checkpoints[1]
-    rotation_model = build_model_with_checkpoint('roteb0', rotation_checkpoint, device=device, out_classes=args.num_classes)
+    # rotation_checkpoint = model_checkpoints[1]
+    # rotation_model = build_model_with_checkpoint('roteb0', rotation_checkpoint, device=device, out_classes=args.num_classes)
 
-    genodin_checkpoint = model_checkpoints[2]
-    genodin_model = build_model_with_checkpoint('geneb0', genodin_checkpoint, device=device, out_classes=args.num_classes)
+    # genodin_checkpoint = model_checkpoints[2]
+    # genodin_model = build_model_with_checkpoint('geneb0', genodin_checkpoint, device=device, out_classes=args.num_classes)
 
-    ensemble_checkpoints_file = model_checkpoints[3]
+    # ensemble_checkpoints_file = model_checkpoints[3]
 
-    ensemble_checkpoints, num_classes = [], []
-    for line in open(ensemble_checkpoints_file, 'r'):
-        model_checkpoint, nc = line.split('\n')[0].split(',')
-        nc = int(nc)
-        ensemble_checkpoints.append(model_checkpoint)
-        num_classes.append(nc)
+    # ensemble_checkpoints, num_classes = [], []
+    # for line in open(ensemble_checkpoints_file, 'r'):
+    #     model_checkpoint, nc = line.split('\n')[0].split(',')
+    #     nc = int(nc)
+    #     ensemble_checkpoints.append(model_checkpoint)
+    #     num_classes.append(nc)
 
     ind_dataset = args.in_distribution_dataset.lower()
     val_dataset = args.val_dataset.lower()
