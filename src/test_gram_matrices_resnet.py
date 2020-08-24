@@ -464,7 +464,7 @@ class Detector:
         self.maxs = {}
         self.classes = range(10)
 
-    def compute_minmaxs(self,data_train,POWERS=[4]):
+    def compute_minmaxs(self,data_train,POWERS=[2]):
         for PRED in tqdm(self.classes):
             # ipdb.set_trace()
             train_indices = np.where(np.array(train_preds)==PRED)[0]
@@ -474,7 +474,7 @@ class Detector:
             self.maxs[PRED] = cpu(maxs)
             torch.cuda.empty_cache()
 
-    def compute_test_deviations(self,POWERS=[6]):
+    def compute_test_deviations(self,POWERS=[2]):
         all_test_deviations = None
         for PRED in tqdm(self.classes):
             test_indices = np.where(np.array(test_preds)==PRED)[0]
@@ -492,7 +492,7 @@ class Detector:
             torch.cuda.empty_cache()
         self.all_test_deviations = all_test_deviations
 
-    def compute_ood_deviations(self,ood,POWERS=[6]):
+    def compute_ood_deviations(self,ood,POWERS=[2]):
         ood_preds = []
         ood_confs = []
 
@@ -538,11 +538,11 @@ def G_p(ob, p):
     return temp
 
 detector = Detector()
-detector.compute_minmaxs(data_train,POWERS=range(1,4))
+detector.compute_minmaxs(data_train,POWERS=range(1,2))
 
-detector.compute_test_deviations(POWERS=range(1,4))
+detector.compute_test_deviations(POWERS=range(1,2))
 
 print("SVHN")
-svhn_results = detector.compute_ood_deviations(svhn,POWERS=range(1,4))
+svhn_results = detector.compute_ood_deviations(svhn,POWERS=range(1,2))
 print("CIFAR-10")
-c100_results = detector.compute_ood_deviations(cifar100,POWERS=range(1,4))
+c100_results = detector.compute_ood_deviations(cifar100,POWERS=range(1,2))
