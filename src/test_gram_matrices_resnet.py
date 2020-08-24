@@ -329,7 +329,7 @@ torch_model = torch_model.to(device)
 torch_model.eval()
 print("Loaded EBNet")
 
-batch_size = 20
+batch_size = 10
 normalize = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 
 image_size = 224
