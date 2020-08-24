@@ -466,7 +466,7 @@ class Detector:
 
     def compute_minmaxs(self,data_train,POWERS=[6]):
         for PRED in tqdm(self.classes):
-            ipdb.set_trace()
+            # ipdb.set_trace()
             train_indices = np.where(np.array(train_preds)==PRED)[0]
             train_PRED = torch.squeeze(torch.stack([data_train[i][0] for i in train_indices]),dim=1)
             mins,maxs = torch_model.get_min_max(train_PRED,power=POWERS)
