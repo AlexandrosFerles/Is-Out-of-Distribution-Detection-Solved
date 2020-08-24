@@ -236,7 +236,7 @@ class EfficientNet(nn.Module):
         mins = []
         maxs = []
 
-        for i in range(0,len(data),64):
+        for i in range(0,len(data),batch_size):
             batch = data[i:i+64].cuda()
             feat_list = self.gram_feature_list(batch)
             for L,feat_L in enumerate(feat_list):
@@ -262,7 +262,7 @@ class EfficientNet(nn.Module):
     def get_deviations(self,data,power,mins,maxs):
         deviations = []
 
-        for i in range(0,len(data),64):
+        for i in range(0,len(data),batch_size):
             batch = data[i:i+64].cuda()
             feat_list = self.gram_feature_list(batch)
             batch_deviations = []
@@ -329,7 +329,7 @@ torch_model = torch_model.to(device)
 torch_model.eval()
 print("Loaded EBNet")
 
-batch_size = 5
+batch_size = 20
 normalize = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 
 image_size = 224
