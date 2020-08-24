@@ -1,2 +1,1 @@
 python ood_ensemble.py --in cifar10 --val cifar100 --test tinyimagenet-cifar10 --mcf /raid/ferles/checkpoints/eb0/cifar10/eb0Cifar10_accuracy_0.3975.pth --nc 10 --dv 5 > accuracy_0.3975.txt
-python ood_ensemble.py --in cifar10 --val cifar100 --test tinyimagenet-cifar10 --mcf /raid/ferles/checkpoints/eb0/cifar10/eb0Cifar10_accuracy_0.8273.pth --nc 10 --dv 5 > accuracy_0.8273*.txt
