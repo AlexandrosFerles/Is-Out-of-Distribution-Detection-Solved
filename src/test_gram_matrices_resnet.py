@@ -329,7 +329,7 @@ torch_model = torch_model.to(device)
 torch_model.eval()
 print("Loaded EBNet")
 
-batch_size = 1
+batch_size = 5
 normalize = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 
 image_size = 224
@@ -419,7 +419,7 @@ print("Test Preds")
 import calculate_log as callog
 def detect(all_test_deviations,all_ood_deviations, verbose=True, normalize=True):
     average_results = {}
-    for i in range(1,7):
+    for i in range(1):
         random.seed(i)
 
         validation_indices = random.sample(range(len(all_test_deviations)),int(0.1*len(all_test_deviations)))
