@@ -464,7 +464,7 @@ class Detector:
         self.maxs = {}
         self.classes = range(10)
 
-    def compute_minmaxs(self,data_train,POWERS=[6]):
+    def compute_minmaxs(self,data_train,POWERS=[4]):
         for PRED in tqdm(self.classes):
             # ipdb.set_trace()
             train_indices = np.where(np.array(train_preds)==PRED)[0]
@@ -538,11 +538,11 @@ def G_p(ob, p):
     return temp
 
 detector = Detector()
-detector.compute_minmaxs(data_train,POWERS=range(1,6))
+detector.compute_minmaxs(data_train,POWERS=range(1,4))
 
-detector.compute_test_deviations(POWERS=range(1,6))
+detector.compute_test_deviations(POWERS=range(1,4))
 
 print("SVHN")
-svhn_results = detector.compute_ood_deviations(svhn,POWERS=range(1,6))
+svhn_results = detector.compute_ood_deviations(svhn,POWERS=range(1,4))
 print("CIFAR-10")
-c100_results = detector.compute_ood_deviations(cifar100,POWERS=range(1,6))
+c100_results = detector.compute_ood_deviations(cifar100,POWERS=range(1,4))
