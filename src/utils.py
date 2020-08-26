@@ -44,7 +44,7 @@ def build_model(args, rot=False, dropout=None):
       return net
     elif modelName == 'densenet':
         from models.DenseNet import DenseNet
-        net = DenseNet(nClasses=out_classes)
+        net = DenseNet(depth=121, growthRate=32, nClasses=out_classes)
         return net
     elif modelName == 'efficientnet':
         if depth in range(8):

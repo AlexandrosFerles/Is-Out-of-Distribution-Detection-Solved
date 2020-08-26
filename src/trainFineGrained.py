@@ -111,7 +111,6 @@ def train(args):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-            ipdb.set_trace()
             loss = criterion(outputs, labels)
             train_loss += loss.item()
             loss.backward()
