@@ -42,6 +42,10 @@ def build_model(args, rot=False, dropout=None):
       else:
         net = WideResNet(d=40, k=4, n_classes=out_classes, input_features=3, output_features=16, strides=[1, 1, 2, 2])
       return net
+    elif modelName == 'densenet':
+        from models.DenseNet import DenseNet
+        net = DenseNet(nClasses=out_classes)
+        return net 
     elif modelName == 'efficientnet':
         if depth in range(8):
             from efficientnet_pytorch import EfficientNet
