@@ -1,0 +1,13 @@
+{
+  "training":{
+    "model": "DenseNet",
+    "depth": "0",
+    "pretrained": "True",
+    "freeze": "False",
+    "resolutionIncrease": "False",
+    "out_classes": 120,
+    "checkpoint": "StanfordDogs",
+    "train_pickle": "train_indices_stanforddogs.pickle",
+    "test_pickle": "val_indices_stanforddogs.pickle"
+  }
+}
