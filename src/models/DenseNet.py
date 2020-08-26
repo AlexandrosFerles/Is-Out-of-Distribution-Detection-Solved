@@ -132,7 +132,7 @@ class DenseNet(nn.Module):
             self.h = nn.Linear(nChannels, nClasses)
         elif self.mode == 1:
             self.h = CentroidEuclideanDist(nChannels, nClasses)
-        else:
+        elif self.mode == 2:
             self.h = CosineSimilarity(nChannels, nClasses)
 
     def _make_dense(self, nChannels, growthRate, nDenseBlocks, bottleneck):
