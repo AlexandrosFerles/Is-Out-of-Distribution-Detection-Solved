@@ -44,7 +44,7 @@ def train(args):
             optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
             scheduler = MultiStepLR(optimizer, milestones=[int(0.5*epochs), int(0.75*epochs)], gamma=0.1)
             batch_size = 8
-            print(batch_size)   
+            print(batch_size)
 
     dataset = args.dataset.lower()
 
