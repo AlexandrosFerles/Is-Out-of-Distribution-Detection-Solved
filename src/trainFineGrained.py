@@ -90,7 +90,6 @@ def train(args):
         ], lr=1.25e-2, momentum=0.9, nesterov=True)
         scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
 
-
     for epoch in tqdm(range(epochs)):
 
         model.train()
@@ -112,6 +111,7 @@ def train(args):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+            ipdb.set_trace()
             loss = criterion(outputs, labels)
             train_loss += loss.item()
             loss.backward()
