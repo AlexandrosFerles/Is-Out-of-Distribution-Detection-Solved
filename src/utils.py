@@ -45,7 +45,7 @@ def build_model(args, rot=False, dropout=None):
     elif modelName == 'densenet':
         from models.DenseNet import DenseNet
         net = DenseNet(nClasses=out_classes)
-        return net 
+        return net
     elif modelName == 'efficientnet':
         if depth in range(8):
             from efficientnet_pytorch import EfficientNet
