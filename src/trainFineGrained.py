@@ -31,6 +31,7 @@ def train(args):
         pickle_files = [training_configurations.train_pickle, training_configurations.test_pickle]
         flag = True
 
+    ipdb.set_trace()
     if args.subset_index is None:
         model = build_model(args)
         model = model.to(device)
