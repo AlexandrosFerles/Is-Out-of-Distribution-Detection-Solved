@@ -153,6 +153,7 @@ class DenseNet(nn.Module):
         out = torch.squeeze(F.avg_pool2d(F.relu(self.bn1(out)), 8))
 
         if self.mode == -1:
+            out = out.view(-1, 342)
             return F.log_softmax(self.fc(out))
 
         else:
