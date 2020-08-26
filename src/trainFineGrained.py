@@ -34,11 +34,11 @@ def train(args):
     if args.subset_index is None:
         model = build_model(args)
         model = model.to(device)
-        if args.model == 'EfficientNet':
+        if training_configurations.model == 'EfficientNet':
             epochs = 40
             optimizer = optim.SGD(model.parameters(), lr=1.25e-2, momentum=0.9, nesterov=True, weight_decay=1e-4)
             scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
-        elif args.model == 'DenseNet':
+        elif training_configurations.model == 'DenseNet':
             epochs = 200
             optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
             scheduler = MultiStepLR(optimizer, milestones=[int(0.5*epochs), int(0.75*epochs)], gamma=0.1)
