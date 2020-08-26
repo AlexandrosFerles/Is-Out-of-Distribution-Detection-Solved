@@ -108,7 +108,6 @@ def train(args):
             if 'genodin' in training_configurations.checkpoint.lower():
                 outputs, h, g = model(inputs)
             else:
-                ipdb.set_trace()
                 outputs = model(inputs)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
