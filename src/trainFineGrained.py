@@ -40,6 +40,8 @@ def train(args):
             scheduler = MultiStepLR(optimizer, milestones=[10, 20, 30], gamma=0.1)
             batch_size = 32
         elif training_configurations.model == 'DenseNet':
+            model = torch.hub.load('pytorch/vision:v0.6.0', 'densenet121', pretrained=True)
+            model = model.to(device)
             epochs = 200
             optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
             scheduler = MultiStepLR(optimizer, milestones=[int(0.5*epochs), int(0.75*epochs)], gamma=0.1)
