@@ -163,8 +163,7 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
 
         if features_mode == 'all':
             x_noise, noise_out_features = model.extract_features(Variable(tempInputs), mode=features_mode)
-            noise_out_features = [noise_out_features[idx].to(device) for idx in range(len(noise_out_features))] + [x_noise.to(device)]
-            # noise_out_features = [noise_out_features[idx].to(device) for idx in idxs] + [x_noise.to(device)]
+            noise_out_features = [noise_out_features[idx].to(device) for idx in idxs] + [x_noise.to(device)]
             noise_out_features = noise_out_features[layer_index]
             noise_out_features = noise_out_features.view(noise_out_features.size(0), noise_out_features.size(1), -1)
             noise_out_features = torch.mean(noise_out_features, 2)
