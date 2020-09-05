@@ -164,7 +164,7 @@ if __name__ == '__main__':
     #     model_checkpoints.append(model_checkpoint)
 
     # standard_checkpoint = model_checkpoints[0]
-    standard_checkpoint = args.model_checkpoints_file
+    standard_checkpoint = args.model_checkpoint
     standard_model = build_model_with_checkpoint('eb0', standard_checkpoint, device=device, out_classes=args.num_classes)
 
     # rotation_checkpoint = model_checkpoints[1]
