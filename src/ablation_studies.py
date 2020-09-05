@@ -122,7 +122,9 @@ def _generate_Mahalanobis(model, loaders, device, ood_dataset_1, ood_dataset_2, 
                 Mahalanobis_ood_3 = np.concatenate((Mahalanobis_ood_3, M_ood_3.reshape((M_ood_3.shape[0], -3))), axis=1)
 
         Mahalanobis_test = np.asarray(Mahalanobis_test, dtype=np.float32)
-        Mahalanobis_ood = np.asarray(Mahalanobis_test, dtype=np.float32)
+        Mahalanobis_ood_1 = np.asarray(Mahalanobis_ood_1, dtype=np.float32)
+        Mahalanobis_ood_2 = np.asarray(Mahalanobis_ood_2, dtype=np.float32)
+        Mahalanobis_ood_3 = np.asarray(Mahalanobis_ood_3, dtype=np.float32)
 
         ind = regressor.predict_proba(Mahalanobis_test)[:, 1]
         ood_1 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
