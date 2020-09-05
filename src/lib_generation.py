@@ -78,6 +78,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader, device, fea
                 else:
                     label = torch.argmax(target[i]).item()
 
+                ipdb.set_trace()
                 if num_sample_per_class[label] == 0:
                     out_count = 0
                     for out in out_features:
