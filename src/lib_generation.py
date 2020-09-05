@@ -130,9 +130,6 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
         data = Variable(data, requires_grad=True)
 
         if features_mode == 'all':
-            # EB-6
-            # idxs = [2, 8, 14, 22, 30, 41]
-            # EB-0
             idxs = [0, 2, 4, 7, 10, 14, 15]
             x, features = model.extract_features(data, mode=features_mode)
             features = [features[idx].to(device) for idx in idxs] + [x.to(device)]

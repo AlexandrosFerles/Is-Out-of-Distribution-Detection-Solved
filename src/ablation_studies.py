@@ -130,7 +130,7 @@ def _generate_Mahalanobis(model, loaders, device, ood_dataset_1, ood_dataset_2, 
         ood_3 = regressor.predict_proba(Mahalanobis_ood_3)[:, 1]
 
         print(f'########## epsilon: {magnitude} ##########')
-        _ood_detection_performance('Odin', val_ind, val_ood, ind, ood_1, ood_2, ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+        _ood_detection_performance('Mahalanobis', val_ind, val_ood, ind, ood_1, ood_2, ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
 
 if __name__ == '__main__':
