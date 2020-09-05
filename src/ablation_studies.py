@@ -4,7 +4,6 @@ from sklearn.linear_model import LogisticRegressionCV
 from sklearn.metrics import confusion_matrix
 from torch import nn
 from torch.autograd import Variable
-from sklearn.metrics import roc_curve, auc, balanced_accuracy_score
 from utils import build_model_with_checkpoint
 from dataLoaders import get_ood_loaders, get_triplets_loaders
 from tqdm import tqdm
