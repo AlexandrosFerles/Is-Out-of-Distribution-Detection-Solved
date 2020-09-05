@@ -420,7 +420,7 @@ class TinyImageNetDataset(data.Dataset):
         if os.path.exists(root):
             self.root = root
         else:
-            self.root = root.replace('raid', 'home')
+            self.root = root.replace('raid', 'storage')
         self.transform = transform
         self.train_dir = os.path.join(self.root, "train")
         self.val_dir = os.path.join(self.root, "val")
@@ -575,7 +575,7 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Test/", key)] = value
                 else:
                     dic = {}
-                    with open('/home/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
+                    with open('/storage/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
@@ -594,7 +594,7 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Test/", key)] = value
                 else:
                     dic = {}
-                    with open('/home/ferles/Birds/nabirds/birdsdict.pickle', 'rb') as dic_pickle:
+                    with open('/storage/ferles/Birds/nabirds/birdsdict.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
@@ -614,7 +614,7 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Test/", value)] = key
                 else:
                     dic = {}
-                    with open(f'/home/ferles/Dogs/Stanford/stanford_classes_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
+                    with open(f'/storage/ferles/Dogs/Stanford/stanford_classes_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
@@ -633,7 +633,7 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Test/", key)] = value
                 else:
                     dic = {}
-                    with open(f'/home/ferles/Birds/nabirds/nabirds_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
+                    with open(f'/storage/ferles/Birds/nabirds/nabirds_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
