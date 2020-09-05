@@ -81,7 +81,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader, device, fea
                 if num_sample_per_class[label] == 0:
                     out_count = 0
                     for out in out_features:
-                        print(label)
+                        ipdb.set_trace()
                         list_features[out_count][label] = out[i].view(1, -1)
                         out_count += 1
                 else:
