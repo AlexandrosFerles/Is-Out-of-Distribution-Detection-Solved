@@ -62,8 +62,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader, device, fea
             if features_mode == 'all':
                 output, out_features = model.extract_features(data, mode=features_mode)
                 idxs = [0, 2, 4, 7, 10, 14, 15]
-                out_features = out_features + [output]
-                # out_features = [out_features[idx] for idx in idxs] + [output]
+                out_features = [out_features[idx] for idx in idxs] + [output]
             else:
                 output = model.extract_features(data, mode=features_mode)
                 out_features = [output]
@@ -78,7 +77,6 @@ def sample_estimator(model, num_classes, feature_list, train_loader, device, fea
                 else:
                     label = torch.argmax(target[i]).item()
 
-                ipdb.set_trace()
                 if num_sample_per_class[label] == 0:
                     out_count = 0
                     for out in out_features:
@@ -137,8 +135,7 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
             # EB-0
             idxs = [0, 2, 4, 7, 10, 14, 15]
             x, features = model.extract_features(data, mode=features_mode)
-            # features = [features[idx].to(device) for idx in idxs] + [x.to(device)]
-            features = [features[idx].to(device) for idx in range(len(features))] + [x.to(device)]
+            features = [features[idx].to(device) for idx in idxs] + [x.to(device)]
         else:
             x = model.extract_features(data, mode=features_mode)
             features = [x]

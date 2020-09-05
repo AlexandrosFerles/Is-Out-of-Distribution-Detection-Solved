@@ -448,29 +448,29 @@ if __name__ == '__main__':
     args = parser.parse_args()
     device = torch.device(f'cuda:{args.device}')
 
-    # model_checkpoints, num_classes = [], []
-    # for line in open(args.model_checkpoints_file, 'r'):
-    #     model_checkpoint = line.split('\n')[0]
-    #     model_checkpoints.append(model_checkpoint)
+    model_checkpoints, num_classes = [], []
+    for line in open(args.model_checkpoints_file, 'r'):
+        model_checkpoint = line.split('\n')[0]
+        model_checkpoints.append(model_checkpoint)
 
-    # standard_checkpoint = model_checkpoints[0]
+    standard_checkpoint = model_checkpoints[0]
     standard_checkpoint = args.model_checkpoints_file
     standard_model = build_model_with_checkpoint('eb0', standard_checkpoint, device=device, out_classes=args.num_classes)
 
-    # rotation_checkpoint = model_checkpoints[1]
-    # rotation_model = build_model_with_checkpoint('roteb0', rotation_checkpoint, device=device, out_classes=args.num_classes)
+    rotation_checkpoint = model_checkpoints[1]
+    rotation_model = build_model_with_checkpoint('roteb0', rotation_checkpoint, device=device, out_classes=args.num_classes)
 
-    # genodin_checkpoint = model_checkpoints[2]
-    # genodin_model = build_model_with_checkpoint('geneb0', genodin_checkpoint, device=device, out_classes=args.num_classes)
+    genodin_checkpoint = model_checkpoints[2]
+    genodin_model = build_model_with_checkpoint('geneb0', genodin_checkpoint, device=device, out_classes=args.num_classes)
 
-    # ensemble_checkpoints_file = model_checkpoints[3]
+    ensemble_checkpoints_file = model_checkpoints[3]
 
-    # ensemble_checkpoints, num_classes = [], []
-    # for line in open(ensemble_checkpoints_file, 'r'):
-    #     model_checkpoint, nc = line.split('\n')[0].split(',')
-    #     nc = int(nc)
-    #     ensemble_checkpoints.append(model_checkpoint)
-    #     num_classes.append(nc)
+    ensemble_checkpoints, num_classes = [], []
+    for line in open(ensemble_checkpoints_file, 'r'):
+        model_checkpoint, nc = line.split('\n')[0].split(',')
+        nc = int(nc)
+        ensemble_checkpoints.append(model_checkpoint)
+        num_classes.append(nc)
 
     ind_dataset = args.in_distribution_dataset.lower()
     val_dataset = args.val_dataset.lower()
@@ -487,29 +487,29 @@ if __name__ == '__main__':
     method_loaders = loaders[1:]
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
     _ood_detection_performance('Baseline', val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-    #
-    # # odin
+
+    # odin
     temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _odin(standard_model, method_loaders, device)
     _ood_detection_performance('Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3, expand=True)
-    #
-    # # mahalanobis
+
+    # mahalanobis
     temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
     _ood_detection_performance('Mahalanobis', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-    #
-    # # self-supervised
+
+    # self-supervised
     rotation_loaders = rotation_loaders[1:]
     temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _rotation(rotation_model, rotation_loaders, device, num_classes=args.num_classes)
     _ood_detection_performance('Self-Supervised', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-    #
-    # # generalized-odin
+
+    # generalized-odin
     temp_val_ind, temp_val_ood,temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
     _ood_detection_performance('Generalized-Odin', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
-    #
-    # # self-ensemble
+
+    # self-ensemble
     temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3 = _ensemble_inference(ensemble_checkpoints, num_classes, method_loaders, device)
     _ood_detection_performance('Self-Ensemble', temp_val_ind, temp_val_ood, temp_ind, temp_ood_1, temp_ood_2, temp_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _update_scores(val_ind, temp_val_ind, val_ood, temp_val_ood, test_ind, temp_ind, test_ood_1, temp_ood_1, test_ood_2, temp_ood_2, test_ood_3, temp_ood_3)
