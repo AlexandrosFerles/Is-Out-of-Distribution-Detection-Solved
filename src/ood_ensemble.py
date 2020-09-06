@@ -448,6 +448,7 @@ if __name__ == '__main__':
     device = torch.device(f'cuda:{args.device}')
 
     model_checkpoints, num_classes = [], []
+    ipdb.set_trace()
     for line in open(args.model_checkpoints_file, 'r'):
         model_checkpoint = line.split('\n')[0]
         model_checkpoints.append(model_checkpoint)
