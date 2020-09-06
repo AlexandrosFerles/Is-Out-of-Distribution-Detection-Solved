@@ -482,7 +482,7 @@ if __name__ == '__main__':
     rotation_loaders = get_triplets_loaders(batch_size=1, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
     # baseline
-    # method_loaders = loaders[1:]
+    method_loaders = loaders[1:]
     # val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _baseline(standard_model, method_loaders, device)
     # _ood_detection_performance('Baseline', val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
 
