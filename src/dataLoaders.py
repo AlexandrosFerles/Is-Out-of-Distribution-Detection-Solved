@@ -1264,10 +1264,7 @@ def imageNetLoader(dataset, batch_size=32):
         normalize
     ])
 
-    if os.path.exists('/raid/ferles'):
-        dataset = MyImageFolder(root='/raid/ferles/ImageNet/', transform=test_transform)
-    else:
-        dataset = MyImageFolder(root='/home/ferles/ImageNet/', transform=test_transform)
+    dataset = MyImageFolder(root='/storage/ferles/ImageNet/', transform=test_transform)
 
     loader = DataLoader(dataset, batch_size=batch_size, num_workers=3, shuffle=True)
 
@@ -1287,10 +1284,7 @@ def tinyImageNetLoader(dataset, batch_size=32):
         normalize
     ])
 
-    if os.path.exists('/raid/ferles'):
-        dataset = MyImageFolder(root='/raid/ferles/tiny-imagenet-200/train', transform=test_transform)
-    else:
-        dataset = MyImageFolder(root='/home/ferles/tiny-imagenet-200/train', transform=test_transform)
+    dataset = MyImageFolder(root='/storage/ferles/tiny-imagenet-200/train', transform=test_transform)
 
     loader = DataLoader(dataset, batch_size=batch_size, num_workers=3)
 
