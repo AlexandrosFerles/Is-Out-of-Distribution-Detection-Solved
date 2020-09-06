@@ -415,12 +415,12 @@ class CustomEnsembleDatasetOut(data.Dataset):
 
 class TinyImageNetDataset(data.Dataset):
 
-    def __init__(self, root='/raid/ferles/tiny-imagenet-200', train=True, transform=None):
+    def __init__(self, root='/storage/ferles/tiny-imagenet-200', train=True, transform=None):
         self.train = train
         if os.path.exists(root):
             self.root = root
         else:
-            self.root = root.replace('raid', 'storage')
+            self.root = root.replace('storage', 'storage')
         self.transform = transform
         self.train_dir = os.path.join(self.root, "train")
         self.val_dir = os.path.join(self.root, "val")
@@ -554,9 +554,9 @@ class GenericImageFolderDataset(data.Dataset):
 
         if self.subset_index is None:
             if self.type == 'dogs':
-                if os.path.exists('/raid/ferles/'):
+                if os.path.exists('/storage/ferles/'):
                     dic = {}
-                    with open('/raid/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
+                    with open('/storage/ferles/Dogs/Stanford/stanford_classes_dict.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
@@ -564,7 +564,7 @@ class GenericImageFolderDataset(data.Dataset):
                             else:
                                 dic[os.path.join(self.root, "Test/", key)] = value
             elif self.type == 'tiny':
-                if os.path.exists('/raid/ferles/'):
+                if os.path.exists('/storage/ferles/'):
                     dic = {}
                     with open(os.path.join(self.root, 'classes_dict.pickle'), 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
@@ -583,9 +583,9 @@ class GenericImageFolderDataset(data.Dataset):
                             else:
                                 dic[os.path.join(self.root, "Test/", key)] = value
             else:
-                if os.path.exists('/raid/ferles/'):
+                if os.path.exists('/storage/ferles/'):
                     dic = {}
-                    with open('/raid/ferles/Birds/nabirds/birdsdict.pickle', 'rb') as dic_pickle:
+                    with open('/storage/ferles/Birds/nabirds/birdsdict.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
@@ -603,9 +603,9 @@ class GenericImageFolderDataset(data.Dataset):
                                 dic[os.path.join(self.root, "Test/", key)] = value
         else:
             if self.type == 'dogs':
-                if os.path.exists('/raid/ferles/'):
+                if os.path.exists('/storage/ferles/'):
                     dic = {}
-                    with open(f'/raid/ferles/Dogs/Stanford/stanford_classes_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
+                    with open(f'/storage/ferles/Dogs/Stanford/stanford_classes_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
@@ -622,9 +622,9 @@ class GenericImageFolderDataset(data.Dataset):
                             else:
                                 dic[os.path.join(self.root, "Test/", value)] = key
             else:
-                if os.path.exists('/raid/ferles/'):
+                if os.path.exists('/storage/ferles/'):
                     dic = {}
-                    with open(f'/raid/ferles/Birds/nabirds/nabirds_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
+                    with open(f'/storage/ferles/Birds/nabirds/nabirds_dict_subset_{self.subset_index}.pickle', 'rb') as dic_pickle:
                         temp_dic = pickle.load(dic_pickle)
                         for key, value in temp_dic.items():
                             if self.train:
