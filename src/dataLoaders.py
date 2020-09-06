@@ -311,17 +311,17 @@ class SubsetSequentialSampler(Sampler):
 
 
 def _get_isic_loaders_ood(batch_size,
-                          train_csv='/raid/ferles/ISIC2019/folds/Train_Fold_new_no_preproc.csv',
-                          val_csv='/raid/ferles/ISIC2019/folds/Val_Fold_new_no_preproc.csv',
-                          test_csv='/raid/ferles/ISIC2019/folds/ValFold1NoPreproc.csv',
-                          full_csv='/raid/ferles/ISIC2019/Training_paths_and_classes_no_preproc.csv',
+                          train_csv='/storage/ferles/ISIC2019/folds/Train_Fold_new_no_preproc.csv',
+                          val_csv='/storage/ferles/ISIC2019/folds/Val_Fold_new_no_preproc.csv',
+                          test_csv='/storage/ferles/ISIC2019/folds/ValFold1NoPreproc.csv',
+                          full_csv='/storage/ferles/ISIC2019/Training_paths_and_classes_no_preproc.csv',
                           exclude_class=None):
 
-    if not os.path.exists('/raid/ferles'):
-        train_csv = train_csv.replace('raid', 'home')
-        val_csv = val_csv.replace('raid', 'home')
-        test_csv = test_csv.replace('raid', 'home')
-        full_csv = full_csv.replace('raid', 'home')
+    if not os.path.exists('/storage/ferles'):
+        train_csv = train_csv.replace('storage', 'home')
+        val_csv = val_csv.replace('storage', 'home')
+        test_csv = test_csv.replace('storage', 'home')
+        full_csv = full_csv.replace('storage', 'home')
 
     input_size = 224
     val_transform = transforms.Compose([
@@ -351,12 +351,12 @@ def oversampling_loaders_custom(csvfiles, train_batch_size, val_batch_size, gtFi
 
     if os.path.exists(csvfiles[0]):
         trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, ret_path=False)
-        valset = PandasDataSetWithPaths('/raid/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, ret_path=False)
+        valset = PandasDataSetWithPaths('/storage/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, ret_path=False)
         testset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform)
     else:
-        trainset = PandasDataSetWithPaths(csvfiles[0].replace('raid', 'home'), transform=training_transform, ret_path=False)
+        trainset = PandasDataSetWithPaths(csvfiles[0].replace('storage', 'home'), transform=training_transform, ret_path=False)
         valset = PandasDataSetWithPaths('/home/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, ret_path=False)
-        testset = PandasDataSetWithPaths(csvfiles[1].replace('raid', 'home'), transform=val_transform)
+        testset = PandasDataSetWithPaths(csvfiles[1].replace('storage', 'home'), transform=val_transform)
 
     if load_gts:
         gts = np.load(f'{abs_path}npzs/indexes/isic/gts_no_preproc.npz')['arr_0']
@@ -390,12 +390,12 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
 
     if os.path.exists(csvfiles[0]):
         trainset = PandasDataSetWithPaths(csvfiles[0], transform=training_transform, exclude_class=exclude_class, ret_path=False)
-        valset = PandasDataSetWithPaths('/raid/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, exclude_class=exclude_class, ret_path=False)
+        valset = PandasDataSetWithPaths('/storage/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, exclude_class=exclude_class, ret_path=False)
         testset = PandasDataSetWithPaths(csvfiles[1], transform=val_transform, exclude_class=exclude_class)
     else:
-        trainset = PandasDataSetWithPaths(csvfiles[0].replace('raid', 'home'), transform=training_transform, exclude_class=exclude_class, ret_path=False)
+        trainset = PandasDataSetWithPaths(csvfiles[0].replace('storage', 'home'), transform=training_transform, exclude_class=exclude_class, ret_path=False)
         valset = PandasDataSetWithPaths('/home/ferles/ISIC2019/folds/ValFold1NoPreproc.csv', transform=val_transform, exclude_class=exclude_class, ret_path=False)
-        testset = PandasDataSetWithPaths(csvfiles[1].replace('raid', 'home'), transform=val_transform, exclude_class=exclude_class)
+        testset = PandasDataSetWithPaths(csvfiles[1].replace('storage', 'home'), transform=val_transform, exclude_class=exclude_class)
 
     if load_gts:
         gts = np.load(f'{abs_path}npzs/indexes/isic/gts_{exclude_class}.npz')['arr_0']
@@ -426,7 +426,7 @@ def oversampling_loaders_exclude_class_custom_no_gts(csvfiles, train_batch_size,
     return train_loader, val_loader, test_loader, testset.csv_columns
 
 
-def _get_7point_loaders(batch_size, csvfile='/raid/ferles/7-point/7pointAsISIC.csv'):
+def _get_7point_loaders(batch_size, csvfile='/storage/ferles/7-point/7pointAsISIC.csv'):
 
     input_size = 224
     val_transform = transforms.Compose([
@@ -446,7 +446,7 @@ def _get_Dermofit_full_loaders(batch_size, input_size=224):
         transforms.ToTensor(),
     ])
 
-    in_path, out_path = '/raid/ferles/DermoFit/In', '/raid/ferles/DermoFit/Out'
+    in_path, out_path = '/storage/ferles/DermoFit/In', '/storage/ferles/DermoFit/Out'
     in_dataset, out_dataset = ImageFolder(in_path, transform=val_transform), ImageFolder(out_path, transform=val_transform)
 
     in_loader = DataLoader(in_dataset, batch_size=batch_size)
@@ -455,7 +455,7 @@ def _get_Dermofit_full_loaders(batch_size, input_size=224):
     return in_loader, out_loader
 
 
-def _get_isic_loader(batch_size, csvfile='/raid/ferles/ISIC2019/Training_paths_and_classes.csv', input_size=224):
+def _get_isic_loader(batch_size, csvfile='/storage/ferles/ISIC2019/Training_paths_and_classes.csv', input_size=224):
 
     val_transform = transforms.Compose([
         transforms.Resize((input_size, input_size)),
@@ -467,7 +467,7 @@ def _get_isic_loader(batch_size, csvfile='/raid/ferles/ISIC2019/Training_paths_a
     return val_loader
 
 
-def _get_7point_loaders_ood(batch_size, exclude_class=None, csvfile='/raid/ferles/7-point/7pointAsISIC.csv', out_mode=False):
+def _get_7point_loaders_ood(batch_size, exclude_class=None, csvfile='/storage/ferles/7-point/7pointAsISIC.csv', out_mode=False):
 
     input_size = 224
     val_transform = transforms.Compose([
@@ -488,7 +488,7 @@ def _get_7point_loaders_ood(batch_size, exclude_class=None, csvfile='/raid/ferle
     return val_loader, ood_loader
 
 
-def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/raid/ferles/7-point/7pointdermClasses.csv'):
+def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/storage/ferles/7-point/7pointdermClasses.csv'):
 
     input_size = 224
     val_transform = transforms.Compose([
@@ -505,12 +505,12 @@ def _get_custom_loader_7point(batch_size, exclude_class, csvfile='/raid/ferles/7
 
 def _get_dataset(dataset, transforms, test=False):
 
-    if os.path.exists('/raid/ferles/data'):
-        root = '/raid/ferles/data'
-        tiny_imagenet_cifar10_root = '/raid/ferles/tiny-imagenet-200/Cifar10'
-        tiny_imagenet_cifar100_root = '/raid/ferles/tiny-imagenet-200/Cifar100'
-        dogs_root = '/raid/ferles/Dogs/Stanford/'
-        birds_root = '/raid/ferles/Birds/nabirds/'
+    if os.path.exists('/storage/ferles/data'):
+        root = '/storage/ferles/data'
+        tiny_imagenet_cifar10_root = '/storage/ferles/tiny-imagenet-200/Cifar10'
+        tiny_imagenet_cifar100_root = '/storage/ferles/tiny-imagenet-200/Cifar100'
+        dogs_root = '/storage/ferles/Dogs/Stanford/'
+        birds_root = '/storage/ferles/Birds/nabirds/'
     else:
         root = '/home/ferles/data'
         tiny_imagenet_cifar10_root = '/home/ferles/tiny-imagenet-200/Cifar10'
@@ -593,17 +593,17 @@ def _get_dataset(dataset, transforms, test=False):
 
 def _get_subset(dataset, subset_index, transforms, single=False, test=False):
 
-    if os.path.exists('/raid/ferles'):
+    if os.path.exists('/storage/ferles'):
         if dataset == 'stanforddogs':
             if single:
-                    root = f'/raid/ferles/Dogs/Stanford/Subset{subset_index}'
+                    root = f'/storage/ferles/Dogs/Stanford/Subset{subset_index}'
             else:
-                root = f'/raid/ferles/Dogs/Stanford/Dataset{subset_index}'
+                root = f'/storage/ferles/Dogs/Stanford/Dataset{subset_index}'
         elif dataset == 'nabirds':
             if single:
-                root = f'/raid/ferles/Birds/nabirds/Subset{subset_index}'
+                root = f'/storage/ferles/Birds/nabirds/Subset{subset_index}'
             else:
-                root = f'/raid/ferles/Birds/nabirds/Dataset{subset_index}'
+                root = f'/storage/ferles/Birds/nabirds/Dataset{subset_index}'
         else:
             raise NotImplementedError(f'{dataset} not implemented!')
     else:
@@ -970,8 +970,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         dataset_size = 897
 
     if ind_dataset == 'isic':
-        if os.path.exists('/raid/ferles'):
-            path = '/raid/ferles/ISIC2019/folds/'
+        if os.path.exists('/storage/ferles'):
+            path = '/storage/ferles/ISIC2019/folds/'
         else:
             path = '/home/ferles/ISIC2019/folds/'
 
@@ -1029,8 +1029,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
 
     if val_ood_dataset != 'fgsm':
         if val_ood_dataset == 'isic':
-            if os.path.exists('/raid/ferles'):
-                path = '/raid/ferles/ISIC2019/folds/'
+            if os.path.exists('/storage/ferles'):
+                path = '/storage/ferles/ISIC2019/folds/'
             else:
                 path = '/home/ferles/ISIC2019/folds/'
             if exclude_class is None:
@@ -1062,8 +1062,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_sampler = SubsetRandomSampler(valset_val_oodices)
                 val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
         elif val_ood_dataset == '7point':
-            if os.path.exists('/raid/ferles'):
-                path_7_points = '/raid/ferles/7-point/non_overlapping/'
+            if os.path.exists('/storage/ferles'):
+                path_7_points = '/storage/ferles/7-point/non_overlapping/'
             else:
                 path_7_points = '/home/ferles/7-point/non_overlapping/'
             dataset7point = ImageFolder(path_7_points, transform=transform_test)
@@ -1085,15 +1085,15 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             sampler = SubsetRandomSampler(valset_indices)
             val_ood_loader = DataLoader(valset, batch_size=32, sampler=sampler, num_workers=3)
         elif val_ood_dataset == 'birdsnap':
-            if os.path.exists('/raid/ferles'):
-                birds_path = '/raid/ferles/Birds/temp_birdsnap/OutBirdsNap'
+            if os.path.exists('/storage/ferles'):
+                birds_path = '/storage/ferles/Birds/temp_birdsnap/OutBirdsNap'
             else:
                 birds_path = '/home/ferles/Birds/temp_birdsnap/OutBirdsNap/'
             dataset_birdsnap = ImageFolder(birds_path, transform=transform_test[0])
             val_ood_loader = DataLoader(dataset_birdsnap, batch_size=batch_size, num_workers=3)
         elif val_ood_dataset == 'imagenet':
-            if os.path.exists('/raid/ferles'):
-                val_imagenet_path = '/raid/ferles/ImageNetVal/'
+            if os.path.exists('/storage/ferles'):
+                val_imagenet_path = '/storage/ferles/ImageNetVal/'
             else:
                 val_imagenet_path = '/home/ferles/ImageNetVal/'
             if ind_dataset == 'stanforddogs' or ind_dataset == 'nabirds':
@@ -1102,8 +1102,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 dataset_imagenet_val = ImageFolder(val_imagenet_path, transform=transform_test)
             val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
         elif val_ood_dataset == 'soodogs':
-            if os.path.exists('/raid/ferles'):
-                val_imagenet_path = '/raid/ferles/Dogs/SOODogs/'
+            if os.path.exists('/storage/ferles'):
+                val_imagenet_path = '/storage/ferles/Dogs/SOODogs/'
             else:
                 val_imagenet_path = '/home/ferles/Dogs/SOODogs/'
             if ind_dataset == 'stanforddogs' or ind_dataset == 'nabirds':
@@ -1113,8 +1113,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             val_ood_loader = DataLoader(dataset_imagenet_val, batch_size=batch_size, num_workers=3)
 
     if test_ood_dataset == 'isic':
-        if os.path.exists('/raid/ferles'):
-            path = '/raid/ferles/ISIC2019/'
+        if os.path.exists('/storage/ferles'):
+            path = '/storage/ferles/ISIC2019/'
         else:
             path = '/home/ferles/ISIC2019/'
         test_ood_testset = PandasDataSetSingleClass(f'{path}Training_paths_and_classes_no_preproc.csv', transform=transform_test, single_class=exclude_class)
@@ -1130,8 +1130,8 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         _, test_ood_testset = _get_dataset(test_ood_dataset, [transform_test, transform_test], test=True)
         test_ood_loader = DataLoader(test_ood_testset, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'oxfordpets':
-        if os.path.exists('/raid/ferles'):
-            oxford_pets_path = '/raid/ferles/Dogs/Oxford/images/'
+        if os.path.exists('/storage/ferles'):
+            oxford_pets_path = '/storage/ferles/Dogs/Oxford/images/'
         else:
             oxford_pets_path = '/home/ferles/Dogs/Oxford/images/'
         if ind_dataset == 'stanforddogs' or ind_dataset == 'nabirds':
@@ -1140,71 +1140,71 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
             dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_oxford_pets, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'oxfordpets-in':
-        if os.path.exists('/raid/ferles'):
-            oxford_pets_path = '/raid/ferles/Dogs/Oxford/In/'
+        if os.path.exists('/storage/ferles'):
+            oxford_pets_path = '/storage/ferles/Dogs/Oxford/In/'
         else:
             oxford_pets_path = '/home/ferles/Dogs/Oxford/In/'
         dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_oxford_pets, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'oxfordpets-out':
-        if os.path.exists('/raid/ferles'):
-            oxford_pets_path = '/raid/ferles/Dogs/Oxford/Out/'
+        if os.path.exists('/storage/ferles'):
+            oxford_pets_path = '/storage/ferles/Dogs/Oxford/Out/'
         else:
             oxford_pets_path = '/home/ferles/Dogs/Oxford/Out/'
         dataset_oxford_pets = ImageFolder(oxford_pets_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_oxford_pets, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'dermofit':
-        if os.path.exists('/raid/ferles'):
-            dermofit_path = '/raid/ferles/DermoFit/'
+        if os.path.exists('/storage/ferles'):
+            dermofit_path = '/storage/ferles/DermoFit/'
         else:
             dermofit_path = '/home/ferles/DermoFit/'
         dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
         test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'dermofit-in':
-        if os.path.exists('/raid/ferles'):
-            dermofit_path = '/raid/ferles/DermoFitIn/'
+        if os.path.exists('/storage/ferles'):
+            dermofit_path = '/storage/ferles/DermoFitIn/'
         else:
             dermofit_path = '/home/ferles/DermoFitIn/'
         dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
         test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'dermofit-out':
-        if os.path.exists('/raid/ferles'):
-            dermofit_path = '/raid/ferles/DermoFitOut/'
+        if os.path.exists('/storage/ferles'):
+            dermofit_path = '/storage/ferles/DermoFitOut/'
         else:
             dermofit_path = '/home/ferles/DermoFitOut/'
         dataset_dermofit = ImageFolder(dermofit_path, transform=transform_test)
         test_ood_loader = DataLoader(dataset_dermofit, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200':
-        if os.path.exists('/raid/ferles'):
-            cub_path = '/raid/ferles/Birds/CUB200/images/'
+        if os.path.exists('/storage/ferles'):
+            cub_path = '/storage/ferles/Birds/CUB200/images/'
         else:
-            cub_path = '/raid/ferles/Birds/CUB200/images/'
+            cub_path = '/storage/ferles/Birds/CUB200/images/'
         dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200-in':
-        if os.path.exists('/raid/ferles'):
-            cub_path = '/raid/ferles/Birds/CUB200/In/'
+        if os.path.exists('/storage/ferles'):
+            cub_path = '/storage/ferles/Birds/CUB200/In/'
         else:
-            cub_path = '/raid/ferles/Birds/CUB200/In/'
+            cub_path = '/storage/ferles/Birds/CUB200/In/'
         dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'cub200-out':
-        if os.path.exists('/raid/ferles'):
-            cub_path = '/raid/ferles/Birds/CUB200/Out/'
+        if os.path.exists('/storage/ferles'):
+            cub_path = '/storage/ferles/Birds/CUB200/Out/'
         else:
             cub_path = '/home/ferles/Birds/CUB200/Out/'
         dataset_cub = ImageFolder(cub_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_cub, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'birdsnap':
-        if os.path.exists('/raid/ferles'):
-            birdsnap_path = '/raid/ferles/Birds/birdsnap/'
+        if os.path.exists('/storage/ferles'):
+            birdsnap_path = '/storage/ferles/Birds/birdsnap/'
         else:
             birdsnap_path = '/home/ferles/Birds/birdsnap'
         dataset_birdsnap = ImageFolder(birdsnap_path, transform=transform_test[0])
         test_ood_loader = DataLoader(dataset_birdsnap, batch_size=batch_size, num_workers=3)
     elif test_ood_dataset == 'places':
-        if os.path.exists('/raid/ferles'):
-            places_path = '/raid/ferles/Places'
+        if os.path.exists('/storage/ferles'):
+            places_path = '/storage/ferles/Places'
         else:
             places_path = '/home/ferles/Places'
         if ind_dataset == 'stanforddogs' or ind_dataset=='nabirds':
