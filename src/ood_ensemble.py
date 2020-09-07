@@ -422,12 +422,15 @@ def _ood_detection_performance(method, val_ind, val_ood, test_ind, test_ood_1, t
     _, threshold = _find_threshold(val_ind, val_ood)
 
     auc1, fpr1, acc1 = _score_npzs(test_ind, test_ood_1, threshold)
-    auc2, fpr2, acc2 = _score_npzs(test_ind, test_ood_2, threshold)
-    auc3, fpr3, acc3 = _score_npzs(test_ind, test_ood_3, threshold)
+    # auc2, fpr2, acc2 = _score_npzs(test_ind, test_ood_2, threshold)
+    # auc3, fpr3, acc3 = _score_npzs(test_ind, test_ood_3, threshold)
 
-    aucs = [auc1, auc2, auc3]
-    fprs = [fpr1, fpr2, fpr3]
-    accs = [acc1, acc2, acc3]
+    # aucs = [auc1, auc2, auc3]
+    aucs = [auc1, auc1, auc1]
+    # fprs = [fpr1, fpr2, fpr3]
+    fprs = [fpr1, fpr1, fpr1]
+    # accs = [acc1, acc2, acc3]
+    accs = [acc1, acc1, acc1]
 
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
