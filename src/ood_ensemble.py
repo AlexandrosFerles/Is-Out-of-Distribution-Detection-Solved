@@ -32,11 +32,10 @@ def _baseline(model, loaders, device):
     val_ood = _get_baseline_scores(model, val_ood_loader, device, monte_carlo_steps=1)
     test_ind = _get_baseline_scores(model, test_ind_loader, device, monte_carlo_steps=1)
     test_ood_1 = _get_baseline_scores(model, test_ood_loader_1, device, monte_carlo_steps=1)
-    # test_ood_2 = _get_baseline_scores(model, test_ood_loader_2, device, monte_carlo_steps=1)
-    # test_ood_3 = _get_baseline_scores(model, test_ood_loader_3, device, monte_carlo_steps=1)
+    test_ood_2 = _get_baseline_scores(model, test_ood_loader_2, device, monte_carlo_steps=1)
+    test_ood_3 = _get_baseline_scores(model, test_ood_loader_3, device, monte_carlo_steps=1)
 
-    # return val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
-    return val_ind, val_ood, test_ind, test_ood_1, test_ood_1, test_ood_1
+    return val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _odin(model, loaders, device):
@@ -67,11 +66,10 @@ def _odin(model, loaders, device):
 
     test_ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device)
     test_ood_1 = _get_odin_scores(model, test_ood_loader_1, best_T, best_epsilon, device=device)
-    # test_ood_2 = _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device)
-    # test_ood_3 = _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device)
+    test_ood_2 = _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device)
+    test_ood_3 = _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device)
 
-    # return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
-    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_1, test_ood_1
+    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0'):
@@ -169,41 +167,40 @@ def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0')
             else:
                 Mahalanobis_ood_1 = np.concatenate((Mahalanobis_ood_1, M_ood_1.reshape((M_ood_1.shape[0], -1))), axis=1)
 
-        # for i in range(num_output):
-        #     M_ood_2 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_2, num_classes, sample_mean, precision, i, best_magnitude, device=device)
-        #     M_ood_2 = np.asarray(M_ood_2, dtype=np.float32)
-        #     if i == 0:
-        #         Mahalanobis_ood_2 = M_ood_2.reshape((M_ood_2.shape[0], -2))
-        #     else:
-        #         Mahalanobis_ood_2 = np.concatenate((Mahalanobis_ood_2, M_ood_2.reshape((M_ood_2.shape[0], -2))), axis=1)
+        for i in range(num_output):
+            M_ood_2 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_2, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+            M_ood_2 = np.asarray(M_ood_2, dtype=np.float32)
+            if i == 0:
+                Mahalanobis_ood_2 = M_ood_2.reshape((M_ood_2.shape[0], -2))
+            else:
+                Mahalanobis_ood_2 = np.concatenate((Mahalanobis_ood_2, M_ood_2.reshape((M_ood_2.shape[0], -2))), axis=1)
 
-        # for i in range(num_output):
-        #     M_ood_3 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_3, num_classes, sample_mean, precision, i, best_magnitude, device=device)
-        #     M_ood_3 = np.asarray(M_ood_3, dtype=np.float32)
-        #     if i == 0:
-        #         Mahalanobis_ood_3 = M_ood_3.reshape((M_ood_3.shape[0], -3))
-        #     else:
-        #         Mahalanobis_ood_3 = np.concatenate((Mahalanobis_ood_3, M_ood_3.reshape((M_ood_3.shape[0], -3))), axis=1)
+        for i in range(num_output):
+            M_ood_3 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_3, num_classes, sample_mean, precision, i, best_magnitude, device=device)
+            M_ood_3 = np.asarray(M_ood_3, dtype=np.float32)
+            if i == 0:
+                Mahalanobis_ood_3 = M_ood_3.reshape((M_ood_3.shape[0], -3))
+            else:
+                Mahalanobis_ood_3 = np.concatenate((Mahalanobis_ood_3, M_ood_3.reshape((M_ood_3.shape[0], -3))), axis=1)
 
         if idx == 0:
             test_ind = regressor.predict_proba(Mahalanobis_test)[:, 1]
             test_ood_1 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-            # test_ood_2 = regressor.predict_proba(Mahalanobis_ood_2)[:, 1]
-            # test_ood_3 = regressor.predict_proba(Mahalanobis_ood_3)[:, 1]
+            test_ood_2 = regressor.predict_proba(Mahalanobis_ood_2)[:, 1]
+            test_ood_3 = regressor.predict_proba(Mahalanobis_ood_3)[:, 1]
         else:
             test_ind += regressor.predict_proba(Mahalanobis_test)[:, 1]
             test_ood_1 += regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-            # test_ood_2 += regressor.predict_proba(Mahalanobis_ood_2)[:, 1]
-            # test_ood_3 += regressor.predict_proba(Mahalanobis_ood_3)[:, 1]
+            test_ood_2 += regressor.predict_proba(Mahalanobis_ood_2)[:, 1]
+            test_ood_3 += regressor.predict_proba(Mahalanobis_ood_3)[:, 1]
         idx += 1
 
     test_ind /= idx
     test_ood_1 /= idx
-    # test_ood_2 /= idx
-    # test_ood_3 /= idx
+    test_ood_2 /= idx
+    test_ood_3 /= idx
 
-    # return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
-    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_1, test_ood_1
+    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _rotation(model, loaders, device, num_classes):
@@ -230,11 +227,10 @@ def _rotation(model, loaders, device, num_classes):
 
     _, _, ind_full = _predict_rotations(model, test_ind_loader, num_classes, lamda=best_lamda, device=device)
     _, _, ood_full_1 = _predict_rotations(model, test_ood_loader_1, num_classes, lamda=best_lamda, device=device)
-    # _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, lamda=best_lamda, device=device)
-    # _, _, ood_full_3 = _predict_rotations(model, test_ood_loader_3, num_classes, lamda=best_lamda, device=device)
+    _, _, ood_full_2 = _predict_rotations(model, test_ood_loader_2, num_classes, lamda=best_lamda, device=device)
+    _, _, ood_full_3 = _predict_rotations(model, test_ood_loader_3, num_classes, lamda=best_lamda, device=device)
 
-    # return best_anomaly_score_ind, best_anomaly_score_ood, ind_full, ood_full_1, ood_full_2, ood_full_3
-    return best_anomaly_score_ind, best_anomaly_score_ood, ind_full, ood_full_1, ood_full_1, ood_full_1
+    return best_anomaly_score_ind, best_anomaly_score_ood, ind_full, ood_full_1, ood_full_2, ood_full_3
 
 
 def _gen_odin_inference(model, loaders, device):
@@ -259,11 +255,10 @@ def _gen_odin_inference(model, loaders, device):
 
     test_ind_scores = _process_gen_odin_loader(model, test_ind_loader, device, best_epsilon)
     test_ood_scores_1 = _process_gen_odin_loader(model, test_ood_loader_1, device, best_epsilon)
-    # test_ood_scores_2 = _process_gen_odin_loader(model, test_ood_loader_2, device, best_epsilon)
-    # test_ood_scores_3 = _process_gen_odin_loader(model, test_ood_loader_3, device, best_epsilon)
+    test_ood_scores_2 = _process_gen_odin_loader(model, test_ood_loader_2, device, best_epsilon)
+    test_ood_scores_3 = _process_gen_odin_loader(model, test_ood_loader_3, device, best_epsilon)
 
-    # return best_val_ind_scores, best_val_ood_scores, test_ind_scores, test_ood_scores_1, test_ood_scores_2, test_ood_scores_3
-    return best_val_ind_scores, best_val_ood_scores, test_ind_scores, test_ood_scores_1, test_ood_scores_1, test_ood_scores_1
+    return best_val_ind_scores, best_val_ood_scores, test_ind_scores, test_ood_scores_1, test_ood_scores_2, test_ood_scores_3
 
 
 def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
@@ -301,21 +296,20 @@ def _ensemble_inference(model_checkpoints, num_classes, loaders, device):
         if index == 0:
             test_ind = _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device, score_entropy=True)
             test_ood_1 = _get_odin_scores(model, test_ood_loader_1, best_T, best_epsilon, device=device, score_entropy=True)
-            # test_ood_2 = _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device, score_entropy=True)
-            # test_ood_3 = _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_2 = _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_3 = _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device, score_entropy=True)
         else:
             test_ind += _get_odin_scores(model, test_ind_loader, best_T, best_epsilon, device=device, score_entropy=True)
             test_ood_1 += _get_odin_scores(model, test_ood_loader_1, best_T, best_epsilon, device=device, score_entropy=True)
-            # test_ood_2 += _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device, score_entropy=True)
-            # test_ood_3 += _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_2 += _get_odin_scores(model, test_ood_loader_2, best_T, best_epsilon, device=device, score_entropy=True)
+            test_ood_3 += _get_odin_scores(model, test_ood_loader_3, best_T, best_epsilon, device=device, score_entropy=True)
 
     test_ind = test_ind / len(models)
     test_ood_1 = test_ood_1 / len(models)
-    # test_ood_2 = test_ood_2 / len(models)
-    # test_ood_3 = test_ood_3 / len(models)
+    test_ood_2 = test_ood_2 / len(models)
+    test_ood_3 = test_ood_3 / len(models)
 
-    # return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
-    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_1, test_ood_1
+    return best_val_ind, best_val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3
 
 
 def _gram_matrices(model, loaders, device, num_classes, power=6, model_type='eb0'):
@@ -422,15 +416,12 @@ def _ood_detection_performance(method, val_ind, val_ood, test_ind, test_ood_1, t
     _, threshold = _find_threshold(val_ind, val_ood)
 
     auc1, fpr1, acc1 = _score_npzs(test_ind, test_ood_1, threshold)
-    # auc2, fpr2, acc2 = _score_npzs(test_ind, test_ood_2, threshold)
-    # auc3, fpr3, acc3 = _score_npzs(test_ind, test_ood_3, threshold)
+    auc2, fpr2, acc2 = _score_npzs(test_ind, test_ood_2, threshold)
+    auc3, fpr3, acc3 = _score_npzs(test_ind, test_ood_3, threshold)
 
-    # aucs = [auc1, auc2, auc3]
-    aucs = [auc1, auc1, auc1]
-    # fprs = [fpr1, fpr2, fpr3]
-    fprs = [fpr1, fpr1, fpr1]
-    # accs = [acc1, acc2, acc3]
-    accs = [acc1, acc1, acc1]
+    aucs = [auc1, auc2, auc3]
+    fprs = [fpr1, fpr2, fpr3]
+    accs = [acc1, acc2, acc3]
 
     _verbose(method, ood_dataset_1, ood_dataset_2, ood_dataset_3, aucs, fprs, accs)
 
