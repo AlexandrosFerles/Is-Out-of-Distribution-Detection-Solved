@@ -481,7 +481,7 @@ if __name__ == '__main__':
     mahalanobis_loaders = get_triplets_loaders(batch_size=20, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
     rotation_loaders = get_triplets_loaders(batch_size=1, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
-    beg = False
+    beg = True
     method_loaders = loaders[1:]
     if beg:
         # baseline
