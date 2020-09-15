@@ -37,7 +37,7 @@ def _ood_detection_performance(method, val_ind, val_ood, test_ind, test_ood):
 def _odin(model, loaders, device):
 
     model.eval()
-    _, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
+    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
     T = 1000
 
