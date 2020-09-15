@@ -38,18 +38,21 @@ def _odin(model, loaders, device):
     model.eval()
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
-    T = 1
 
-    for epsilon in tqdm([-0.1, -0.0005, 0, 0.0005, 0.1]):
+    for T in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
+        print(f'########## T: {T} ##########')
+        print()
+        for epsilon in tqdm([-0.1, -0.0005, 0, 0.0005, 0.1]):
 
-        val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device)
-        val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device)
+            val_ind = _get_odin_scores(model, val_ind_loader, T, epsilon, device=device)
+            val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device)
 
-        ind = _get_odin_scores(model, test_ind_loader, T, epsilon, device=device)
-        ood = _get_odin_scores(model, test_ood_loader, T, epsilon, device=device)
+            ind = _get_odin_scores(model, test_ind_loader, T, epsilon, device=device)
+            ood = _get_odin_scores(model, test_ood_loader, T, epsilon, device=device)
 
-        print(f'########## epsilon: {epsilon} ##########')
-        _ood_detection_performance('Odin', val_ind, val_ood, ind, ood)
+            print(f'########## epsilon: {epsilon} ##########')
+            _ood_detection_performance('Odin', val_ind, val_ood, ind, ood)
+        print()
 
 
 def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0'):
