@@ -149,13 +149,13 @@ if __name__ == '__main__':
     standard_checkpoint = args.model_checkpoint
     standard_model = build_model_with_checkpoint('eb0', standard_checkpoint, device=device, out_classes=args.num_classes)
 
-    if args.md == 0:
+    if args.mode == 0:
         loaders = get_ood_loaders('isic', 'imagenet', 'places', batch_size=args.batch_size)
         mahalanobis_loaders = get_ood_loaders('isic', 'imagenet', 'places', batch_size=20)
-    elif args.md == 1:
+    elif args.mode == 1:
         loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-in', batch_size=args.batch_size)
         mahalanobis_loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-in', batch_size=20)
-    elif args.md == 2:
+    elif args.mode == 2:
         loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-out', batch_size=args.batch_size)
         mahalanobis_loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-out', batch_size=20)
 
