@@ -159,4 +159,4 @@ if __name__ == '__main__':
         mahalanobis_loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-out', batch_size=20)
 
     _odin(standard_model, loaders[1:], device)
-    _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
+    # _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
