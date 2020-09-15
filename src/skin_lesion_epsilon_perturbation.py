@@ -134,12 +134,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Out-of-Distribution Detection')
 
-    parser.add_argument('--in_distribution_dataset', '--in', required=True)
-    parser.add_argument('--val_dataset', '--val', required=True)
-    parser.add_argument('--test_dataset', '--test', default='tinyimagenet', required=False)
-    parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--model_checkpoint', '--mc', default=None, required=True)
     parser.add_argument('--mode', '--md', type=int, default=0, required=False)
+    parser.add_argument('--num_classes', '--nc', type=int, required=True)
     parser.add_argument('--batch_size', '--bs', type=int, default=32, required=False)
     parser.add_argument('--device', '--dv', type=int, default=0, required=False)
 
