@@ -1,14 +1,16 @@
 import torch
 import numpy as np
 from torch.autograd import Variable
+
+from ood_triplets import _verbose
 from utils import build_model_with_checkpoint
-from dataLoaders import _get_isic_loaders_ood, _get_Dermofit_full_loaders
+from dataLoaders import get_ood_loaders
 from tqdm import tqdm
 import lib_generation
 import argparse
 import os
 import random
-from ood import _get_metrics, _score_npzs, _find_threshold, _get_odin_scores, _score_mahalanobis
+from ood import _get_odin_scores, _score_mahalanobis, _find_threshold, _score_npzs
 from ood_ensemble import _ood_detection_performance
 import ipdb
 
@@ -20,10 +22,22 @@ torch.manual_seed(global_seed)
 torch.cuda.manual_seed(global_seed)
 
 
-def _odin(model, loaders, device, ood_dataset_1, ood_dataset_2, ood_dataset_3):
+def _ood_detection_performance(method, val_ind, val_ood, test_ind, test_ood):
+
+    _, threshold = _find_threshold(val_ind, val_ood)
+
+    auc, fpr, acc = _score_npzs(test_ind, test_ood, threshold)
+
+    print()
+    print(f'Area Under Receiver Operating Characteristic curve: {auc}')
+    print(f'True Negative Rate @ 95% True Positive Rate: {100-fpr}')
+    print(f'Detection Accuracy: {acc}')
+
+
+def _odin(model, loaders, device):
 
     model.eval()
-    val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
+    _, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
     T = 1000
 
@@ -33,18 +47,16 @@ def _odin(model, loaders, device, ood_dataset_1, ood_dataset_2, ood_dataset_3):
         val_ood = _get_odin_scores(model, val_ood_loader, T, epsilon, device=device)
 
         ind = _get_odin_scores(model, test_ind_loader, T, epsilon, device=device)
-        ood_1 = _get_odin_scores(model, test_ood_loader_1, T, epsilon, device=device)
-        ood_2 = _get_odin_scores(model, test_ood_loader_2, T, epsilon, device=device)
-        ood_3 = _get_odin_scores(model, test_ood_loader_3, T, epsilon, device=device)
+        ood = _get_odin_scores(model, test_ood_loader, T, epsilon, device=device)
 
         print(f'########## epsilon: {epsilon} ##########')
-        _ood_detection_performance('Odin', val_ind, val_ood, ind, ood_1, ood_2, ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+        _ood_detection_performance('Odin', val_ind, val_ood, ind, ood)
 
 
-def _generate_Mahalanobis(model, loaders, device, ood_dataset_1, ood_dataset_2, ood_dataset_3, num_classes, model_type='eb0'):
+def _generate_Mahalanobis(model, loaders, device, num_classes, model_type='eb0'):
 
     model.eval()
-    train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader_1, test_ood_loader_2, test_ood_loader_3 = loaders
+    train_ind_loader, val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
     temp_x = torch.rand(2, 3, 224, 224).to(device)
     temp_x = Variable(temp_x)
@@ -98,41 +110,21 @@ def _generate_Mahalanobis(model, loaders, device, ood_dataset_1, ood_dataset_2, 
                 Mahalanobis_test = np.concatenate((Mahalanobis_test, M_test.reshape((M_test.shape[0], -1))), axis=1)
 
         for i in range(num_output):
-            M_ood_1 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_1, num_classes, sample_mean, precision, i, magnitude, device=device)
-            M_ood_1 = np.asarray(M_ood_1, dtype=np.float32)
+            M_ood = lib_generation.get_Mahalanobis_score(model, test_ood_loader, num_classes, sample_mean, precision, i, magnitude, device=device)
+            M_ood = np.asarray(M_ood, dtype=np.float32)
             if i == 0:
-                Mahalanobis_ood_1 = M_ood_1.reshape((M_ood_1.shape[0], -1))
+                Mahalanobis_ood = M_ood.reshape((M_ood.shape[0], -1))
             else:
-                Mahalanobis_ood_1 = np.concatenate((Mahalanobis_ood_1, M_ood_1.reshape((M_ood_1.shape[0], -1))), axis=1)
-
-        for i in range(num_output):
-            M_ood_2 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_2, num_classes, sample_mean, precision, i, magnitude, device=device)
-            M_ood_2 = np.asarray(M_ood_2, dtype=np.float32)
-            if i == 0:
-                Mahalanobis_ood_2 = M_ood_2.reshape((M_ood_2.shape[0], -2))
-            else:
-                Mahalanobis_ood_2 = np.concatenate((Mahalanobis_ood_2, M_ood_2.reshape((M_ood_2.shape[0], -2))), axis=1)
-
-        for i in range(num_output):
-            M_ood_3 = lib_generation.get_Mahalanobis_score(model, test_ood_loader_3, num_classes, sample_mean, precision, i, magnitude, device=device)
-            M_ood_3 = np.asarray(M_ood_3, dtype=np.float32)
-            if i == 0:
-                Mahalanobis_ood_3 = M_ood_3.reshape((M_ood_3.shape[0], -3))
-            else:
-                Mahalanobis_ood_3 = np.concatenate((Mahalanobis_ood_3, M_ood_3.reshape((M_ood_3.shape[0], -3))), axis=1)
+                Mahalanobis_ood = np.concatenate((Mahalanobis_ood, M_ood.reshape((M_ood.shape[0], -1))), axis=1)
 
         Mahalanobis_test = np.asarray(Mahalanobis_test, dtype=np.float32)
-        Mahalanobis_ood_1 = np.asarray(Mahalanobis_ood_1, dtype=np.float32)
-        Mahalanobis_ood_2 = np.asarray(Mahalanobis_ood_2, dtype=np.float32)
-        Mahalanobis_ood_3 = np.asarray(Mahalanobis_ood_3, dtype=np.float32)
+        Mahalanobis_ood = np.asarray(Mahalanobis_ood, dtype=np.float32)
 
         ind = regressor.predict_proba(Mahalanobis_test)[:, 1]
-        ood_1 = regressor.predict_proba(Mahalanobis_ood_1)[:, 1]
-        ood_2 = regressor.predict_proba(Mahalanobis_ood_2)[:, 1]
-        ood_3 = regressor.predict_proba(Mahalanobis_ood_3)[:, 1]
+        ood = regressor.predict_proba(Mahalanobis_ood)[:, 1]
 
         print(f'########## epsilon: {magnitude} ##########')
-        _ood_detection_performance('Mahalanobis', val_ind, val_ood, ind, ood_1, ood_2, ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+        _ood_detection_performance('Mahalanobis', val_ind, val_ood, ind, ood)
 
 
 if __name__ == '__main__':
@@ -160,13 +152,15 @@ if __name__ == '__main__':
     standard_checkpoint = args.model_checkpoint
     standard_model = build_model_with_checkpoint('eb0', standard_checkpoint, device=device, out_classes=args.num_classes)
 
-    _, val_isic, test_isic = _get_isic_loaders_ood(batch_size=args.batch_size)
-    mah_train_isic, mah_val_isic, mah_test_isic = _get_isic_loaders_ood(batch_size=20)
+    if args.md == 0:
+        loaders = get_ood_loaders('isic', 'imagenet', 'places', batch_size=args.batch_size)
+        mahalanobis_loaders = get_ood_loaders('isic', 'imagenet', 'places', batch_size=20)
+    elif args.md == 1:
+        loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-in', batch_size=args.batch_size)
+        mahalanobis_loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-in', batch_size=20)
+    elif args.md == 2:
+        loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-out', batch_size=args.batch_size)
+        mahalanobis_loaders = get_ood_loaders('isic', 'imagenet', 'dermofit-out', batch_size=20)
 
-    if args.md == 2:
-        pass
-    else:
-        dermofit_in, dermofit_out = _get_Dermofit_full_loaders(batch_size=args.batch_size)
-        mah_dermofit_in, mah_dermofit_out = _get_Dermofit_full_loaders(batch_size=20)
-
-    _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, ood_dataset_1, ood_dataset_2, ood_dataset_3, num_classes=args.num_classes)
+    _odin(standard_model, loaders[1:], device)
+    _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
