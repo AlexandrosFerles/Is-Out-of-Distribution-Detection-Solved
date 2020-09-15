@@ -1,8 +1,6 @@
 import torch
 import numpy as np
 from torch.autograd import Variable
-
-from ood_triplets import _verbose
 from utils import build_model_with_checkpoint
 from dataLoaders import get_ood_loaders
 from tqdm import tqdm
@@ -29,6 +27,7 @@ def _ood_detection_performance(method, val_ind, val_ood, test_ind, test_ood):
     auc, fpr, acc = _score_npzs(test_ind, test_ood, threshold)
 
     print()
+    print(f'Method: {method}')
     print(f'Area Under Receiver Operating Characteristic curve: {auc}')
     print(f'True Negative Rate @ 95% True Positive Rate: {100-fpr}')
     print(f'Detection Accuracy: {acc}')
@@ -39,7 +38,7 @@ def _odin(model, loaders, device):
     model.eval()
     val_ind_loader, test_ind_loader, val_ood_loader, test_ood_loader = loaders
 
-    T = 1000
+    T = 1
 
     for epsilon in tqdm([-0.1, -0.0005, 0, 0.0005, 0.1]):
 
