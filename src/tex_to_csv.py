@@ -1,4 +1,5 @@
 from csv import writer
+import numpy as np
 def append_list_as_row(file_name, list_of_elem):
     # Open file in append mode
     with open(file_name, 'a+', newline='') as write_obj:
@@ -9,45 +10,77 @@ def append_list_as_row(file_name, list_of_elem):
 
 beg = True
 if beg:
-    ind = 'stl'
-    val = 'tinyimagenet'
-    oods_all = ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']
-    oods_all.remove(ind)
-    s=""" Baseline & 51.41/ 94.24/ 50.94 & 65.46/ 86.66/ 60.42 & 95.7/ 19.5/ 74.01 & 70.86/ 66.8/ 61.79 \\ 
-          Odin              & 53.52/ 92.38/ 52.6 & 72.87/ 75.3/ 66.28  & 98.69/ 6.66/ 82.77 & 75.03/ 58.11/ 67.22 \\
-          Mahalanobis       & 55.48/ 92.33/ 53.41 & 70.95/ 71.31/ 65.74 & 96.84/ 18.18/ 86.3 & 74.42/ 60.61/ 68.48 \\
-          Self-Supervised   & 58.43/ 92.33/ 56.36 & 75.36/ 86.99/ 70.26 & 92.13/ 58.43/ 81.8 & 75.31/ 79.25/ 69.47 \\
-          Generalized-Odin  & 62.97/ 88.81/ 58.5 & 85.02/ 70.78/ 76.89 & 83.95/ 95.47/ 78.69 & 77.31/ 85.02/ 71.36\\
-          Self-Ensemble     & 97.08/ 15.09/ 90.57 & 99.38/ 1.95/ 95.4 & 99.99/ 0.0/ 95.69 & 98.82/ 5.68/ 94.2 \\"""
-    oods_all.remove(val)
+    # ind = 'stl'
+    # val = 'tinyimagenet'
+    # oods_all = ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']
+    # oods_all.remove(ind)
+    s="""
+         Baseline          & 80.23/ 75.22/ 73.19 & 93.13/ 39.89/ 83.15 & 75.05/ 80.97/ 68.26 & 82.8/ 65.36/ 74.87 \\
+         Odin             & 83.75/ 70.36/ 76.43 & 97.52/ 14.77/ 86.97 & 79.38/ 74.64/ 71.93 & 86.88/ 53.26/ 78.44 \\
+         Mahalanobis      & 93.8/ 45.61/ 88.0 & 98.43/ 2.73/ 94.12 & 83.52/ 81.03/ 66.99 & 91.92/ 43.12/ 83.04 \\
+         Self-Supervised  & 96.31/ 13.11/ 91.07 & 96.84/ 17.87/ 87.78 & 99.71/ 1.2/ 97.31 & \\
+         Generalized-Odin & 79.93/ 79.78/ 73.61 & 76.82/ 97.93/ 73.36 & 77.71/ 74.48/ 70.74 & 78.15/ 84.06/ 72.57 \\
+         Self-Ensemble    & 87.36/ 52.45/ 79.01 & 99.61/ 2.15/ 89.71 & 75.82/ 82.68/ 65.85 & 87.6/ 45.76/ 78.19 \\
+    """
+    # oods_all.remove(val)
 
-
-    # for elem in s.split("&"):
+    # for elem in s.split('\\'):
+    #     if len(elem) > 2:
+    #         temp = elem.split('&')
+    #         method = temp[0].replace(' ','')
+    #         try:
+    #             auc1, fpr1, acc1 = [float(x) for x in temp[1].replace(' ','').split('/')]
+    #             tnr1 = round(100 - fpr1, 2)
+    #             row_contents1 = [method, ind, oods_all[0], val, auc1, fpr1, tnr1, acc1]
+    #             append_list_as_row('standard.csv', row_contents1)
+    #         except:
+    #             print('Failure')
+    #         try:
+    #             auc2, fpr2, acc2 = [float(x) for x in temp[2].replace(' ','').split('/')]
+    #             tnr2 = round(100 - fpr2, 2)
+    #             row_contents2 = [method, ind, oods_all[1], val, auc2, fpr2, tnr2, acc2]
+    #             append_list_as_row('standard.csv', row_contents2)
+    #         except:
+    #             print('Failure')
+    #         try:
+    #             auc3, fpr3, acc3 = [float(x) for x in temp[3].replace(' ','').split('/')]
+    #             tnr3 = round(100 - fpr3, 2)
+    #             row_contents3 = [method, ind, oods_all[2], val, auc3, fpr3, tnr3, acc3]
+    #             append_list_as_row('standard.csv', row_contents3)
+    #         except:
+    #             print('Failure')
+    ret = ""
     for elem in s.split('\\'):
         if len(elem) > 2:
             temp = elem.split('&')
             method = temp[0].replace(' ','')
+            # val_set = temp[0].replace(' ','')
+            ret +=f"{method} & "
             try:
                 auc1, fpr1, acc1 = [float(x) for x in temp[1].replace(' ','').split('/')]
                 tnr1 = round(100 - fpr1, 2)
-                row_contents1 = [method, ind, oods_all[0], val, auc1, fpr1, tnr1, acc1]
-                append_list_as_row('standard.csv', row_contents1)
+                ret += f"{auc1}/ {tnr1}/ {acc1} & "
             except:
                 print('Failure')
             try:
                 auc2, fpr2, acc2 = [float(x) for x in temp[2].replace(' ','').split('/')]
                 tnr2 = round(100 - fpr2, 2)
-                row_contents2 = [method, ind, oods_all[1], val, auc2, fpr2, tnr2, acc2]
-                append_list_as_row('standard.csv', row_contents2)
+                ret += f"{auc2}/ {tnr2}/ {acc2} & "
             except:
                 print('Failure')
             try:
                 auc3, fpr3, acc3 = [float(x) for x in temp[3].replace(' ','').split('/')]
                 tnr3 = round(100 - fpr3, 2)
-                row_contents3 = [method, ind, oods_all[2], val, auc3, fpr3, tnr3, acc3]
-                append_list_as_row('standard.csv', row_contents3)
+                ret += f"{auc3}/ {fpr3}/ {acc3} & "
             except:
                 print('Failure')
+            mean_auc = round(np.mean([auc1, acc2, auc3]), 2)
+            mean_tnr = round(np.mean([tnr1, tnr2, tnr3]), 2)
+            mean_acc = round(np.mean([acc1, acc2, acc3]), 2)
+            ret += f"{mean_auc}/ {mean_tnr}/ {mean_acc} \\\\"
+            # ret+="\n"
+    print(ret)
+
 else:
     ind = 'ISIC'
     val = 'ImageNet-Val'
