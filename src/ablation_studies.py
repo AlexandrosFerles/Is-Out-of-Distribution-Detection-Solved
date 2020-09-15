@@ -169,5 +169,5 @@ if __name__ == '__main__':
     loaders = get_triplets_loaders(batch_size=args.batch_size, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
     mahalanobis_loaders = get_triplets_loaders(batch_size=20, ind_dataset=ind_dataset, val_ood_dataset=val_dataset, ood_datasets=all_datasets)
 
-    # _odin(standard_model, loaders[1:], device, ood_dataset_1, ood_dataset_2, ood_dataset_3)
+    _odin(standard_model, loaders[1:], device, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, ood_dataset_1, ood_dataset_2, ood_dataset_3, num_classes=args.num_classes)
