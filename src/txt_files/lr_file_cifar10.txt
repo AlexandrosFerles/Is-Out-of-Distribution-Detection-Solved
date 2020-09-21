@@ -1,0 +1,4 @@
+/storage/ferles/checkpoints/eb0/cifar10/eb0Cifar10.pth
+/storage/ferles/checkpoints/eb0/cifar10/rot_eb0Cifar10.pth
+/storage/ferles/checkpoints/eb0/cifar10/genOdinCifar10.pth
+ensemblesCifar.txt

@@ -1,0 +1,8 @@
+/raid/ferles/checkpoints/isic_classifiers/ensemble_AK.pth
+/raid/ferles/checkpoints/isic_classifiers/ensemble_BCC.pth
+/raid/ferles/checkpoints/isic_classifiers/ensemble_BKL.pth
+/raid/ferles/checkpoints/isic_classifiers/ensemble_DF.pth
+/raid/ferles/checkpoints/isic_classifiers/ensemble_MEL.pth
+/raid/ferles/checkpoints/isic_classifiers/ensemble_NV.pth
+/raid/ferles/checkpoints/isic_classifiers/ensemble_SCC.pth
+/raid/ferles/checkpoints/isic_classifiers/ensemble_VASC.pth

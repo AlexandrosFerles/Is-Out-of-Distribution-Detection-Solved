@@ -1,0 +1,5 @@
+/raid/ferles/checkpoints/eb0/tinyimagenet/eb0tinyimagenet_best_accuracy_ensemble_0.pth, 160
+/raid/ferles/checkpoints/eb0/tinyimagenet/eb0tinyimagenet_best_accuracy_ensemble_1.pth, 160
+/raid/ferles/checkpoints/eb0/tinyimagenet/eb0tinyimagenet_best_accuracy_ensemble_2.pth, 160
+/raid/ferles/checkpoints/eb0/tinyimagenet/eb0tinyimagenet_best_accuracy_ensemble_3.pth, 160
+/raid/ferles/checkpoints/eb0/tinyimagenet/eb0tinyimagenet_best_accuracy_ensemble_4.pth, 160

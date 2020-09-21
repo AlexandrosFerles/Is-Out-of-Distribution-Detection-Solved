@@ -1,0 +1,5 @@
+/storage/ferles/checkpoints/eb0/cifar10/eb0Cifar10_best_accuracy_ensemble_0.pth, 8
+/storage/ferles/checkpoints/eb0/cifar10/eb0Cifar10_best_accuracy_ensemble_1.pth, 8
+/storage/ferles/checkpoints/eb0/cifar10/eb0Cifar10_best_accuracy_ensemble_2.pth, 8
+/storage/ferles/checkpoints/eb0/cifar10/eb0Cifar10_best_accuracy_ensemble_3.pth, 8
+/storage/ferles/checkpoints/eb0/cifar10/eb0Cifar10_best_accuracy_ensemble_4.pth, 8
