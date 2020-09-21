@@ -1,0 +1,4 @@
+/storage/ferles/checkpoints/eb0/stl/STL.pth
+/storage/ferles/checkpoints/eb0/stl/rot_STL.pth
+/storage/ferles/checkpoints/eb0/stl/genOdinSTL.pth
+ensemblesSTL.txt

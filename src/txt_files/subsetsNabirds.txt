@@ -1,0 +1,5 @@
+/raid/ferles/checkpoints/eb0/nabirds/Nabirds_subset_ens_1.pth, 460
+/raid/ferles/checkpoints/eb0/nabirds/Nabirds_subset_ens_2.pth, 460
+/raid/ferles/checkpoints/eb0/nabirds/Nabirds_subset_ens_3.pth, 434
+/raid/ferles/checkpoints/eb0/nabirds/Nabirds_subset_ens_4.pth, 434
+/raid/ferles/checkpoints/eb0/nabirds/Nabirds_subset_ens_5.pth, 433

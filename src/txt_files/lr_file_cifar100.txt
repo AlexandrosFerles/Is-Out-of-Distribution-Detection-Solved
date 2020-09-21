@@ -1,0 +1,4 @@
+/raid/ferles/checkpoints/eb0/cifar100/eb0Cifar100.pth
+/raid/ferles/checkpoints/eb0/cifar100/rot_eb0Cifar100.pth
+/raid/ferles/checkpoints/eb0/cifar100/genOdinCifar100.pth
+ensemblesCifar100.txt

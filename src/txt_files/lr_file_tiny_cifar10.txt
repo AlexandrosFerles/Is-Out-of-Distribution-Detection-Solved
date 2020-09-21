@@ -1,0 +1,4 @@
+/storage/ferles/checkpoints/eb0/tinyimagenet-cifar10/eb0tinyimagenet-cifar10.pth
+/storage/ferles/checkpoints/eb0/tinyimagenet-cifar10/rot_eb0tinyimagenet-cifar10.pth
+/storage/ferles/checkpoints/eb0/tinyimagenet-cifar10/genOdinTinyImageNet-cifar10.pth
+ensemblesTinyCifar10.txt

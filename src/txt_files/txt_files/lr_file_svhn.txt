@@ -1,0 +1,4 @@
+/raid/ferles/checkpoints/eb0/svhn/eb0SVHN.pth
+/raid/ferles/checkpoints/eb0/svhn/rot_eb0SVHN.pth
+/raid/ferles/checkpoints/eb0/svhn/genOdinSVHN.pth
+ensemblesSVHN.txt

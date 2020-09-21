@@ -1,0 +1,5 @@
+/raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs_subset_ens_1.pth, 96
+/raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs_subset_ens_2.pth, 96
+/raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs_subset_ens_3.pth, 96
+/raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs_subset_ens_4.pth, 96
+/raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs_subset_ens_5.pth, 96
