@@ -1,3 +1,0 @@
-python ood.py --m baseline --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --nc 120 --dv 2 --in stanforddogs --val imagenet --out oxfordpets > results/baseline_stanford_dogs_validation_set_choice_imagenet.txt
-python ood.py --m odin --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --nc 120 --dv 2 --in stanforddogs --val imagenet --out oxfordpets > results/odin_stanford_dogs_validation_set_choice_imagenet.txt
-python ood.py --m mahalanobis --mc /raid/ferles/checkpoints/eb0/stanforddogs/StanfordDogs.pth --nc 120 --dv 2 --in stanforddogs --val imagenet --out oxfordpets > results/mahalanobis_stanford_dogs_validation_set_choice_imagenet.txt
