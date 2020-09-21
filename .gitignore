@@ -36,7 +36,6 @@ src/csvs
 src/wandb
 *.out
 src/txts
-*.pickle
 *.csv
 src/parse_mahalanobis.py 
 /src/Notebooks/
