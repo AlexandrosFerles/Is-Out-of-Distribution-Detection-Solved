@@ -43,3 +43,5 @@ src/parse_mahalanobis.py
 /src/data
 src/results/__init__.py
 src/*.pickle
+src/outlierExposureFIneGrained.py
+src/outlier_exposure.py
