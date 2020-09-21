@@ -1,0 +1,5 @@
+/raid/ferles/checkpoints/eb0/cifar100/eb0Cifar100_best_accuracy_ensemble_0.pth, 80
+/raid/ferles/checkpoints/eb0/cifar100/eb0Cifar100_best_accuracy_ensemble_1.pth, 80
+/raid/ferles/checkpoints/eb0/cifar100/eb0Cifar100_best_accuracy_ensemble_2.pth, 80
+/raid/ferles/checkpoints/eb0/cifar100/eb0Cifar100_best_accuracy_ensemble_3.pth, 80
+/raid/ferles/checkpoints/eb0/cifar100/eb0Cifar100_best_accuracy_ensemble_4.pth, 80
