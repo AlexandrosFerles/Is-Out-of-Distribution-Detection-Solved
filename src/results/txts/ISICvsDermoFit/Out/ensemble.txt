@@ -1,9 +1,0 @@
-###############################################
-
-Succesfully stored in-distribution ood scores to npzs/ensemble_ISIC_mode_accuracy.npz and out-distribution ood scores to npzs/ensemble_Dermofit-Out_mode_accuracy.npz
-
-###############################################
-
-Leave-Out Ensemble results (accuracy) on ISIC (In) vs Dermofit-Out:
-Area Under Receiver Operating Characteristic curve: 66.62
-False Positive Rate @ 95% True Positive Rate: 88.24
