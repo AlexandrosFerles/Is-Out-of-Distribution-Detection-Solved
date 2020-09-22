@@ -51,3 +51,9 @@ You can apply one of the included OoD detection method through the following com
 ```python ood.py --m $OOD_METHOD --in $InD --val $Val-OoD --out $TEST-OoD --dv $DEVICE_INDEX --mc $CHECKPOINT_FILE --nc $NUMBER_OF_IND_CLASSES```
 
 For our main results, use "imagenet" as the val dataset. If running the self-ensemble method, replace the `--mc` parameter with `--mcf` pointing to the txt file that includes all the ensemble checkpoints. Choose between a subset of a fine-grained dataset and an excluded class from ISIC by including either `--sub $SUBSET_INDEX` or `--ex $EXCLUDED_CLASS`. 
+
+## Acknowledgements
+
+Code from [ODIN](https://github.com/facebookresearch/odin) and [Mahalanobis](https://github.com/pokaxpoka/deep_Mahalanobis_detector/) was used in this work, and we sincerely thank the authors for making their work and code publicly available.
+
+Most importantly, we deeply thank the authors of [Generalized-ODIN](https://arxiv.org/abs/2002.11297) for answering immediately all the questions that we came up with (and sharing code chunks) when trying to reproduce their work.
