@@ -41,3 +41,5 @@ By executing `ood_ensemble.py` you can apply all OOD detection methods based on 
 ```python ood_ensemble.py --in $InD --val $OoD --dv $DEVICE_INDEX --nc $NUMBER_OF_IND_CLASSES --mcf txt_files/$CHECKPOINTS_FILE```  
 
 where $CHECKPOINTS_FILE refers to a txt file that provides the paths for all the checkpoints trained on the InD dataset and are required for the OoD detection methods. 
+
+If you wish to use either tinyimagenet-cifar10 or tinyimagenet-cifar100, you need to add the parameter `--test {tinyimagenet-cifar10, tinyimagenet-cifar100}`
