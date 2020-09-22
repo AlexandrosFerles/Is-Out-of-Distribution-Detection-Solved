@@ -30,4 +30,4 @@ Finally, the appropriate commands for ISIC (dermatology data) are the following:
 
 ```python {custom_train.py, ss_rot.py, EnsembleISIC.py} --c $CONFIG_FILE_NAME --dv $DEVICE_INDEX```
 
-Subset training is performed by applying the appropriate config file. For instance, 
+Subset training is performed by applying the appropriate config file. For instance, `configs/ISIC/AK_exclude.json` trains a base model on all classes except Actinic Keratosis (AK; see the [ISIC 2019 competition page](https://challenge2019.isic-archive.com) for details).
