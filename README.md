@@ -3,7 +3,6 @@
 Code to accompany the "Is Out-of-Distribution detection solved?" paper. We asses 6 Out-of-Distribution (OoD) detection methods ([Baseline](https://arxiv.org/abs/1610.02136), [ODIN](https://arxiv.org/abs/1706.02690), [Mahalanobis](https://arxiv.org/abs/1807.03888), [Self-Supervision](https://arxiv.org/pdf/1906.12340.pdf), [Generalized-ODIN](https://arxiv.org/abs/2002.11297), [Self-Ensemble](https://arxiv.org/abs/1809.03576)) .
 
 Updates to follow:
-* Code for ablation studies
 * Code to run individual OoD detection experiments on standard datasets
 
 ## Datasets and pickle files
@@ -44,7 +43,9 @@ By executing `ood_ensemble.py` you can apply all OoD detection methods based on 
 
 ```python ood_ensemble.py --in $InD --val $OoD --dv $DEVICE_INDEX --nc $NUMBER_OF_IND_CLASSES --mcf txt_files/$CHECKPOINTS_FILE```  
 
-where $CHECKPOINTS_FILE refers to a txt file that provides the paths for all the checkpoints trained on the InD dataset and are required for the OoD detection methods. 
+where $CHECKPOINTS_FILE refers to a txt file that provides the paths for all the checkpoints trained on the InD dataset and are required for the OoD detection methods.
+
+If you add the parameter `--m $METHOD_NAME` where method name can be any of the options `baseline, odin, mahalanobis, self-supervision, selfsupervision, self_supervision, generalized-odin, generalizedodin, generalized_odin, ensemble`, you can apply an individual OoD detection method on standard datasets. 
 
 If you wish to use either tinyimagenet-cifar10 or tinyimagenet-cifar100, you need to add the parameter `--test {tinyimagenet-cifar10, tinyimagenet-cifar100}`
 
