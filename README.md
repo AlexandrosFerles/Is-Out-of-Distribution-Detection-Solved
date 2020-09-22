@@ -31,3 +31,13 @@ Finally, the appropriate commands for ISIC (dermatology data) are the following:
 ```python {custom_train.py, ss_rot.py, EnsembleISIC.py} --c $CONFIG_FILE_NAME --dv $DEVICE_INDEX```
 
 Subset training is performed by applying the appropriate config file. For instance, `configs/ISIC/AK_exclude.json` trains a base model on all classes except Actinic Keratosis (AK; see the [ISIC 2019 competition page](https://challenge2019.isic-archive.com) for details).
+
+## OOD detection methods on standard datasets
+
+Standard datasets include {cifar10, cifar100, stl, svhn} and one option out of {tinyimagenet, tinyimagenet-cifar10, tinyimagenet-cifar100}.
+
+By executing `ood_ensemble.py` you can apply all OOD detection methods based on a train (InD) and val (OoD) dataset. All methods are optimized on this pair, and scored in between the InD dataset and the remaining 3 datasets which are considered as OoD.
+
+```python ood_ensemble.py --in $InD --val $OoD --dv $DEVICE_INDEX --nc $NUMBER_OF_IND_CLASSES --mcf txt_files/$CHECKPOINTS_FILE```  
+
+where $CHECKPOINTS_FILE refers to a txt file that provides the paths for all the checkpoints trained on the InD dataset and are required for the OoD detection methods. 
