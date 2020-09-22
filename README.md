@@ -54,6 +54,6 @@ For our main results, use "imagenet" as the val dataset. If running the self-ens
 
 ## Acknowledgements
 
-Code from [ODIN](https://github.com/facebookresearch/odin) and [Mahalanobis](https://github.com/pokaxpoka/deep_Mahalanobis_detector/) was used in this work, and we sincerely thank the authors for making their work and code publicly available.
+Code from [ODIN](https://github.com/facebookresearch/odin) and [Mahalanobis](https://github.com/pokaxpoka/deep_Mahalanobis_detector/) was used in this work, and we sincerely thank the authors for making their work and code publicly available. We also found the contributions of [Self-Supervision](https://github.com/hendrycks/ss-ood) and [Self-Ensemble](https://github.com/YU1ut/Ensemble-of-Leave-out-Classifiers) pretty helpful to understand their core components.
 
 Most importantly, we deeply thank the authors of [Generalized-ODIN](https://arxiv.org/abs/2002.11297) for answering immediately all the questions that we came up with (and sharing code chunks) when trying to reproduce their work.
