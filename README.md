@@ -32,14 +32,22 @@ Finally, the appropriate commands for ISIC (dermatology data) are the following:
 
 Subset training is performed by applying the appropriate config file. For instance, `configs/ISIC/AK_exclude.json` trains a base model on all classes except Actinic Keratosis (AK; see the [ISIC 2019 competition page](https://challenge2019.isic-archive.com) for details).
 
-## OOD detection methods on standard datasets
+## OoD detection methods on standard datasets
 
 Standard datasets include {cifar10, cifar100, stl, svhn} and one option out of {tinyimagenet, tinyimagenet-cifar10, tinyimagenet-cifar100}.
 
-By executing `ood_ensemble.py` you can apply all OOD detection methods based on a train (InD) and val (OoD) dataset. All methods are optimized on this pair, and scored in between the InD dataset and the remaining 3 datasets which are considered as OoD.
+By executing `ood_ensemble.py` you can apply all OoD detection methods based on a train (InD) and val (OoD) dataset. All methods are optimized on this pair, and scored in between the InD dataset and the remaining 3 datasets which are considered as OoD.
 
 ```python ood_ensemble.py --in $InD --val $OoD --dv $DEVICE_INDEX --nc $NUMBER_OF_IND_CLASSES --mcf txt_files/$CHECKPOINTS_FILE```  
 
 where $CHECKPOINTS_FILE refers to a txt file that provides the paths for all the checkpoints trained on the InD dataset and are required for the OoD detection methods. 
 
 If you wish to use either tinyimagenet-cifar10 or tinyimagenet-cifar100, you need to add the parameter `--test {tinyimagenet-cifar10, tinyimagenet-cifar100}`
+
+## OoD detection methods on fine-grained datasets
+
+You can apply one of the included OoD detection method through the following command:
+
+```python ood.py --m $OOD_METHOD --in $InD --val $Val-OoD --out $TEST-OoD --dv $DEVICE_INDEX --mc $CHECKPOINT_FILE --nc $NUMBER_OF_IND_CLASSES```
+
+For our main results, use "imagenet" as the val dataset. If running the self-ensemble method, replace the `--mc` parameter with `--mcf` pointing to the txt file that includes all the ensemble checkpoints. Choose between a subset of a fine-grained dataset and an excluded class from ISIC by including either `--sub $SUBSET_INDEX` or `--ex $EXCLUDED_CLASS`. 
