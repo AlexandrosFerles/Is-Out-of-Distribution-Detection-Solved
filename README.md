@@ -14,3 +14,12 @@ We use [this version](https://github.com/lukemelas/EfficientNet-PyTorch) of [Eff
 
 ## Training base classifiers
 
+In order to train {EB0, Rot-EB0, Ensemble-EB0} as a base classifier for standard datasets:
+
+```python {trainNaturalImages.py, rotationNaturalImages.py, ensembleNaturalImages.py} --c $CONFIG_FILE_NAME --dv $DEVICE_INDEX --ds $DATASET_NAME```
+
+where you can set a GPU device index if not using device #0, choose one of the config files under the path `configs/standard` and select one of the standard datasets from {cifar10, cifar100, svhn, stl, tinyimagenet, tinyimagenet-cifar10, tinyimagenet-cifar100}. 
+
+Similarly, for fine grained datasets (dog breeds from Stanford Dogs and bird species from NaBirds) you need to run the following script:
+
+```python {trainFineGrained.py, rotationFineGrained.py} --c $CONFIG_FILE_NAME --dv $DEVICE_INDEX --ds $DATASET_NAME```
