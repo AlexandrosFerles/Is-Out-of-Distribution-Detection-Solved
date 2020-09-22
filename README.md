@@ -25,3 +25,9 @@ Similarly, for fine grained datasets (dog breeds from Stanford Dogs and bird spe
 ```python {trainFineGrained.py, rotationFineGrained.py, trainFineGrainedEnsemble.py} --c $CONFIG_FILE_NAME --dv $DEVICE_INDEX --ds $DATASET_NAME```
 
 If you need to train a classifier on one of the designated subsets of each dataset, simly add the parameter `--sub $SUBSET_INDEX` in the above command. 
+
+Finally, the appropriate commands for ISIC (dermatology data) are the following:
+
+```python {custom_train.py, ss_rot.py, EnsembleISIC.py} --c $CONFIG_FILE_NAME --dv $DEVICE_INDEX```
+
+Subset training is performed by applying the appropriate config file. For instance, 
