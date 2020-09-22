@@ -751,7 +751,7 @@ def natural_image_loaders(dataset='cifar10', train_batch_size=32, test_batch_siz
             if dataset == 'tinyimagenet' or dataset == 'tinyimagenet-cifar10' or dataset == 'tinyimagenet-cifar100':
                 random.shuffle(trainset_indices)
             if save_to_pickle:
-                with open(f'train_indices_{dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}.pickle', 'wb') as val_pickle:
+                with open(f'pickle_files/train_indices_{dataset}.pickle', 'wb') as train_pickle, open(f'pickle_files/val_indices_{dataset}.pickle', 'wb') as val_pickle:
                     pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
                     pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
@@ -811,7 +811,7 @@ def fine_grained_image_loaders(dataset, train_batch_size=32, test_batch_size=32,
             trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
 
             if save_to_pickle:
-                with open(f'train_indices_{dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}.pickle', 'wb') as val_pickle:
+                with open(f'pickle_files/train_indices_{dataset}.pickle', 'wb') as train_pickle, open(f'pickle_files/val_indices_{dataset}.pickle', 'wb') as val_pickle:
                     pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
                     pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
@@ -918,7 +918,7 @@ def fine_grained_image_loaders_subset(dataset, subset_index, single=False, train
             trainset_indices, valset_indices = next(iter(splitter.split(indexes, gts)))
 
             # if save_to_pickle:
-            with open(f'train_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as train_pickle, open(f'val_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as val_pickle:
+            with open(f'pickle_files/train_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as train_pickle, open(f'pickle_files/val_indices_{dataset}_subset_{subset_index}.pickle', 'wb') as val_pickle:
                 pickle.dump(trainset_indices, train_pickle, protocol=pickle.HIGHEST_PROTOCOL)
                 pickle.dump(valset_indices, val_pickle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -993,7 +993,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
     elif ind_dataset == 'stanforddogs' or ind_dataset == 'nabirds':
         if subset_index is None:
             ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
-            with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
+            with open(f'pickle_files/train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'pickle_files/val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
                 # print(f'train_indices_{ind_dataset}.pickle')
                 # print(f'val_indices_{ind_dataset}.pickle')
                 trainset_indices = pickle.load(train_pickle)
@@ -1006,7 +1006,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
         else:
             ind_trainset, ind_testset = _get_subset(ind_dataset, subset_index, [transform_test, transform_test], test=True)
-            with open(f'train_indices_{ind_dataset}_subset_{subset_index}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}_subset_{subset_index}.pickle', 'rb') as val_pickle:
+            with open(f'pickle_files/train_indices_{ind_dataset}_subset_{subset_index}.pickle', 'rb') as train_pickle, open(f'pickle_files/val_indices_{ind_dataset}_subset_{subset_index}.pickle', 'rb') as val_pickle:
                 trainset_indices = pickle.load(train_pickle)
                 valset_indices = pickle.load(val_pickle)
 
@@ -1017,7 +1017,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
     elif ind_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
         ind_trainset, ind_testset = _get_dataset(ind_dataset, [transform_test, transform_test], test=True)
-        with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
+        with open(f'pickle_files/train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'pickle_files/val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
             trainset_indices = pickle.load(train_pickle)
             valset_indices = pickle.load(val_pickle)
 
@@ -1044,7 +1044,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
         elif val_ood_dataset == 'stanforddogs' or val_ood_dataset == 'nabirds':
             if subset_index is None:
                 val_ood_trainset, val_ood_testset = _get_dataset(val_ood_dataset, [transform_test, transform_test], test=True)
-                with open(f'train_indices_{val_ood_dataset}.pickle', 'wb') as train_pickle, open(f'val_indices_{val_ood_dataset}.pickle', 'wb') as val_pickle:
+                with open(f'pickle_files/train_indices_{val_ood_dataset}.pickle', 'wb') as train_pickle, open(f'pickle_files/val_indices_{val_ood_dataset}.pickle', 'wb') as val_pickle:
                     valset_indices = pickle.load(val_pickle)
                     val_sampler = SubsetRandomSampler(valset_indices)
                     val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
@@ -1057,7 +1057,7 @@ def get_ood_loaders(ind_dataset, val_ood_dataset, test_ood_dataset, batch_size=3
                 val_ood_loader = DataLoader(val_trainset, batch_size=val_batch_size, num_workers=3, sampler=val_sampler)
         elif val_ood_dataset in ['cifar10', 'cifar100', 'svhn', 'stl', 'tinyimagenet']:
             val_ood_trainset, val_ood_testset = _get_dataset(val_ood_dataset, [transform_test, transform_test], test=True)
-            with open(f'val_indices_{val_ood_dataset}.pickle', 'rb') as val_pickle:
+            with open(f'pickle_files/val_indices_{val_ood_dataset}.pickle', 'rb') as val_pickle:
                 valset_val_oodices = pickle.load(val_pickle)
                 val_sampler = SubsetRandomSampler(valset_val_oodices)
                 val_ood_loader = DataLoader(val_ood_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
@@ -1223,7 +1223,7 @@ def get_triplets_loaders(ind_dataset, val_ood_dataset, ood_datasets, batch_size=
 
     _, transform_test = _get_image_transforms(ind_dataset, resize=resize)
     ind_trainset, ind_testset = _get_dataset(ind_dataset, transforms=[transform_test, transform_test], test=True)
-    with open(f'train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
+    with open(f'pickle_files/train_indices_{ind_dataset}.pickle', 'rb') as train_pickle, open(f'pickle_files/val_indices_{ind_dataset}.pickle', 'rb') as val_pickle:
         trainset_indices = pickle.load(train_pickle)
         valset_indices = pickle.load(val_pickle)
 
@@ -1233,7 +1233,7 @@ def get_triplets_loaders(ind_dataset, val_ood_dataset, ood_datasets, batch_size=
         val_ind_loader = DataLoader(ind_trainset, batch_size=batch_size, num_workers=3, sampler=val_sampler)
         test_ind_loader = DataLoader(ind_testset, batch_size=batch_size, num_workers=3)
 
-    with open(f'val_indices_{val_ood_dataset}.pickle', 'rb') as val_val_pickle:
+    with open(f'pickle_files/val_indices_{val_ood_dataset}.pickle', 'rb') as val_val_pickle:
         val_ood_trainset, _ = _get_dataset(val_ood_dataset, transforms=[transform_test, transform_test], test=True)
         val_valset_indices = pickle.load(val_val_pickle)
 
