@@ -519,10 +519,10 @@ if __name__ == '__main__':
     elif ood_method == 'mahalanobis':
         val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _generate_Mahalanobis(standard_model, mahalanobis_loaders, device, num_classes=args.num_classes)
         _ood_detection_performance('Mahalanobis', val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-    elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision' or ood_method =='rotation':
+    elif ood_method == 'self-supervision' or ood_method =='selfsupervision' or ood_method =='self_supervision':
         val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _rotation(rotation_model, rotation_loaders, device, num_classes=args.num_classes)
         _ood_detection_performance('Self-Supervised', val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
-    elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin':
+    elif ood_method == 'generalized-odin' or ood_method == 'generalizedodin' or ood_method == 'generalized_odin':
         val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3 = _gen_odin_inference(genodin_model, method_loaders, device)
         _ood_detection_performance('Generalized-Odin', val_ind, val_ood, test_ind, test_ood_1, test_ood_2, test_ood_3, ood_dataset_1, ood_dataset_2, ood_dataset_3)
     elif ood_method == 'ensemble':
