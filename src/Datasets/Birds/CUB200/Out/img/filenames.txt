@@ -1,0 +1,21 @@
+001.Black_footed_Albatross     063.Ivory_Gull                 123.Henslow_Sparrow
+002.Laysan_Albatross           070.Green_Violetear            124.Le_Conte_Sparrow
+003.Sooty_Albatross            071.Long_tailed_Jaeger         126.Nelson_Sharp_tailed_Sparrow
+004.Groove_billed_Ani          072.Pomarine_Jaeger            128.Seaside_Sparrow
+005.Crested_Auklet             075.Green_Jay                  134.Cape_Glossy_Starling
+006.Least_Auklet               077.Tropical_Kingbird          141.Artic_Tern
+007.Parakeet_Auklet            078.Gray_Kingbird              145.Elegant_Tern
+008.Rhinoceros_Auklet          080.Green_Kingfisher           147.Least_Tern
+018.Spotted_Catbird            081.Pied_Kingfisher            150.Sage_Thrasher
+022.Chuck_will_Widow           082.Ringed_Kingfisher          151.Black_capped_Vireo
+024.Red_faced_Cormorant        083.White_breasted_Kingfisher  153.Philadelphia_Vireo
+027.Shiny_Cowbird              084.Red_legged_Kittiwake       164.Cerulean_Warbler
+029.American_Crow              098.Scott_Oriole               166.Golden_winged_Warbler
+030.Fish_Crow                  103.Sayornis                   168.Kentucky_Warbler
+032.Mangrove_Cuckoo            106.Horned_Puffin              178.Swainson_Warbler
+037.Acadian_Flycatcher         108.White_necked_Raven         181.Worm_eating_Warbler
+040.Olive_sided_Flycatcher     110.Geococcyx                  182.Yellow_Warbler
+043.Yellow_bellied_Flycatcher  113.Baird_Sparrow              187.American_Three_toed_Woodpecker
+044.Frigatebird                114.Black_throated_Sparrow     190.Red_cockaded_Woodpecker
+045.Northern_Fulmar            117.Clay_colored_Sparrow
+048.European_Goldfinch         121.Grasshopper_Sparrow
