@@ -1,0 +1,3 @@
+# How to use the Datasets folder
+
+Apart from DermoFit that is not freely available, all other datasets can be used to run our designed experiments. Due to the huge size of some of these datasets, we can only share a few of the in a [Google Drive folder](https://drive.google.com/drive/folders/1LQmT5BNBjwjwKF3K3W5I-ncwhJMjIpiB). For all the other datasets (etc. StanfordDogs, NaBirds, ISIC etc.) there is need to download them and place them in the corresponding folders as designed in this repository. We have made sure to leave placeholders for all cases, which dictate the names of the folders (foldernames.txt) or files (filenames.txt) which are expected at each subfolder at each case. 
