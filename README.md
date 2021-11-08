@@ -1,9 +1,6 @@
 # Is Out-of-Distribution detection solved?
 
-Code to accompany the "Is Out-of-Distribution detection solved?" paper. We asses 6 Out-of-Distribution (OoD) detection methods ([Baseline](https://arxiv.org/abs/1610.02136), [ODIN](https://arxiv.org/abs/1706.02690), [Mahalanobis](https://arxiv.org/abs/1807.03888), [Self-Supervision](https://arxiv.org/pdf/1906.12340.pdf), [Generalized-ODIN](https://arxiv.org/abs/2002.11297), [Self-Ensemble](https://arxiv.org/abs/1809.03576)) .
-
-Updates to follow:
-* Code to run individual OoD detection experiments on standard datasets
+Code to accompany the "Is Out-of-Distribution detection solved?" paper. We asses 6 Out-of-Distribution (OoD) detection methods ([Baseline](https://arxiv.org/abs/1610.02136), [ODIN](https://arxiv.org/abs/1706.02690), [Mahalanobis](https://arxiv.org/abs/1807.03888), [Self-Supervision](https://arxiv.org/pdf/1906.12340.pdf), [Generalized-ODIN](https://arxiv.org/abs/2002.11297), [Self-Ensemble](https://arxiv.org/abs/1809.03576)).
 
 ## Datasets and pickle files
 
