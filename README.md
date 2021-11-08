@@ -52,7 +52,7 @@ You can apply one of the included OoD detection method through the following com
 
 ```python ood.py --m $OOD_METHOD --in $InD --val $Val-OoD --out $TEST-OoD --dv $DEVICE_INDEX --mc $CHECKPOINT_FILE --nc $NUMBER_OF_IND_CLASSES```
 
-For our main results, use "imagenet" as the val dataset. If running the self-ensemble method, replace the `--mc` parameter with `--mcf` pointing to the txt file that includes all the ensemble checkpoints. Choose between a subset of a fine-grained dataset and an excluded class from ISIC by including either `--sub $SUBSET_INDEX` or `--ex $EXCLUDED_CLASS`. 
+For our main results, we use "imagenet" as the val dataset. When running the self-ensemble method, replace the `--mc` parameter with `--mcf` pointing to the txt file that includes all the ensemble checkpoints. Choose between a subset of a fine-grained dataset and an excluded class from ISIC by including either `--sub $SUBSET_INDEX` or `--ex $EXCLUDED_CLASS` respectively. 
 
 ## Acknowledgements
 
